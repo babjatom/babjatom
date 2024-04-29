@@ -5,7 +5,7 @@
 <td align="center">
 <img width="2000" height="0"><br>
 Hello, this is Tomi's github 👋<br>
-<sup><sub>Built with ❤️, GO & Github Actions</sub></sup><br>
+<sup>Built with ❤️, GO & Github Actions</sup><br>
 <img width="2000" height="0">
 </td>
 </tbody>
@@ -16,7 +16,7 @@ Hello, this is Tomi's github 👋<br>
 <td align="left">
 <img width="2000" height="0"><br>
 Tomi's weather conditions<br>
-<sup><sub>Updated at {{ updated_at }} UTC </sub></sup><br>
+<sup>Updated at {{ updated_at }}</sup><br>
 <sup>:low_brightness: {{ weather }}</sup><br>
 <sup>:thermometer: Temperature {{ temp }} </sup><br>
 <sup>:thermometer: Feels like {{ feelsLike }}</sup><br>
