@@ -1,16 +1,38 @@
-### Hi there 👋
 
-<!--
-**babyak/babyak** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-
-Here are some ideas to get you started:
-
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+<div align="center">
+<table>
+<tbody>
+<td align="center">
+<img width="2000" height="0"><br>
+Hello, this is Tomi's github 👋<br>
+<sup><sub>Built with ❤️, GO & Github Actions</sub></sup><br>
+<img width="2000" height="0">
+</td>
+</tbody>
+</table>
+</div>
+<table>
+<tbody>
+<td align="left">
+<img width="2000" height="0"><br>
+Tomi's weather conditions<br>
+<sup><sub>Updated at 2024-04-29 21:46:44.228374831 +0000 UTC UTC </sub></sup><br>
+<sup>:low_brightness: Few Clouds</sup><br>
+<sup>:thermometer: Temperature 30.85 </sup><br>
+<sup>:thermometer: Feels like 37.85</sup><br>
+<sup>:sweat_drops: Humidity 79%</sup><br>
+<sup>:mask: PM2.5 38.82 μg/m3</sup><br>
+<sup>:cyclone: Wind 3.6m/s </sup><br>
+<sup>:telescope: Visibility 10000m </sup><br>
+<sup>:droplet: Rain 0mm/last 1h </sup><br>
+<img width="2000" height="0">
+</td>
+<td align="left">
+<img width="2000" height="0"><br>
+<br>
+<img width="2000" height="0">
+</td>
+</tbody>
+</table>
+</div>
+    
