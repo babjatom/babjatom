@@ -5,7 +5,7 @@
 <td align="center">
 <img width="2000" height="0"><br>
 Hello, this is Tomi's github 👋<br>
-<sup><sub>Built with ❤️, GO & Github Actions</sub></sup><br>
+<sup>Built with ❤️, GO & Github Actions</sup><br>
 <img width="2000" height="0">
 </td>
 </tbody>
@@ -16,11 +16,11 @@ Hello, this is Tomi's github 👋<br>
 <td align="left">
 <img width="2000" height="0"><br>
 Tomi's weather conditions<br>
-<sup><sub>Updated at 2024-04-29 22:32:05.490408245 +0000 UTC UTC </sub></sup><br>
+<sup>Updated at 2024-04-29 22:38:28.820403249 +0000 UTC</sup><br>
 <sup>:low_brightness: Few Clouds</sup><br>
-<sup>:thermometer: Temperature 31.48 </sup><br>
-<sup>:thermometer: Feels like 38.48</sup><br>
-<sup>:sweat_drops: Humidity 85%</sup><br>
+<sup>:thermometer: Temperature 30.85 </sup><br>
+<sup>:thermometer: Feels like 37.85</sup><br>
+<sup>:sweat_drops: Humidity 79%</sup><br>
 <sup>:mask: PM2.5 43.61 μg/m3</sup><br>
 <sup>:cyclone: Wind 4.63m/s </sup><br>
 <sup>:telescope: Visibility 10000m </sup><br>
