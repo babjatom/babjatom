@@ -29,7 +29,11 @@ Tomi's weather conditions<br>
 </td>
 <td align="left">
 <img width="2000" height="0"><br>
-<img src="icons/go.svg">
+Tomi's current Tech Stack<br>
+<img src="icons/go.svg" height="64"> Go<br>
+<img src="icons/react.svg" height="64"> React<br>
+<img src="icons/astrojs.svg" height="64"> Astrojs <br>
+<img src="icons/typescript.svg" height="32"><img src="icons/symfony.svg" height="32"><img src="icons/laravel.svg" height="32"><img src="icons/mongo.svg" height="32"><img src="icons/docker.svg" height="32">
 <img width="2000" height="0">
 </td>
 </tbody>
