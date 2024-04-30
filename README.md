@@ -29,7 +29,7 @@ Tomi's weather conditions<br>
 </td>
 <td align="left">
 <img width="2000" height="0"><br>
-<br>
+<img src="icons/go.svg">
 <img width="2000" height="0">
 </td>
 </tbody>
