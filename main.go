@@ -7,38 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
-
-type CurrentWeatherResponse struct {
-	Weather []struct {
-		Id          int    `json:"id"`
-		Main        string `json:"main"`
-		Description string `json:"description"`
-	} `json:"weather"`
-	Main struct {
-		Temp      float32 `json:"temp"`
-		FeelsLike float32 `json:"feels_like"`
-		TempMin   float32 `json:"temp_min"`
-		TempMax   float32 `json:"temp_max"`
-		Humidity  float32 `json:"humidity"`
-	} `json:"main"`
-	Wind struct {
-		Speed float32 `json:"speed"`
-	} `json:"wind"`
-	Rain struct {
-		LastHour float32 `json:"1h"`
-	}
-	Visibility int `json:"visibility"`
-}
-
-type CurrentAirQualityResponse struct {
-	List []struct {
-		Components struct {
-			Pm2_5 float32 `json:"pm2_5"`
-		} `json:"components"`
-	} `json:"list"`
-}
 
 func timer(name string) func() {
 	start := time.Now()
@@ -47,90 +18,74 @@ func timer(name string) func() {
 	}
 }
 
-type result struct {
-	index    int
-	jsonData []byte
+func getRequest(url string) ([]byte, error) {
+	defer timer("GET " + url)()
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println("%s", err)
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return body, err
 }
 
-func getDataParallel() (CurrentWeatherResponse, CurrentAirQualityResponse) {
-	defer timer("Parallel")()
+var (
+	OPENWEATHER_API_KEY        = os.Getenv("OPENWEATHER_API_KEY")
+	WEATHER_URL         string = "https://api.openweathermap.org/data/2.5/weather?units=metric&" + "lat=13.9125&lon=100.606667&appid=" + OPENWEATHER_API_KEY
+	AIR_QUALITY_URL     string = "https://api.openweathermap.org/data/2.5/air_pollution?units=metric&" + "lat=13.9125&lon=100.606667&appid=" + OPENWEATHER_API_KEY
+)
 
-	OPENWEATHER_API_KEY := os.Getenv("OPENWEATHER_API_KEY")
-	WEATHER_URL :=
-		"https://api.openweathermap.org/data/2.5/weather?units=metric&" +
-			"lat=13.9125&lon=100.606667&appid=" + OPENWEATHER_API_KEY
-	AIR_QUALITY_URL :=
-		"https://api.openweathermap.org/data/2.5/air_pollution?units=metric&" +
-			"lat=13.9125&lon=100.606667&appid=" + OPENWEATHER_API_KEY
-	urls := []string{
-		WEATHER_URL,
-		AIR_QUALITY_URL,
+func getWeather(weather *Weather, wg *sync.WaitGroup) {
+	res, err := getRequest(WEATHER_URL)
+	if err != nil {
+		fmt.Println("Request failed ", err)
 	}
-
-	ch := make(chan *result)
-	defer func() {
-		close(ch)
-	}()
-
-	for i, url := range urls {
-		go func(i int, url string) {
-			fmt.Println("Making request to", url)
-			res, err := http.Get(url)
-			if err != nil {
-				fmt.Println("%s", err)
-			}
-			defer res.Body.Close()
-
-			body, err := io.ReadAll(res.Body)
-			if err != nil {
-				fmt.Println(err)
-			}
-			result := &result{i, []byte(body)}
-			ch <- result
-
-		}(i, url)
+	if err := json.Unmarshal(res, weather); err != nil {
+		fmt.Println("Can not unmarshal JSON")
+		fmt.Println(err)
 	}
+	wg.Done()
+}
 
-	var currentAirQualityResponse CurrentAirQualityResponse
-	var currentWeatherResponse CurrentWeatherResponse
-
-	for range urls {
-		result := <-ch
-		switch result.index {
-		case 0:
-			if err := json.Unmarshal(result.jsonData, &currentWeatherResponse); err != nil {
-				fmt.Println("Can not unmarshal JSON")
-				fmt.Println(err)
-			}
-		case 1:
-			if err := json.Unmarshal(result.jsonData, &currentAirQualityResponse); err != nil {
-				fmt.Println("Can not unmarshal JSON")
-				fmt.Println(err)
-			}
-		}
+func getAirQuality(airQuality *AirQuality, wg *sync.WaitGroup) {
+	res, err := getRequest(AIR_QUALITY_URL)
+	if err != nil {
+		fmt.Println("Request failed ", err)
 	}
-
-	return currentWeatherResponse, currentAirQualityResponse
+	if err := json.Unmarshal(res, airQuality); err != nil {
+		fmt.Println("Can not unmarshal JSON")
+		fmt.Println(err)
+	}
+	wg.Done()
 }
 
 func main() {
-	currentWeather, currentAirQuality := getDataParallel()
+	var weather Weather
+	var airQuality AirQuality
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	go getWeather(&weather, wg)
+	go getAirQuality(&airQuality, wg)
+	wg.Wait()
 
 	template, err := os.ReadFile("template.md")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	replacer := strings.NewReplacer(
 		"{{ updated_at }}", fmt.Sprint(time.Now().UTC()),
-		"{{ weather }}", strings.Title(currentWeather.Weather[0].Description),
-		"{{ temp }}", fmt.Sprint(currentWeather.Main.Temp),
-		"{{ feelsLike }}", fmt.Sprint(currentWeather.Main.FeelsLike),
-		"{{ humidity }}", fmt.Sprint(currentWeather.Main.Humidity),
-		"{{ pm25 }}", fmt.Sprint(currentAirQuality.List[0].Components.Pm2_5),
-		"{{ wind }}", fmt.Sprint(currentWeather.Wind.Speed),
-		"{{ visibility }}", fmt.Sprint(currentWeather.Visibility),
-		"{{ rain }}", fmt.Sprint(currentWeather.Rain.LastHour),
+		"{{ weather }}", strings.Title(weather.Weather[0].Description),
+		"{{ temp }}", fmt.Sprint(weather.Main.Temp),
+		"{{ feelsLike }}", fmt.Sprint(weather.Main.FeelsLike),
+		"{{ humidity }}", fmt.Sprint(weather.Main.Humidity),
+		"{{ pm25 }}", fmt.Sprint(airQuality.List[0].Components.Pm2_5),
+		"{{ wind }}", fmt.Sprint(weather.Wind.Speed),
+		"{{ visibility }}", fmt.Sprint(weather.Visibility),
+		"{{ rain }}", fmt.Sprint(weather.Rain.LastHour),
 	)
 
 	var readme string = replacer.Replace(string(template))
