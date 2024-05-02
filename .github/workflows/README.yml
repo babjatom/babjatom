@@ -26,7 +26,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Generate README.md
         run: |
-          go run main.go
+          go run main.go types.go
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add README.md
