@@ -77,7 +77,7 @@ func main() {
 	}
 
 	replacer := strings.NewReplacer(
-		"{{ updated_at }}", fmt.Sprint(time.Now().UTC()),
+		"{{ updated_at }}", fmt.Sprint(time.Now().Format(time.RFC3339)),
 		"{{ weather }}", strings.Title(weather.Weather[0].Description),
 		"{{ temp }}", fmt.Sprint(weather.Main.Temp),
 		"{{ feelsLike }}", fmt.Sprint(weather.Main.FeelsLike),
