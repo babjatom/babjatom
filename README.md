@@ -16,8 +16,8 @@ Hello, this is Tomi's github 👋<br>
 <td align="left">
 <img width="2000" height="0"><br>
 Tomi's weather conditions<br>
-<sup>Updated at 2024-06-11T18:40:09Z</sup><br>
-<sup>:low_brightness: Scattered Clouds</sup><br>
+<sup>Updated at 2024-06-11T18:46:22Z</sup><br>
+<sup>:low_brightness: Few Clouds</sup><br>
 <sup>:thermometer: Temperature 28.96 </sup><br>
 <sup>:thermometer: Feels like 32.82</sup><br>
 <sup>:sweat_drops: Humidity 71%</sup><br>
