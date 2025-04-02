@@ -16,10 +16,10 @@ Hello, this is Tomi's github 👋<br>
 <td align="left">
 <img width="2000" height="0"><br>
 Tomi's weather conditions<br>
-<sup>Updated at 2025-04-02T07:54:47Z</sup><br>
+<sup>Updated at 2025-04-02T08:02:17Z</sup><br>
 <sup>:low_brightness: Few Clouds</sup><br>
-<sup>:thermometer: Temperature 34.75 </sup><br>
-<sup>:thermometer: Feels like 37.98</sup><br>
+<sup>:thermometer: Temperature 34.87 </sup><br>
+<sup>:thermometer: Feels like 38.22</sup><br>
 <sup>:sweat_drops: Humidity 44%</sup><br>
 <sup>:mask: PM2.5 32.93 μg/m3</sup><br>
 <sup>:cyclone: Wind 3.6m/s </sup><br>
