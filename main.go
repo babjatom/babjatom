@@ -1,27 +1,21 @@
 package main
 
 import (
-	"sync"
+	"fmt"
+	"log"
+	"net/http"
 )
 
-func weatherRoutine(weather *Weather, wg *sync.WaitGroup) {
-	getWeather(weather)
-	wg.Done()
-}
-
-func airQualityRoutine(airQuality *AirQuality, wg *sync.WaitGroup) {
-	getAirQuality(airQuality)
-	wg.Done()
-}
-
 func main() {
-	var weather Weather
-	var airQuality AirQuality
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
-	go weatherRoutine(&weather, wg)
-	go airQualityRoutine(&airQuality, wg)
-	wg.Wait()
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/api/tweets", handleAPI)
 
-	generateReadme(&weather, &airQuality)
+	addr := ":" + Port
+	fmt.Printf("Hashtag Tweet Feed running on http://localhost%s\n", addr)
+	if TwitterBearerToken == "" {
+		fmt.Println("TWITTER_BEARER_TOKEN not set — running in demo mode with mock data")
+	} else {
+		fmt.Println("Twitter API configured — fetching live tweets")
+	}
+	log.Fatal(http.ListenAndServe(addr, nil))
 }

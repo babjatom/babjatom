@@ -3,44 +3,93 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+	"strings"
+	"sync"
+	"time"
 )
 
-func getRequest(url string) ([]byte, error) {
-	defer timer("GET " + url)()
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
+var (
+	cache    = make(map[string]*CacheEntry)
+	cacheMu  sync.RWMutex
+	cacheTTL = 60 * time.Second
+)
+
+func getCachedOrFetch(hashtag string) APIResponse {
+	cacheMu.RLock()
+	entry, exists := cache[hashtag]
+	cacheMu.RUnlock()
+
+	if exists && time.Since(entry.FetchedAt) < cacheTTL {
+		return entry.Response
 	}
-	defer res.Body.Close()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
+
+	resp := fetchTweets(hashtag)
+
+	cacheMu.Lock()
+	cache[hashtag] = &CacheEntry{
+		Response:  resp,
+		FetchedAt: time.Now(),
 	}
-	return body, err
+	cacheMu.Unlock()
+
+	return resp
 }
 
-func getWeather(weather *Weather) {
-	res, err := getRequest(WEATHER_URL)
-	if err != nil {
-		fmt.Println("Request failed ", err)
+func fetchTweets(hashtag string) APIResponse {
+	if TwitterBearerToken == "" {
+		tweets := generateMockTweets(hashtag)
+		return APIResponse{
+			Tweets:    tweets,
+			Hashtag:   hashtag,
+			FetchedAt: time.Now().Format(time.RFC3339),
+			IsMock:    true,
+		}
 	}
-	if err := json.Unmarshal(res, weather); err != nil {
-		fmt.Println("Can not unmarshal JSON")
-		fmt.Println(err)
+
+	searchResp, err := searchTweets(hashtag)
+	if err != nil {
+		fmt.Printf("Twitter API error for #%s: %v — falling back to mock data\n", hashtag, err)
+		tweets := generateMockTweets(hashtag)
+		return APIResponse{
+			Tweets:    tweets,
+			Hashtag:   hashtag,
+			FetchedAt: time.Now().Format(time.RFC3339),
+			IsMock:    true,
+			Error:     err.Error(),
+		}
+	}
+
+	tweets := transformTweets(searchResp)
+	return APIResponse{
+		Tweets:    tweets,
+		Hashtag:   hashtag,
+		FetchedAt: time.Now().Format(time.RFC3339),
+		IsMock:    false,
 	}
 }
 
-func getAirQuality(airQuality *AirQuality) {
-	res, err := getRequest(AIR_QUALITY_URL)
-	if err != nil {
-		fmt.Println("Request failed ", err)
+func handleAPI(w http.ResponseWriter, r *http.Request) {
+	hashtag := strings.TrimSpace(r.URL.Query().Get("hashtag"))
+	allowed := map[string]bool{"iran": true, "trump": true, "saudi": true}
+
+	if hashtag == "" || !allowed[strings.ToLower(hashtag)] {
+		hashtag = "iran"
 	}
-	if err := json.Unmarshal(res, airQuality); err != nil {
-		fmt.Println("Can not unmarshal JSON")
-		fmt.Println(err)
+	hashtag = strings.ToLower(hashtag)
+
+	resp := getCachedOrFetch(hashtag)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, indexHTML)
 }
