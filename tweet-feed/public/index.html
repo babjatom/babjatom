@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HashFeed — Live Tweet Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #16181c;
+      --surface-hover: #1d1f24;
+      --border: #2f3336;
+      --text-primary: #e7e9ea;
+      --text-secondary: #71767b;
+      --text-muted: #3e4144;
+      --accent: #1d9bf0;
+      --accent-hover: #1a8cd8;
+      --like: #f91880;
+      --retweet: #00ba7c;
+      --verified: #1d9bf0;
+      --iran: #e63946;
+      --trump: #f4a261;
+      --saudi: #2a9d8f;
+      --all: #a855f7;
+      --radius: 16px;
+      --radius-sm: 8px;
+      --transition: 0.2s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      max-width: 1100px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-right: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition);
+      text-align: left;
+      width: 100%;
+    }
+
+    .nav-btn:hover { background: var(--surface-hover); }
+
+    .nav-btn.active { font-weight: 700; }
+
+    .nav-btn .tag-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .nav-btn[data-tag="all"]    .tag-dot { background: var(--all); }
+    .nav-btn[data-tag="iran"]   .tag-dot { background: var(--iran); }
+    .nav-btn[data-tag="trump"]  .tag-dot { background: var(--trump); }
+    .nav-btn[data-tag="saudi"]  .tag-dot { background: var(--saudi); }
+
+    .nav-btn.active[data-tag="all"]   { color: var(--all); }
+    .nav-btn.active[data-tag="iran"]  { color: var(--iran); }
+    .nav-btn.active[data-tag="trump"] { color: var(--trump); }
+    .nav-btn.active[data-tag="saudi"] { color: var(--saudi); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 16px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--retweet);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.demo { background: var(--trump); animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Main Feed ─────────────────────────────────────────── */
+    .main {
+      border-right: 1px solid var(--border);
+    }
+
+    .feed-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feed-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .refresh-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .refresh-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .refresh-btn:hover { background: var(--accent-hover); transform: scale(1.03); }
+    .refresh-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    .countdown {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Tweet Card ─────────────────────────────────────────── */
+    .tweets-list { }
+
+    .tweet-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+      cursor: pointer;
+      animation: slideIn 0.3s ease;
+    }
+
+    .tweet-card:hover { background: var(--surface-hover); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tweet-card.new-tweet {
+      border-left: 3px solid var(--accent);
+    }
+
+    .tweet-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1d9bf0, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .user-info { flex: 1; min-width: 0; }
+
+    .user-name {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      color: var(--verified);
+      flex-shrink: 0;
+    }
+
+    .user-handle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .tweet-time {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .hashtag-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hashtag-pill.iran  { background: rgba(230,57,70,0.15);  color: var(--iran); }
+    .hashtag-pill.trump { background: rgba(244,162,97,0.15); color: var(--trump); }
+    .hashtag-pill.saudi { background: rgba(42,157,143,0.15); color: var(--saudi); }
+
+    .tweet-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      word-break: break-word;
+    }
+
+    .tweet-text .hashtag-link { color: var(--accent); }
+
+    .tweet-actions {
+      display: flex;
+      gap: 28px;
+    }
+
+    .action {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color var(--transition);
+    }
+
+    .action:hover { color: var(--accent); }
+    .action.like:hover { color: var(--like); }
+    .action.retweet:hover { color: var(--retweet); }
+
+    .action svg { width: 18px; height: 18px; }
+
+    /* ── Loading / Empty ─────────────────────────────────────────── */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    /* ── New Tweets Banner ─────────────────────────────────────────── */
+    .new-banner {
+      display: none;
+      position: sticky;
+      top: 65px;
+      z-index: 9;
+      margin: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 9999px;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      animation: slideDown 0.3s ease;
+      border: none;
+      width: calc(100% - 32px);
+    }
+
+    .new-banner.show { display: block; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Mobile ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+        z-index: 100;
+      }
+      .logo, .sidebar-footer { display: none; }
+      .nav-btn {
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: var(--radius-sm);
+      }
+      .main { padding-bottom: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">HashFeed</span>
+    </div>
+
+    <button class="nav-btn active" data-tag="all" onclick="selectTag('all')">
+      <span class="tag-dot"></span>
+      All Feeds
+    </button>
+    <button class="nav-btn" data-tag="iran" onclick="selectTag('iran')">
+      <span class="tag-dot"></span>
+      #iran
+    </button>
+    <button class="nav-btn" data-tag="trump" onclick="selectTag('trump')">
+      <span class="tag-dot"></span>
+      #trump
+    </button>
+    <button class="nav-btn" data-tag="saudi" onclick="selectTag('saudi')">
+      <span class="tag-dot"></span>
+      #saudi
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot demo" id="statusDot"></span>
+        <span id="statusText">Demo mode</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Feed -->
+  <main class="main">
+    <div class="feed-header">
+      <h1 id="feedTitle">All Feeds</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="countdown" id="countdown">Refreshing in 30s</span>
+        <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">Refresh</button>
+      </div>
+    </div>
+
+    <button class="new-banner" id="newBanner" onclick="showNewTweets()"></button>
+
+    <div id="feedContent">
+      <div class="loading">
+        <div class="spinner"></div>
+        <span>Loading tweets…</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const REFRESH_INTERVAL = 30;
+  let currentTag = 'all';
+  let countdown = REFRESH_INTERVAL;
+  let countdownTimer = null;
+  let refreshTimer = null;
+  let pendingTweets = [];
+  let displayedIds = new Set();
+
+  const feedContent = document.getElementById('feedContent');
+  const feedTitle   = document.getElementById('feedTitle');
+  const countdownEl = document.getElementById('countdown');
+  const refreshBtn  = document.getElementById('refreshBtn');
+  const newBanner   = document.getElementById('newBanner');
+  const statusDot   = document.getElementById('statusDot');
+  const statusText  = document.getElementById('statusText');
+
+  // ── Tag selection ────────────────────────────────────────
+  function selectTag(tag) {
+    currentTag = tag;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-tag="${tag}"]`).classList.add('active');
+
+    const labels = { all: 'All Feeds', iran: '#iran', trump: '#trump', saudi: '#saudi' };
+    feedTitle.textContent = labels[tag];
+
+    displayedIds.clear();
+    pendingTweets = [];
+    newBanner.classList.remove('show');
+    fetchTweets(true);
+    resetCountdown();
+  }
+
+  // ── Fetch tweets ─────────────────────────────────────────
+  async function fetchTweets(initial = false) {
+    if (initial) {
+      feedContent.innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading tweets…</span></div>';
+    }
+
+    try {
+      const endpoint = currentTag === 'all' ? '/api/all' : `/api/tweets?hashtag=${currentTag}`;
+      const res  = await fetch(endpoint);
+      const data = await res.json();
+
+      // Update status
+      if (data.live) {
+        statusDot.classList.remove('demo');
+        statusText.textContent = 'Live data';
+      } else {
+        statusDot.classList.add('demo');
+        statusText.textContent = 'Demo mode';
+      }
+
+      const tweets = data.tweets || [];
+
+      if (initial) {
+        displayedIds.clear();
+        renderTweets(tweets);
+        tweets.forEach(t => displayedIds.add(t.id));
+      } else {
+        const newOnes = tweets.filter(t => !displayedIds.has(t.id));
+        if (newOnes.length > 0) {
+          pendingTweets = newOnes;
+          newBanner.textContent = `↑ ${newOnes.length} new tweet${newOnes.length > 1 ? 's' : ''} — click to load`;
+          newBanner.classList.add('show');
+        }
+        // Update IDs for next round
+        tweets.forEach(t => displayedIds.add(t.id));
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      if (initial) {
+        feedContent.innerHTML = '<div class="empty">⚠️ Could not load tweets. Make sure the server is running.</div>';
+      }
+    }
+  }
+
+  function showNewTweets() {
+    newBanner.classList.remove('show');
+    if (pendingTweets.length === 0) return;
+    const existing = feedContent.querySelectorAll('.tweet-card');
+    const fragment = document.createDocumentFragment();
+    pendingTweets.forEach(t => {
+      const el = createTweetCard(t, true);
+      fragment.appendChild(el);
+    });
+    feedContent.insertBefore(fragment, existing[0] || null);
+    pendingTweets = [];
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Render ───────────────────────────────────────────────
+  function renderTweets(tweets) {
+    if (!tweets.length) {
+      feedContent.innerHTML = '<div class="empty">No tweets found.</div>';
+      return;
+    }
+    feedContent.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    tweets.forEach(t => fragment.appendChild(createTweetCard(t, false)));
+    feedContent.appendChild(fragment);
+  }
+
+  function createTweetCard(tweet, isNew) {
+    const card = document.createElement('div');
+    card.className = 'tweet-card' + (isNew ? ' new-tweet' : '');
+    card.dataset.id = tweet.id;
+
+    const initial = (tweet.author.name || 'U')[0].toUpperCase();
+    const avatarHtml = tweet.author.profile_image_url
+      ? `<img src="${tweet.author.profile_image_url}" alt="${initial}" onerror="this.style.display='none'">`
+      : initial;
+
+    const verifiedHtml = tweet.author.verified
+      ? `<span class="verified-badge" title="Verified">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.88 9.33 2 10.57 2 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.8c.66 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.33-2.19c1.4.46 2.91.2 3.92-.81s1.26-2.52.8-3.91c1.31-.67 2.2-1.91 2.2-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z"/>
+          </svg>
+        </span>` : '';
+
+    const pillHtml = tweet.hashtag
+      ? `<span class="hashtag-pill ${tweet.hashtag}">#${tweet.hashtag}</span>` : '';
+
+    const tweetText = linkify(tweet.text);
+    const timeAgo = formatTime(tweet.created_at);
+    const m = tweet.metrics || {};
+
+    card.innerHTML = `
+      <div class="tweet-header">
+        <div class="avatar">${avatarHtml}</div>
+        <div class="user-info">
+          <div class="user-name">
+            ${escHtml(tweet.author.name)}
+            ${verifiedHtml}
+            ${pillHtml}
+          </div>
+          <div class="user-handle">@${escHtml(tweet.author.username)}</div>
+        </div>
+        <span class="tweet-time">${timeAgo}</span>
+      </div>
+      <div class="tweet-text">${tweetText}</div>
+      <div class="tweet-actions">
+        <span class="action retweet">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+          ${fmt(m.retweet_count)}
+        </span>
+        <span class="action like">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+          ${fmt(m.like_count)}
+        </span>
+        <span class="action">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.501 3.58 7.501 8 0 4.43-3.011 8-7.5 8h-4.367c-4.421 0-8.005-3.58-8.005-8zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.31 2.688 6 6.005 6h4.366c3.316 0 5.5-2.69 5.5-6 0-3.31-2.184-6-5.5-6H9.756z"/></svg>
+          ${fmt(m.reply_count)}
+        </span>
+      </div>
+    `;
+    return card;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function linkify(text) {
+    return escHtml(text)
+      .replace(/(#\w+)/g, '<span class="hashtag-link">$1</span>')
+      .replace(/(@\w+)/g, '<span style="color:var(--accent)">$1</span>');
+  }
+
+  function fmt(n) {
+    if (!n) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60)   return `${Math.round(diff)}s`;
+    if (diff < 3600) return `${Math.round(diff / 60)}m`;
+    if (diff < 86400)return `${Math.round(diff / 3600)}h`;
+    return new Date(iso).toLocaleDateString();
+  }
+
+  // ── Countdown & Auto-refresh ─────────────────────────────
+  function resetCountdown() {
+    clearInterval(countdownTimer);
+    clearTimeout(refreshTimer);
+    countdown = REFRESH_INTERVAL;
+    startCountdown();
+  }
+
+  function startCountdown() {
+    updateCountdownDisplay();
+    countdownTimer = setInterval(() => {
+      countdown--;
+      updateCountdownDisplay();
+      if (countdown <= 0) {
+        countdown = REFRESH_INTERVAL;
+        fetchTweets(false);
+      }
+    }, 1000);
+  }
+
+  function updateCountdownDisplay() {
+    countdownEl.textContent = countdown <= 5
+      ? `Refreshing in ${countdown}s…`
+      : `Auto-refresh in ${countdown}s`;
+  }
+
+  function manualRefresh() {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = 'Loading…';
+    pendingTweets = [];
+    newBanner.classList.remove('show');
+    fetchTweets(true).then(() => {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = 'Refresh';
+      resetCountdown();
+    });
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  (async function init() {
+    try {
+      const res = await fetch('/api/status');
+      const status = await res.json();
+      if (status.live) {
+        statusDot.classList.remove('demo');
+        statusText.textContent = 'Live data';
+      }
+    } catch (_) {}
+    fetchTweets(true);
+    startCountdown();
+  })();
+</script>
+</body>
+</html>
