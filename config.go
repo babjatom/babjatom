@@ -3,13 +3,29 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 var (
-	OPENWEATHER_API_KEY        = os.Getenv("OPENWEATHER_API_KEY")
-	LATITUDE                   = os.Getenv("LATITUDE")
-	LONGITUDE                  = os.Getenv("LONGITUDE")
-	BASE_URL                   = "https://api.openweathermap.org/data/2.5/"
-	WEATHER_URL         string = fmt.Sprintf("%sweather?units=metric&lat=%s&lon=%s&appid=%s", BASE_URL, LATITUDE, LONGITUDE, OPENWEATHER_API_KEY)
-	AIR_QUALITY_URL     string = fmt.Sprintf("%sair_pollution?units=metric&lat=%s&lon=%s&appid=%s", BASE_URL, LATITUDE, LONGITUDE, OPENWEATHER_API_KEY)
+	// XBearerToken is a Twitter/X API v2 Bearer token (from the developer portal).
+	XBearerToken = os.Getenv("X_BEARER_TOKEN")
+	Port         = getenvInt("PORT", 8080)
+	// RefreshIntervalSec is how often the browser polls /api/feed (also used for Cache-Control).
+	RefreshIntervalSec = getenvInt("REFRESH_INTERVAL_SEC", 60)
 )
+
+func getenvInt(key string, def int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return def
+	}
+	return n
+}
+
+func serverAddr() string {
+	return fmt.Sprintf(":%d", Port)
+}

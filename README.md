@@ -1,38 +1,22 @@
+# Hashtag tweet feed
 
-<div align="center">
-<table>
-<tbody>
-<td align="center">
-<img width="2000" height="0"><br>
-Hello, this is Tomi's github 👋<br>
-<sup>Built with ❤️, GO & Github Actions</sup><br>
-<img width="2000" height="0">
-</td>
-</tbody>
-</table>
-</div>
-<table>
-<tbody>
-<td align="left">
-<img width="2000" height="0"><br>
-Tomi's weather conditions<br>
-<sup>Updated at 2026-01-13T08:44:23Z</sup><br>
-<sup>:low_brightness: Clear Sky</sup><br>
-<sup>:thermometer: Temperature 32.08 </sup><br>
-<sup>:thermometer: Feels like 31.57</sup><br>
-<sup>:sweat_drops: Humidity 35%</sup><br>
-<sup>:mask: PM2.5 176.88 μg/m3</sup><br>
-<sup>:cyclone: Wind 0.45m/s </sup><br>
-<sup>:telescope: Visibility 10000m </sup><br>
-<sup>:droplet: Rain 0mm/last 1h </sup><br>
-<img width="2000" height="0">
-</td>
-<td align="left">
-<img width="2000" height="0"><br>
-<br>
-<img width="2000" height="0">
-</td>
-</tbody>
-</table>
-</div>
-    
+A small web app that shows recent posts from X (Twitter) matching **#iran**, **#trump**, and **#saudi**. The page polls the server on an interval and looks like a simple Twitter-style timeline.
+
+## Requirements
+
+- Go 1.22+
+- An [X Developer](https://developer.x.com/) project with **Bearer token** access to the v2 **Recent search** endpoint (search is not available on the free tier in many cases).
+
+## Run
+
+```bash
+export X_BEARER_TOKEN="your_bearer_token"
+# optional: PORT=8080 REFRESH_INTERVAL_SEC=60
+make run
+```
+
+Open `http://localhost:8080` (or your `PORT`).
+
+## How it works
+
+The server calls `GET /2/tweets/search/recent` with query `(#iran OR #trump OR #saudi)`, merges and sorts by time, and serves a static UI plus `GET /api/feed` JSON for the browser.

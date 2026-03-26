@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hashtag feed — #iran · #trump · #saudi</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #16181c;
+      --border: #2f3336;
+      --text: #e7e9ea;
+      --muted: #71767b;
+      --accent: #1d9bf0;
+      --error: #f4212e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      min-height: 100vh;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(15, 20, 25, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .sub {
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .tags {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(29, 155, 240, 0.12);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .dot.ok { background: #00ba7c; }
+    .dot.err { background: var(--error); }
+    .banner {
+      margin: 12px 16px 0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(244, 33, 46, 0.12);
+      color: #f9cfd2;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .banner.warn {
+      background: rgba(255, 193, 7, 0.12);
+      color: #fce8b2;
+    }
+    .banner.show { display: block; }
+    .feed { padding-bottom: 48px; }
+    article {
+      display: flex;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    article:hover { background: rgba(255, 255, 255, 0.03); }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+    .body { min-width: 0; flex: 1; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 8px;
+      margin-bottom: 4px;
+    }
+    .name { font-weight: 700; font-size: 0.95rem; }
+    .handle, .time { color: var(--muted); font-size: 0.85rem; }
+    .text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+    .empty {
+      padding: 48px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Live hashtag feed</h1>
+      <p class="sub">Recent posts from X matching your hashtags. Refreshes automatically.</p>
+      <div class="tags">
+        <span class="tag">#iran</span>
+        <span class="tag">#trump</span>
+        <span class="tag">#saudi</span>
+      </div>
+      <div class="status" id="status">
+        <span class="dot" id="dot"></span>
+        <span id="statusText">Connecting…</span>
+      </div>
+    </header>
+    <div class="banner" id="banner"></div>
+    <main class="feed" id="feed"></main>
+  </div>
+  <script>
+    const feedEl = document.getElementById("feed");
+    const bannerEl = document.getElementById("banner");
+    const dotEl = document.getElementById("dot");
+    const statusText = document.getElementById("statusText");
+
+    let intervalMs = 60000;
+    let pollHandle;
+
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function render(items) {
+      if (!items.length) {
+        feedEl.innerHTML = '<div class="empty">No recent posts found for these hashtags.</div>';
+        return;
+      }
+      feedEl.innerHTML = items.map((t) => {
+        const av = t.avatar_url
+          ? `<img class="avatar" src="${esc(t.avatar_url)}" alt="" loading="lazy" />`
+          : '<div class="avatar"></div>';
+        const when = t.created_at ? new Date(t.created_at).toLocaleString() : "";
+        return `<article>
+          ${av}
+          <div class="body">
+            <div class="meta">
+              <span class="name">${esc(t.author_name)}</span>
+              <span class="handle">@${esc(t.author_handle)}</span>
+              <span class="time">${esc(when)}</span>
+            </div>
+            <div class="text">${esc(t.text)}</div>
+            <div style="margin-top:8px;font-size:0.8rem;"><a href="${esc(t.tweet_url)}" target="_blank" rel="noopener">View on X →</a></div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    async function load() {
+      try {
+        const res = await fetch("/api/feed", { cache: "no-store" });
+        const data = await res.json();
+        if (typeof data.interval_sec === "number" && data.interval_sec > 0) {
+          const next = data.interval_sec * 1000;
+          if (next !== intervalMs) {
+            intervalMs = next;
+            if (pollHandle) clearInterval(pollHandle);
+            pollHandle = setInterval(load, intervalMs);
+          }
+        }
+        if (!data.ok) {
+          dotEl.className = "dot err";
+          statusText.textContent = "Error — check configuration";
+          bannerEl.textContent = data.message || "Something went wrong.";
+          bannerEl.classList.remove("warn");
+          bannerEl.classList.add("show");
+          render([]);
+          return;
+        }
+        if (data.warning) {
+          bannerEl.textContent = "Showing cached posts. " + data.warning;
+          bannerEl.classList.add("warn");
+          bannerEl.classList.add("show");
+        } else {
+          bannerEl.classList.remove("show");
+          bannerEl.classList.remove("warn");
+        }
+        dotEl.className = "dot ok";
+        const t = data.refreshed_at ? new Date(data.refreshed_at).toLocaleTimeString() : "";
+        statusText.textContent = "Live · updated " + t;
+        render(data.items || []);
+      } catch (e) {
+        dotEl.className = "dot err";
+        statusText.textContent = "Network error";
+        bannerEl.textContent = "Could not reach the server.";
+        bannerEl.classList.add("show");
+      }
+    }
+
+    async function init() {
+      try {
+        const c = await fetch("/api/config", { cache: "no-store" });
+        const cfg = await c.json();
+        if (typeof cfg.interval_sec === "number" && cfg.interval_sec > 0) {
+          intervalMs = cfg.interval_sec * 1000;
+        }
+      } catch (e) { /* use default */ }
+      await load();
+      pollHandle = setInterval(load, intervalMs);
+    }
+    init();
+  </script>
+</body>
+</html>
