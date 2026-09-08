@@ -26,15 +26,15 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { THEME_TOKEN_KEYS } from '@/domain/theme'
 import { useTheme } from './theme-provider'
+import { VisitsDataTable } from './visits-data-table'
 
 export function ComponentShowcase() {
   const { theme } = useTheme()
   const [notifications, setNotifications] = useState(true)
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
       <header className="animate-rise relative overflow-hidden rounded-2xl border border-border/70">
         <div className="theme-mesh absolute inset-0 opacity-80" />
         <div className="relative px-6 py-10 sm:px-10">
@@ -104,7 +104,7 @@ export function ComponentShowcase() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Dialog</CardTitle>
             <CardDescription>
@@ -131,31 +131,17 @@ export function ComponentShowcase() {
             </Dialog>
           </CardContent>
         </Card>
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Token map</CardTitle>
-            <CardDescription>
-              Live values for the active theme. Add themes by editing variables,
-              not components.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid max-h-64 grid-cols-1 gap-2 overflow-auto sm:grid-cols-2">
-              {THEME_TOKEN_KEYS.map((key) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between gap-3 rounded-md border border-border/70 bg-secondary/40 px-3 py-2 text-xs"
-                >
-                  <span className="font-medium">{key}</span>
-                  <span className="truncate text-muted-foreground">
-                    {theme.tokens[key]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <section className="animate-rise-delay flex flex-col gap-3">
+        <div>
+          <h2 className="font-display text-2xl font-semibold">Recent visits</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sortable mock data table with row selection, drag reorder, and a
+            row actions menu — styled with the active theme tokens.
+          </p>
+        </div>
+        <VisitsDataTable />
       </section>
 
       <section className="rounded-2xl border border-dashed border-border/80 bg-card/50 p-6">
