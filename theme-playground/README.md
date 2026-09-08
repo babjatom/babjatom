@@ -2,6 +2,13 @@
 
 A static shadcn/ui theme playground demonstrating how the same component system can be transformed through different visual themes.
 
+The app in this folder is served from GitHub Pages with routes:
+
+- `/` — babjatom home (shared shell + placeholder)
+- `/theme-playground` — component showcase and visits table
+
+The sidebar **Pages** menu lists Theme Playground first, then **Themes** below.
+
 ## Features
 
 - shadcn/ui components

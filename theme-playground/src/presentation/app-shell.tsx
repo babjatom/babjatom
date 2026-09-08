@@ -1,11 +1,21 @@
-import type { ReactNode } from 'react'
-import { Dices, Menu, PanelLeftClose, PanelLeftOpen, SwatchBook } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+import {
+  Dices,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  SwatchBook,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useTheme } from './theme-provider'
 
-export function AppShell({ children }: { children: ReactNode }) {
+const pages = [
+  { to: '/theme-playground', label: 'Theme Playground', end: false },
+] as const
+
+export function AppShell() {
   const {
     theme,
     themes,
@@ -24,26 +34,32 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       >
         <div className="flex items-center justify-between gap-3 px-4 py-4">
-          <div className={cn('flex items-center gap-3', sidebarCollapsed && 'lg:justify-center lg:w-full')}>
+          <NavLink
+            to="/"
+            className={cn(
+              'flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              sidebarCollapsed && 'lg:justify-center lg:w-full',
+            )}
+          >
             <div className="theme-orb flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <SwatchBook className="h-5 w-5" />
             </div>
             {!sidebarCollapsed && (
               <div className="animate-rise">
                 <p className="font-display text-lg font-semibold leading-none">
-                  Theme Playground
+                  babjatom
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   shadcn/ui · CSS variables
                 </p>
               </div>
             )}
-          </div>
+          </NavLink>
           <Button
             variant="ghost"
             size="icon"
             className="lg:hidden"
-            aria-label="Toggle themes panel"
+            aria-label="Toggle sidebar"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           >
             <Menu className="h-5 w-5" />
@@ -61,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <>
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  Themes
+                  Pages
                 </p>
                 <Button
                   variant="ghost"
@@ -73,6 +89,31 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <PanelLeftClose className="h-4 w-4" />
                 </Button>
               </div>
+              <nav className="mb-4 flex flex-col gap-2" aria-label="Pages">
+                {pages.map((page) => (
+                  <NavLink
+                    key={page.to}
+                    to={page.to}
+                    end={page.end}
+                    className={({ isActive }) =>
+                      cn(
+                        'rounded-lg border px-3 py-2 text-sm transition-colors',
+                        isActive
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-transparent bg-secondary/50 hover:bg-secondary',
+                      )
+                    }
+                  >
+                    {page.label}
+                  </NavLink>
+                ))}
+              </nav>
+
+              <Separator className="my-4" />
+
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Themes
+              </p>
               <div className="flex flex-col gap-2">
                 {themes.map((item) => (
                   <button
@@ -125,16 +166,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </div>
 
-        {!sidebarCollapsed && (
-          <div className="px-4 pb-4 lg:hidden">
-            {/* mobile panel already shown above when not collapsed */}
-          </div>
-        )}
-
         {sidebarCollapsed && (
           <div className="flex gap-2 px-4 pb-4 lg:hidden">
             <Button className="flex-1" onClick={() => setSidebarCollapsed(false)}>
-              Show themes
+              Show menu
             </Button>
             <Button variant="outline" onClick={randomizeTheme}>
               <Dices className="h-4 w-4" />
@@ -143,7 +178,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </aside>
 
-      <main className="px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>
+      <main className="px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        <Outlet />
+      </main>
     </div>
   )
 }
