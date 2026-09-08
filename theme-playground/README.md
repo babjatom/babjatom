@@ -6,8 +6,9 @@ The app in this folder is served from GitHub Pages with routes:
 
 - `/` — babjatom home (shared shell + placeholder)
 - `/theme-playground` — component showcase and visits table
+- `/analytics` — visits table plus area, bar, line, pie, radar, radial, and tooltip charts
 
-The sidebar **Pages** menu lists Theme Playground first, then **Themes** below.
+The sidebar **Pages** menu lists Theme Playground first, then Analytics, with **Themes** below.
 
 ## Features
 

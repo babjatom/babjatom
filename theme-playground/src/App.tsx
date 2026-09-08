@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AnalyticsPage } from '@/presentation/analytics-page'
 import { AppShell } from '@/presentation/app-shell'
 import { ComponentShowcase } from '@/presentation/component-showcase'
 import { HomePage } from '@/presentation/home-page'
@@ -14,6 +15,7 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
             <Route path="theme-playground" element={<ComponentShowcase />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
