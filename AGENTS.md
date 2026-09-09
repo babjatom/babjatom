@@ -20,6 +20,7 @@ Everything committed here is public forever, including history.
 - Reuse the existing CSS-variable theme system.
 - Ship incomplete features as intentional placeholders, not broken nav entries.
 - When adding routes, add or update routing/navigation tests.
+- Use Conventional Commits for every commit (see below).
 - Verify changes with install, test, and build (commands below).
 
 ## Do not
@@ -31,6 +32,31 @@ Everything committed here is public forever, including history.
 - Expose unfinished experiments in public navigation.
 
 If configuration files are needed later, commit only `.env.example` with empty placeholders. Backend services and training data belong outside this public SPA.
+
+## Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```text
+<type>(optional-scope): <description>
+```
+
+Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+Rules:
+
+- Imperative, concise description (for example `add AGENTS.md`, not `added` / `Adds`).
+- Scope optional; use when it clarifies the area (`theme-playground`, `deploy`, `agents`).
+- Breaking changes: append `!` after type/scope or add a `BREAKING CHANGE:` footer.
+- One logical change per commit when practical.
+
+Examples:
+
+```text
+docs: add AGENTS.md agent contract
+feat(theme-playground): add analytics charts page
+fix(deploy): preserve Pages base path
+```
 
 ## Verify
 
