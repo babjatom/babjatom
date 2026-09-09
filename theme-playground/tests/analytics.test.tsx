@@ -22,6 +22,7 @@ describe('Analytics page', () => {
     expect(links.map((link) => link.textContent)).toEqual([
       'Theme Playground',
       'Analytics',
+      'Tomi AI',
     ])
 
     await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))
