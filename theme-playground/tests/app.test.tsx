@@ -21,6 +21,9 @@ describe('babjatom shell navigation', () => {
     expect(
       within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
     ).toBeInTheDocument()
+    expect(
+      within(pagesNav).getByRole('link', { name: 'Tomi AI' }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
   })
 
@@ -34,6 +37,24 @@ describe('babjatom shell navigation', () => {
     )
     expect(screen.getByRole('button', { name: 'Primary' })).toBeInTheDocument()
     expect(screen.getByText(/recent visits/i)).toBeInTheDocument()
+  })
+
+  it('navigates to the Tomi AI placeholder route', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(within(pagesNav).getByRole('link', { name: 'Tomi AI' }))
+
+    expect(screen.getByRole('heading', { name: 'Tomi AI' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Question')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText(
+        /ask about tomi’s experience, stack, or approach/i,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
+    expect(screen.getByText(/coming soon/i)).toBeInTheDocument()
   })
 
   it('switches themes from the sidebar', async () => {

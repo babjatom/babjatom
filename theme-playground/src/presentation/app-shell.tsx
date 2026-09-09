@@ -14,6 +14,7 @@ import { useTheme } from './theme-provider'
 const pages = [
   { to: '/theme-playground', label: 'Theme Playground', end: false },
   { to: '/analytics', label: 'Analytics', end: false },
+  { to: '/tomi-ai', label: 'Tomi AI', end: false },
 ] as const
 
 export function AppShell() {
