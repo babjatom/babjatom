@@ -141,3 +141,56 @@ body {
 .theme-orb {
   animation: soft-pulse 3.2s ease-in-out infinite;
 }
+
+.tomi-md :where(p, ul, ol, pre, blockquote) {
+  margin: 0.5em 0;
+}
+
+.tomi-md :where(p:first-child, ul:first-child, ol:first-child, pre:first-child) {
+  margin-top: 0;
+}
+
+.tomi-md :where(p:last-child, ul:last-child, ol:last-child, pre:last-child) {
+  margin-bottom: 0;
+}
+
+.tomi-md :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.tomi-md :where(ul) {
+  list-style: disc;
+}
+
+.tomi-md :where(ol) {
+  list-style: decimal;
+}
+
+.tomi-md :where(a) {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tomi-md :where(code) {
+  border-radius: 0.25rem;
+  background: hsl(var(--background) / 0.7);
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+
+.tomi-md :where(pre) {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  background: hsl(var(--background) / 0.85);
+  padding: 0.75rem 0.9rem;
+}
+
+.tomi-md :where(pre code) {
+  background: transparent;
+  padding: 0;
+}
+
+.tomi-md :where(strong) {
+  font-weight: 600;
+}

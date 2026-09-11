@@ -1,46 +1,301 @@
+import {
+  type FormEvent,
+  type KeyboardEvent,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import ReactMarkdown from 'react-markdown'
+import {
+  Copy,
+  Eraser,
+  LoaderCircle,
+  RefreshCw,
+  SendHorizontal,
+  Square,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import {
+  STARTER_PROMPTS,
+  useTomiChat,
+  type ChatMessage,
+} from './use-tomi-chat'
+
+function AssistantBody({ message }: { message: ChatMessage }) {
+  if (message.status === 'pending') {
+    return (
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
+        Thinking…
+      </p>
+    )
+  }
+
+  if (message.status === 'cancelled' || message.status === 'error') {
+    return (
+      <p
+        className={cn(
+          'text-sm',
+          message.status === 'error'
+            ? 'text-destructive'
+            : 'text-muted-foreground',
+        )}
+      >
+        {message.content}
+      </p>
+    )
+  }
+
+  return (
+    <div className="tomi-md text-sm leading-relaxed">
+      <ReactMarkdown>{message.content}</ReactMarkdown>
+    </div>
+  )
+}
 
 export function TomiAiPage() {
+  const { messages, pending, send, stop, regenerate, clear, copy } =
+    useTomiChat()
+  const [draft, setDraft] = useState('')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const node = listRef.current
+    if (!node) return
+    node.scrollTop = node.scrollHeight
+  }, [messages, pending])
+
+  useEffect(() => {
+    if (!copiedId) return
+    const timer = window.setTimeout(() => setCopiedId(null), 1600)
+    return () => window.clearTimeout(timer)
+  }, [copiedId])
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const question = draft
+    setDraft('')
+    await send(question)
+    inputRef.current?.focus()
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      if (!pending && draft.trim()) {
+        void send(draft).then(() => {
+          setDraft('')
+          inputRef.current?.focus()
+        })
+      }
+    }
+  }
+
+  const lastAssistantId = [...messages]
+    .reverse()
+    .find((message) => message.role === 'assistant')?.id
+
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-      <header className="animate-rise">
-        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Tomi AI
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Coming soon — interview and screening Q&amp;A assistant about Tomi
-          (babjatom). Ask about experience, stack, or approach.
-        </p>
+    <div className="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-col gap-4 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]">
+      <header className="animate-rise shrink-0">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Tomi AI
+            </h1>
+            <p className="mt-2 max-w-2xl text-muted-foreground">
+              Ask about Tomi’s experience, stack, or approach. Each question is
+              answered independently.
+            </p>
+          </div>
+          {messages.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={clear}
+              aria-label="Clear chat"
+            >
+              <Eraser className="h-4 w-4" />
+              Clear
+            </Button>
+          )}
+        </div>
       </header>
 
-      <section className="animate-rise-delay flex flex-col gap-3">
-        <form
-          className="flex flex-col gap-3 sm:flex-row sm:items-end"
-          onSubmit={(event) => {
-            event.preventDefault()
-          }}
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <Label htmlFor="tomi-ai-question">Question</Label>
-            <Input
-              id="tomi-ai-question"
-              name="question"
-              type="text"
-              placeholder="Ask about Tomi’s experience, stack, or approach…"
-              autoComplete="off"
-            />
+      <section
+        ref={listRef}
+        className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
+        {messages.length === 0 ? (
+          <div className="flex h-full flex-col justify-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              Start with a suggested question, or type your own below.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {STARTER_PROMPTS.map((prompt) => (
+                <Button
+                  key={prompt}
+                  type="button"
+                  variant="secondary"
+                  className="justify-start text-left"
+                  disabled={pending}
+                  onClick={() => void send(prompt)}
+                >
+                  {prompt}
+                </Button>
+              ))}
+            </div>
           </div>
-          <Button type="submit" disabled>
+        ) : (
+          <ul className="flex flex-col gap-4">
+            {messages.map((message) => {
+              const isUser = message.role === 'user'
+              const showActions =
+                !isUser &&
+                message.status !== 'pending' &&
+                message.id === lastAssistantId
+
+              return (
+                <li
+                  key={message.id}
+                  className={cn(
+                    'flex',
+                    isUser ? 'justify-end' : 'justify-start',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'max-w-[92%] space-y-2 sm:max-w-[85%]',
+                      isUser ? 'items-end' : 'items-start',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'rounded-2xl px-3.5 py-2.5',
+                        isUser
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-foreground',
+                      )}
+                    >
+                      {isUser ? (
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                          {message.content}
+                        </p>
+                      ) : (
+                        <AssistantBody message={message} />
+                      )}
+                    </div>
+                    {showActions && (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={!message.content.trim()}
+                          onClick={() => {
+                            void copy(message.content).then(() =>
+                              setCopiedId(message.id),
+                            )
+                          }}
+                          aria-label="Copy answer"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          {copiedId === message.id ? 'Copied' : 'Copy'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={pending}
+                          onClick={() => void regenerate(message.id)}
+                          aria-label="Regenerate answer"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          Regenerate
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
+      <form
+        className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
+        onSubmit={handleSubmit}
+      >
+        <LabelledComposer
+          draft={draft}
+          pending={pending}
+          inputRef={inputRef}
+          onDraftChange={setDraft}
+          onKeyDown={handleKeyDown}
+          onStop={stop}
+        />
+      </form>
+    </div>
+  )
+}
+
+function LabelledComposer({
+  draft,
+  pending,
+  inputRef,
+  onDraftChange,
+  onKeyDown,
+  onStop,
+}: {
+  draft: string
+  pending: boolean
+  inputRef: RefObject<HTMLTextAreaElement | null>
+  onDraftChange: (value: string) => void
+  onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
+  onStop: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor="tomi-ai-question" className="sr-only">
+        Question
+      </label>
+      <textarea
+        ref={inputRef}
+        id="tomi-ai-question"
+        name="question"
+        rows={2}
+        value={draft}
+        disabled={pending}
+        onChange={(event) => onDraftChange(event.target.value)}
+        onKeyDown={onKeyDown}
+        placeholder="Ask about Tomi’s experience, stack, or approach…"
+        autoComplete="off"
+        className="min-h-[2.75rem] w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+      />
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          Enter to send · Shift+Enter for a new line
+        </p>
+        {pending ? (
+          <Button type="button" variant="secondary" onClick={onStop}>
+            <Square className="h-3.5 w-3.5" />
+            Stop
+          </Button>
+        ) : (
+          <Button type="submit" disabled={!draft.trim()}>
+            <SendHorizontal className="h-4 w-4" />
             Ask
           </Button>
-        </form>
-        <p className="text-sm text-muted-foreground">
-          Answers are not available yet. This input is a placeholder for the
-          upcoming assistant.
-        </p>
-      </section>
+        )}
+      </div>
     </div>
   )
 }
