@@ -39,7 +39,7 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByText(/recent visits/i)).toBeInTheDocument()
   })
 
-  it('navigates to the Tomi AI placeholder route', async () => {
+  it('navigates to the Tomi AI chat route', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
@@ -54,7 +54,10 @@ describe('babjatom shell navigation', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Who is Tomi?' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
   })
 
   it('switches themes from the sidebar', async () => {
