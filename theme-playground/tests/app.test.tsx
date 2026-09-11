@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '@/App'
+import { setMatchMediaMatches } from './setup'
 
 function renderApp(path = '/babjatom/') {
   window.history.pushState({}, '', path)
@@ -11,6 +12,7 @@ function renderApp(path = '/babjatom/') {
 describe('babjatom shell navigation', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    setMatchMediaMatches(false)
   })
 
   it('renders the home placeholder with pages nav', () => {
@@ -25,6 +27,18 @@ describe('babjatom shell navigation', () => {
       within(pagesNav).getByRole('link', { name: 'Tomi AI' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
+  })
+
+  it('keeps the pages menu collapsed on mobile viewports', async () => {
+    const user = userEvent.setup()
+    setMatchMediaMatches(true)
+    renderApp('/babjatom/')
+
+    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /show menu/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
   })
 
   it('navigates to the theme playground route', async () => {
