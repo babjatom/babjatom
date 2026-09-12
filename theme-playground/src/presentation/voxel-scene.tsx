@@ -12,14 +12,16 @@ function TomiModel({ pointer }: { pointer: RefObject<Pointer> }) {
   const { scene } = useGLTF(MODEL_URL)
   const cloned = useMemo(() => scene.clone(true), [scene])
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
 
-    const targetY = pointer.current.x * 0.55
-    const targetX = pointer.current.y * 0.28
-    group.rotation.y += (targetY - group.rotation.y) * 0.1
-    group.rotation.x += (targetX - group.rotation.x) * 0.1
+    // Gentle follow: small angles + frame-rate–aware easing (not snappy).
+    const targetY = pointer.current.x * 0.22
+    const targetX = pointer.current.y * 0.1
+    const ease = 1 - Math.exp(-2.2 * delta)
+    group.rotation.y += (targetY - group.rotation.y) * ease
+    group.rotation.x += (targetX - group.rotation.x) * ease
   })
 
   return (
@@ -49,20 +51,27 @@ export function VoxelScene() {
   }, [])
 
   return (
-    <div className="h-full w-full" role="img" aria-label="3D Tomi scene">
-      <Canvas
-        camera={{ position: [1.15, 0.85, 1.45], fov: 32 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <ambientLight intensity={0.75} />
-        <directionalLight position={[4, 6, 3]} intensity={1.15} />
-        <hemisphereLight intensity={0.35} groundColor="#444444" />
-        <Suspense fallback={null}>
-          <TomiModel pointer={pointer} />
-          <ContactShadows opacity={0.35} scale={12} blur={2.5} far={8} />
-        </Suspense>
-      </Canvas>
+    <div className="relative h-full w-full" role="img" aria-label="3D Tomi scene">
+      <div className="voxel-scene absolute inset-0">
+        <Canvas
+          camera={{ position: [1.15, 0.85, 1.45], fov: 32 }}
+          dpr={[1, 1.75]}
+          gl={{ antialias: true, alpha: true }}
+        >
+          <ambientLight intensity={0.75} />
+          <directionalLight position={[4, 6, 3]} intensity={1.15} />
+          <hemisphereLight intensity={0.35} groundColor="#444444" />
+          <Suspense fallback={null}>
+            <TomiModel pointer={pointer} />
+            <ContactShadows opacity={0.28} scale={12} blur={2.8} far={8} />
+          </Suspense>
+        </Canvas>
+      </div>
+      {/* Soft theme fade so the incomplete waist cut reads intentional */}
+      <div
+        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
+        aria-hidden
+      />
     </div>
   )
 }
