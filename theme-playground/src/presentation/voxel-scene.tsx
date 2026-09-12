@@ -25,7 +25,7 @@ function TomiModel({ pointer }: { pointer: RefObject<Pointer> }) {
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[0, -0.22, 0]}>
       <Center>
         <primitive object={cloned} />
       </Center>
