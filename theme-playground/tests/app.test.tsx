@@ -24,7 +24,7 @@ describe('babjatom shell navigation', () => {
       within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
     ).toBeInTheDocument()
     expect(
-      within(pagesNav).getByRole('link', { name: 'Tomi AI' }),
+      within(pagesNav).getByRole('link', { name: 'Ask Tomi' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
   })
@@ -53,14 +53,14 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByText(/recent visits/i)).toBeInTheDocument()
   })
 
-  it('navigates to the Tomi AI chat route', async () => {
+  it('navigates to the Ask Tomi chat route', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
-    await user.click(within(pagesNav).getByRole('link', { name: 'Tomi AI' }))
+    await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
 
-    expect(screen.getByRole('heading', { name: 'Tomi AI' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
     expect(
       screen.getByPlaceholderText(

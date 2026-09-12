@@ -56,7 +56,7 @@ function AssistantBody({ message }: { message: ChatMessage }) {
   )
 }
 
-export function TomiAiPage() {
+export function AskTomiPage() {
   const { messages, pending, send, stop, regenerate, clear, copy } =
     useTomiChat()
   const [draft, setDraft] = useState('')
@@ -106,7 +106,7 @@ export function TomiAiPage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Tomi AI
+              Ask Tomi
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
               Ask about Tomi’s experience, stack, or approach. Each question is
@@ -272,12 +272,12 @@ function LabelledComposer({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="tomi-ai-question" className="sr-only">
+      <label htmlFor="ask-tomi-question" className="sr-only">
         Question
       </label>
       <textarea
         ref={inputRef}
-        id="tomi-ai-question"
+        id="ask-tomi-question"
         name="question"
         rows={2}
         value={draft}
