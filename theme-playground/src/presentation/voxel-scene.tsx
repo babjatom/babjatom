@@ -68,7 +68,7 @@ export function VoxelScene() {
       </div>
       {/* Soft theme fade — WebGL canvases often ignore CSS masks, so use an overlay */}
       <div
-        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[58%]"
+        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[65%]"
         aria-hidden
       />
     </div>
