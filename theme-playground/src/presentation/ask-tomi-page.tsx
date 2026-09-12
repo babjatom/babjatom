@@ -2,6 +2,8 @@ import {
   type FormEvent,
   type KeyboardEvent,
   type RefObject,
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -25,6 +27,10 @@ import {
   useTomiChat,
   type ChatMessage,
 } from './use-tomi-chat'
+
+const VoxelScene = lazy(() =>
+  import('./voxel-scene').then((module) => ({ default: module.VoxelScene })),
+)
 
 function AssistantBody({
   message,
@@ -322,12 +328,15 @@ export function AskTomiPage() {
         </div>
 
         <aside className="animate-rise-delay flex h-[min(50vh,24rem)] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background/50 lg:h-auto lg:w-[min(100%,28rem)]">
-          <iframe
-            title="3D scene"
-            src="https://supavoxel.com/embed/cmty8vasz05y1fbqybfy1usfw"
-            className="h-full w-full border-0"
-            allowFullScreen
-          />
+          <Suspense
+            fallback={
+              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                Loading 3D…
+              </div>
+            }
+          >
+            <VoxelScene />
+          </Suspense>
         </aside>
       </div>
     </div>
