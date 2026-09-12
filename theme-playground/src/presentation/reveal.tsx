@@ -21,6 +21,13 @@ type RevealProps = {
   once?: boolean
 }
 
+function prefersReducedMotion() {
+  return (
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
+
 /**
  * Fade-in + slight rise when the element scrolls (or mounts) into view.
  * Skips motion when `prefers-reduced-motion` is set.
@@ -34,13 +41,13 @@ export function Reveal({
   once = true,
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null)
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(prefersReducedMotion)
 
   useEffect(() => {
-    const node = ref.current
-    if (!node) return
+    if (visible) return
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const node = ref.current
+    if (!node || typeof IntersectionObserver === 'undefined') {
       setVisible(true)
       return
     }
@@ -60,7 +67,7 @@ export function Reveal({
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [once, rootRef])
+  }, [once, rootRef, visible])
 
   return (
     <Tag

@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import { beforeEach, vi } from 'vitest'
 
 class ResizeObserverMock {
   observe() {}
@@ -6,10 +7,7 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-class IntersectionObserverMock implements IntersectionObserver {
-  readonly root: Element | Document | null = null
-  readonly rootMargin = ''
-  readonly thresholds: ReadonlyArray<number> = []
+class IntersectionObserverMock {
   constructor(callback: IntersectionObserverCallback) {
     // Reveal content immediately in jsdom so tests stay deterministic.
     queueMicrotask(() => {
@@ -19,9 +17,9 @@ class IntersectionObserverMock implements IntersectionObserver {
             isIntersecting: true,
             intersectionRatio: 1,
             target: document.body,
-          } as IntersectionObserverEntry,
+          } as unknown as IntersectionObserverEntry,
         ],
-        this,
+        this as unknown as IntersectionObserver,
       )
     })
   }
@@ -33,8 +31,10 @@ class IntersectionObserverMock implements IntersectionObserver {
   }
 }
 
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
-vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
+function stubObservers() {
+  vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+  vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
+}
 
 /** Default to desktop so shell nav tests see the expanded menu. */
 export function setMatchMediaMatches(matches: boolean) {
@@ -53,4 +53,7 @@ export function setMatchMediaMatches(matches: boolean) {
   )
 }
 
-setMatchMediaMatches(false)
+beforeEach(() => {
+  stubObservers()
+  setMatchMediaMatches(false)
+})
