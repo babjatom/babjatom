@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Center, ContactShadows, useGLTF } from '@react-three/drei'
+import { Center, useGLTF } from '@react-three/drei'
 import type { Group } from 'three'
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tomi.glb`
@@ -54,7 +54,7 @@ export function VoxelScene() {
     <div className="relative h-full w-full" role="img" aria-label="3D Tomi scene">
       <div className="voxel-scene absolute inset-0">
         <Canvas
-          camera={{ position: [1.15, 0.85, 1.45], fov: 32 }}
+          camera={{ position: [1.05, 1.05, 1.35], fov: 30 }}
           dpr={[1, 1.75]}
           gl={{ antialias: true, alpha: true }}
         >
@@ -63,13 +63,12 @@ export function VoxelScene() {
           <hemisphereLight intensity={0.35} groundColor="#444444" />
           <Suspense fallback={null}>
             <TomiModel pointer={pointer} />
-            <ContactShadows opacity={0.28} scale={12} blur={2.8} far={8} />
           </Suspense>
         </Canvas>
       </div>
-      {/* Soft theme fade so the incomplete waist cut reads intentional */}
+      {/* Soft theme fade — WebGL canvases often ignore CSS masks, so use an overlay */}
       <div
-        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
+        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[58%]"
         aria-hidden
       />
     </div>

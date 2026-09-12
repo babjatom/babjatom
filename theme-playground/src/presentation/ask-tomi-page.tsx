@@ -327,7 +327,7 @@ export function AskTomiPage() {
           </form>
         </div>
 
-        <aside className="animate-rise-delay relative flex h-[min(50vh,24rem)] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background/50 lg:h-auto lg:w-[min(100%,28rem)]">
+        <aside className="animate-rise-delay relative flex h-[min(50vh,24rem)] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background lg:h-auto lg:w-[min(100%,28rem)]">
           <Suspense
             fallback={
               <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">

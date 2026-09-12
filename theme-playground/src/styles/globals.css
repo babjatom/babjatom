@@ -224,32 +224,15 @@ body {
   font-weight: 600;
 }
 
-/* Ask Tomi GLB: soft bottom dissolve so the waist cut is not a hard edge. */
-.voxel-scene {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 42%,
-    rgba(0, 0, 0, 0.75) 62%,
-    rgba(0, 0, 0, 0.28) 80%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 42%,
-    rgba(0, 0, 0, 0.75) 62%,
-    rgba(0, 0, 0, 0.28) 80%,
-    transparent 100%
-  );
-}
-
+/* Ask Tomi GLB: soft bottom dissolve so the waist cut is not a hard edge.
+   Overlay is primary — WebGL canvases often ignore CSS masks. */
 .voxel-scene-fade {
   background: linear-gradient(
     to top,
-    hsl(var(--background) / 0.95) 0%,
-    hsl(var(--background) / 0.55) 32%,
-    hsl(var(--background) / 0.12) 68%,
+    hsl(var(--background)) 0%,
+    hsl(var(--background) / 0.92) 18%,
+    hsl(var(--background) / 0.55) 42%,
+    hsl(var(--background) / 0.18) 70%,
     transparent 100%
   );
 }
