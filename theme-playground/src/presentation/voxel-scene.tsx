@@ -69,7 +69,7 @@ export function VoxelScene() {
       </div>
       {/* Soft theme fade so the incomplete waist cut reads intentional */}
       <div
-        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
+        className="voxel-scene-fade pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
         aria-hidden
       />
     </div>
