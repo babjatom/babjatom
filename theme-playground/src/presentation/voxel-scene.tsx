@@ -21,7 +21,7 @@ export function VoxelScene() {
   return (
     <div className="h-full w-full" role="img" aria-label="3D Tomi scene">
       <Canvas
-        camera={{ position: [2.5, 1.8, 3.2], fov: 40 }}
+        camera={{ position: [1.15, 0.85, 1.45], fov: 32 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true }}
       >
@@ -35,10 +35,9 @@ export function VoxelScene() {
         <OrbitControls
           makeDefault
           enablePan={false}
-          minDistance={1.5}
-          maxDistance={10}
-          autoRotate
-          autoRotateSpeed={0.55}
+          minDistance={0.8}
+          maxDistance={6}
+          target={[0, 0.15, 0]}
         />
       </Canvas>
     </div>
