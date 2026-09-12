@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Reveal } from './reveal'
 import {
   STARTER_PROMPTS,
   useTomiChat,
@@ -135,21 +136,26 @@ export function TomiAiPage() {
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col justify-center gap-4">
-            <p className="text-sm text-muted-foreground">
+            <Reveal as="p" className="text-sm text-muted-foreground">
               Start with a suggested question, or type your own below.
-            </p>
+            </Reveal>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {STARTER_PROMPTS.map((prompt) => (
-                <Button
+              {STARTER_PROMPTS.map((prompt, index) => (
+                <Reveal
                   key={prompt}
-                  type="button"
-                  variant="secondary"
-                  className="justify-start text-left"
-                  disabled={pending}
-                  onClick={() => void send(prompt)}
+                  rootRef={listRef}
+                  delayMs={60 + index * 70}
                 >
-                  {prompt}
-                </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full justify-start text-left sm:w-auto"
+                    disabled={pending}
+                    onClick={() => void send(prompt)}
+                  >
+                    {prompt}
+                  </Button>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -163,8 +169,10 @@ export function TomiAiPage() {
                 message.id === lastAssistantId
 
               return (
-                <li
+                <Reveal
                   key={message.id}
+                  as="li"
+                  rootRef={listRef}
                   className={cn(
                     'flex',
                     isUser ? 'justify-end' : 'justify-start',
@@ -223,7 +231,7 @@ export function TomiAiPage() {
                       </div>
                     )}
                   </div>
-                </li>
+                </Reveal>
               )
             })}
           </ul>
