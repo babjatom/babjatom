@@ -83,7 +83,7 @@ export const presetThemes: Theme[] = [
   }),
 ]
 
-export const DEFAULT_THEME_ID = 'slate-day'
+export const DEFAULT_THEME_ID = 'ink-night'
 
 export function findPresetTheme(id: string): Theme | undefined {
   return presetThemes.find((theme) => theme.id === id)
