@@ -1,11 +1,20 @@
 import { Suspense, useMemo, useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import type { Group } from 'three'
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tomi.glb`
 /** Radians per second — steady spin, a bit quicker than a lazy turntable. */
 const ROTATE_SPEED = 1.1
+
+function CameraLookUp() {
+  const { camera } = useThree()
+  useFrame(() => {
+    // Aim above center so the head reads upright / slightly from below.
+    camera.lookAt(0, 0.42, 0)
+  })
+  return null
+}
 
 function TomiModel() {
   const groupRef = useRef<Group>(null)
@@ -19,10 +28,12 @@ function TomiModel() {
   })
 
   return (
-    <group ref={groupRef} position={[0, -0.22, 0]}>
-      <Center>
-        <primitive object={cloned} />
-      </Center>
+    <group position={[0, -0.28, 0]} rotation={[-0.12, 0, 0]}>
+      <group ref={groupRef}>
+        <Center>
+          <primitive object={cloned} />
+        </Center>
+      </group>
     </group>
   )
 }
@@ -34,13 +45,14 @@ export function VoxelScene() {
     <div className="relative h-full w-full" role="img" aria-label="3D Tomi scene">
       <div className="voxel-scene absolute inset-0">
         <Canvas
-          camera={{ position: [0.95, 0.95, 1.2], fov: 28 }}
+          camera={{ position: [0.9, 0.55, 1.25], fov: 28 }}
           dpr={[1, 1.75]}
           gl={{ antialias: true, alpha: true }}
         >
           <ambientLight intensity={0.75} />
           <directionalLight position={[4, 6, 3]} intensity={1.15} />
           <hemisphereLight intensity={0.35} groundColor="#444444" />
+          <CameraLookUp />
           <Suspense fallback={null}>
             <TomiModel />
           </Suspense>
