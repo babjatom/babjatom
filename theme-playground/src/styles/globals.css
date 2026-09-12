@@ -235,9 +235,8 @@ body {
   background: linear-gradient(
     to top,
     hsl(var(--background)) 0%,
-    hsl(var(--background) / 0.98) 36%,
-    hsl(var(--background) / 0.78) 55%,
-    hsl(var(--background) / 0.32) 76%,
+    hsl(var(--background) / 0.92) 40%,
+    hsl(var(--background) / 0.45) 72%,
     transparent 100%
   );
 }
