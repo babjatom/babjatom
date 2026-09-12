@@ -180,7 +180,7 @@ export function AppShell() {
         )}
       </aside>
 
-      <main className="px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <main className="px-3 py-3 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
         <Outlet />
       </main>
     </div>

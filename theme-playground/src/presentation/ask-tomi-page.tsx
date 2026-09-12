@@ -143,14 +143,14 @@ export function AskTomiPage() {
     .find((message) => message.role === 'assistant')?.id
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-6xl flex-col gap-4 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]">
+    <div className="mx-auto flex h-[calc(100dvh-3.25rem)] w-full max-w-6xl flex-col gap-3 sm:h-[calc(100vh-4rem)] sm:gap-4 lg:h-[calc(100vh-4rem)]">
       <header className="animate-rise shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
               Ask Tomi
             </h1>
-            <p className="mt-2 max-w-2xl text-muted-foreground">
+            <p className="mt-1 hidden max-w-2xl text-sm text-muted-foreground sm:mt-2 sm:block sm:text-base">
               Ask about Tomi’s experience, stack, or approach. Each question is
               answered independently.
             </p>
@@ -173,8 +173,21 @@ export function AskTomiPage() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4 lg:flex-row">
+        {/* Model first on mobile; chat uses lg:order-first so desktop stays chat | model */}
+        <aside className="animate-rise-delay relative order-1 flex h-[9.5rem] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background sm:h-44 lg:order-2 lg:h-auto lg:w-[min(100%,28rem)]">
+          <Suspense
+            fallback={
+              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                Loading 3D…
+              </div>
+            }
+          >
+            <VoxelScene />
+          </Suspense>
+        </aside>
+
+        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col gap-3 sm:gap-4 lg:order-1">
           <section
             ref={listRef}
             className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
@@ -327,17 +340,6 @@ export function AskTomiPage() {
           </form>
         </div>
 
-        <aside className="animate-rise-delay relative flex h-[min(50vh,24rem)] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background lg:h-auto lg:w-[min(100%,28rem)]">
-          <Suspense
-            fallback={
-              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                Loading 3D…
-              </div>
-            }
-          >
-            <VoxelScene />
-          </Suspense>
-        </aside>
       </div>
     </div>
   )
