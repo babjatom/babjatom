@@ -46,6 +46,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { track } from '@/infrastructure/analytics'
 import { mockVisits, type VisitRow } from './mock-visits'
 
 function DragHandle({ id }: { id: number }) {
@@ -110,7 +111,10 @@ const columns: ColumnDef<VisitRow>[] = [
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value) => {
+            track('Visits Table Interacted', { action: 'select' })
+            table.toggleAllPageRowsSelected(!!value)
+          }}
           aria-label="Select all"
         />
       </div>
@@ -119,7 +123,10 @@ const columns: ColumnDef<VisitRow>[] = [
       <div className="flex items-center justify-center">
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(value) => {
+            track('Visits Table Interacted', { action: 'select' })
+            row.toggleSelected(!!value)
+          }}
           aria-label="Select row"
         />
       </div>
@@ -133,7 +140,10 @@ const columns: ColumnDef<VisitRow>[] = [
       <Button
         variant="ghost"
         className="-ml-2 h-8 px-2"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => {
+          track('Visits Table Interacted', { action: 'sort' })
+          column.toggleSorting(column.getIsSorted() === 'asc')
+        }}
       >
         IP Address
         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -149,7 +159,10 @@ const columns: ColumnDef<VisitRow>[] = [
       <Button
         variant="ghost"
         className="-ml-2 h-8 px-2"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => {
+          track('Visits Table Interacted', { action: 'sort' })
+          column.toggleSorting(column.getIsSorted() === 'asc')
+        }}
       >
         Hits
         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -165,7 +178,10 @@ const columns: ColumnDef<VisitRow>[] = [
       <Button
         variant="ghost"
         className="-ml-2 h-8 px-2"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => {
+          track('Visits Table Interacted', { action: 'sort' })
+          column.toggleSorting(column.getIsSorted() === 'asc')
+        }}
       >
         Country
         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -179,7 +195,10 @@ const columns: ColumnDef<VisitRow>[] = [
       <Button
         variant="ghost"
         className="-ml-2 h-8 px-2"
-        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        onClick={() => {
+          track('Visits Table Interacted', { action: 'sort' })
+          column.toggleSorting(column.getIsSorted() === 'asc')
+        }}
       >
         Last visit
         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -208,6 +227,7 @@ const columns: ColumnDef<VisitRow>[] = [
           <DropdownMenuItem
             onSelect={(event) => {
               event.preventDefault()
+              track('Visits Table Interacted', { action: 'row_action' })
             }}
           >
             Edit
@@ -217,6 +237,7 @@ const columns: ColumnDef<VisitRow>[] = [
             className="text-destructive focus:text-destructive"
             onSelect={(event) => {
               event.preventDefault()
+              track('Visits Table Interacted', { action: 'row_action' })
             }}
           >
             Delete
@@ -264,6 +285,7 @@ export function VisitsDataTable() {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
+    track('Visits Table Interacted', { action: 'reorder' })
     setData((rows) => {
       const oldIndex = dataIds.indexOf(active.id)
       const newIndex = dataIds.indexOf(over.id)

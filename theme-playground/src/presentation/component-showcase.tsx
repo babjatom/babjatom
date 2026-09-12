@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { track } from '@/infrastructure/analytics'
 import { Reveal } from './reveal'
 import { useTheme } from './theme-provider'
 import { VisitsDataTable } from './visits-data-table'
@@ -61,11 +62,60 @@ export function ComponentShowcase() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="outline">Outline</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Button variant="destructive">Destructive</Button>
+            <Button
+              onClick={() =>
+                track('Showcase Control Used', {
+                  control: 'button',
+                  value: 'primary',
+                })
+              }
+            >
+              Primary
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                track('Showcase Control Used', {
+                  control: 'button',
+                  value: 'secondary',
+                })
+              }
+            >
+              Secondary
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                track('Showcase Control Used', {
+                  control: 'button',
+                  value: 'outline',
+                })
+              }
+            >
+              Outline
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                track('Showcase Control Used', {
+                  control: 'button',
+                  value: 'ghost',
+                })
+              }
+            >
+              Ghost
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                track('Showcase Control Used', {
+                  control: 'button',
+                  value: 'destructive',
+                })
+              }
+            >
+              Destructive
+            </Button>
           </CardContent>
         </Card>
 
@@ -79,11 +129,30 @@ export function ComponentShowcase() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="project">Project name</Label>
-              <Input id="project" placeholder="aurora-dashboard" />
+              <Input
+                id="project"
+                placeholder="aurora-dashboard"
+                onBlur={(event) => {
+                  if (event.target.value.trim()) {
+                    track('Showcase Control Used', {
+                      control: 'input',
+                      value: 'project',
+                    })
+                  }
+                }}
+              />
             </div>
             <div className="space-y-2">
               <Label>Density</Label>
-              <Select defaultValue="comfortable">
+              <Select
+                defaultValue="comfortable"
+                onValueChange={(value) =>
+                  track('Showcase Control Used', {
+                    control: 'select',
+                    value,
+                  })
+                }
+              >
                 <SelectTrigger aria-label="Density">
                   <SelectValue placeholder="Choose density" />
                 </SelectTrigger>
@@ -99,7 +168,13 @@ export function ComponentShowcase() {
               <Switch
                 id="notifications"
                 checked={notifications}
-                onCheckedChange={setNotifications}
+                onCheckedChange={(checked) => {
+                  setNotifications(checked)
+                  track('Showcase Control Used', {
+                    control: 'switch',
+                    value: checked ? 'on' : 'off',
+                  })
+                }}
               />
             </div>
           </CardContent>
@@ -113,7 +188,13 @@ export function ComponentShowcase() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Dialog>
+            <Dialog
+              onOpenChange={(open) => {
+                if (open) {
+                  track('Showcase Control Used', { control: 'dialog' })
+                }
+              }}
+            >
               <DialogTrigger asChild>
                 <Button variant="outline">Open dialog</Button>
               </DialogTrigger>

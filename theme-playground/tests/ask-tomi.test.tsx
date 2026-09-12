@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
+import { track } from '@/infrastructure/analytics'
 import { TOMI_CHAT_URL } from '@/infrastructure/tomi-chat-api'
 
 function renderApp(path = '/babjatom/') {
@@ -21,6 +22,7 @@ async function openAskTomi(
 describe('Ask Tomi chat', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    vi.mocked(track).mockClear()
     vi.stubGlobal(
       'fetch',
       vi.fn(async () =>
@@ -57,6 +59,11 @@ describe('Ask Tomi chat', () => {
     await openAskTomi(user)
 
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+
+    expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
+      source: 'starter',
+      starter_id: 'Who is Tomi?',
+    })
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(

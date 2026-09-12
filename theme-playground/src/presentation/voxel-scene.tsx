@@ -1,7 +1,8 @@
-import { Suspense, useMemo, useRef } from 'react'
+import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import type { Group } from 'three'
+import { track } from '@/infrastructure/analytics'
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tomi.glb`
 /** Radians per second — steady spin, a bit quicker than a lazy turntable. */
@@ -25,6 +26,10 @@ function TomiModel() {
   const { scene } = useGLTF(MODEL_URL)
   const cloned = useMemo(() => scene.clone(true), [scene])
 
+  useEffect(() => {
+    track('Voxel Scene Loaded', { status: 'ok' })
+  }, [])
+
   useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
@@ -43,6 +48,33 @@ function TomiModel() {
   )
 }
 
+function VoxelSceneError() {
+  useEffect(() => {
+    track('Voxel Scene Loaded', { status: 'error' })
+  }, [])
+
+  return null
+}
+
+/** Minimal error boundary for GLB load failures. */
+class ModelErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <VoxelSceneError />
+    }
+    return this.props.children
+  }
+}
+
 useGLTF.preload(MODEL_URL)
 
 export function VoxelScene() {
@@ -55,12 +87,14 @@ export function VoxelScene() {
           dpr={[1, 1.75]}
           gl={{ antialias: true, alpha: true }}
         >
-          <ambientLight intensity={0.75} />
+          <ambientLight intensity={0.9} />
           <directionalLight position={[4, 6, 3]} intensity={1.15} />
           <hemisphereLight intensity={0.35} groundColor="#444444" />
           <CameraFrame />
           <Suspense fallback={null}>
-            <TomiModel />
+            <ModelErrorBoundary>
+              <TomiModel />
+            </ModelErrorBoundary>
           </Suspense>
         </Canvas>
       </div>

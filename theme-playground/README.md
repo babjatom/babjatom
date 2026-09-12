@@ -21,6 +21,7 @@ The sidebar **Pages** menu lists Theme Playground first, then Analytics, with **
 - responsive mobile layout
 - CSS-based visual effects
 - localStorage theme persistence
+- Mixpanel product analytics (optional via `VITE_MIXPANEL_TOKEN`)
 - Vitest + React Testing Library
 - GitHub Pages deployment
 
@@ -101,11 +102,17 @@ Lightweight DDD layering keeps theming logic independent of React:
 ```text
 domain          Theme entities, presets, random generation (no React)
 application     ThemeService use-cases and persistence ports
-infrastructure  localStorage adapter
+infrastructure  localStorage adapter, Mixpanel analytics
 presentation    React shell, sidebar, showcase, CSS variable application
 ```
 
 The Theme domain can be unit-tested and reused without mounting the UI.
+
+## Analytics
+
+Mixpanel is optional. Copy `.env.example` to `.env` and set `VITE_MIXPANEL_TOKEN` for local tracking. Without a token, analytics no-ops.
+
+For GitHub Pages, add a repository secret named `VITE_MIXPANEL_TOKEN` (Mixpanel project token). The deploy workflow injects it into the production build. Do not commit real tokens.
 
 ## Deployment
 

@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import { beforeEach, vi } from 'vitest'
 
+vi.mock('@/infrastructure/analytics', () => ({
+  initMixpanel: vi.fn(),
+  track: vi.fn(),
+  __resetAnalyticsForTests: vi.fn(),
+}))
+
 class ResizeObserverMock {
   observe() {}
   unobserve() {}
