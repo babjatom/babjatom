@@ -137,7 +137,7 @@ export function AskTomiPage() {
     .find((message) => message.role === 'assistant')?.id
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-3xl flex-col gap-4 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]">
+    <div className="mx-auto flex h-[calc(100vh-3rem)] w-full max-w-6xl flex-col gap-4 sm:h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]">
       <header className="animate-rise shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -167,155 +167,169 @@ export function AskTomiPage() {
         </div>
       </header>
 
-      <section
-        ref={listRef}
-        className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
-        {messages.length === 0 ? (
-          <div className="flex h-full flex-col justify-center gap-4">
-            <Reveal as="p" className="text-sm text-muted-foreground">
-              Start with a suggested question, or type your own below.
-            </Reveal>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {STARTER_PROMPTS.map((prompt, index) => (
-                <Reveal
-                  key={prompt}
-                  rootRef={listRef}
-                  delayMs={60 + index * 70}
-                >
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="w-full justify-start text-left sm:w-auto"
-                    disabled={pending}
-                    onClick={() => void send(prompt)}
-                  >
-                    {prompt}
-                  </Button>
+      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+          <section
+            ref={listRef}
+            className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
+            aria-live="polite"
+            aria-relevant="additions"
+          >
+            {messages.length === 0 ? (
+              <div className="flex h-full flex-col justify-center gap-4">
+                <Reveal as="p" className="text-sm text-muted-foreground">
+                  Start with a suggested question, or type your own below.
                 </Reveal>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-4">
-            {messages.map((message) => {
-              const isUser = message.role === 'user'
-              const isLatestAssistant = message.id === lastAssistantId
-              const typingComplete =
-                !isLatestAssistant ||
-                message.status !== 'complete' ||
-                Boolean(typingDoneIds[message.id])
-              const showActions =
-                !isUser &&
-                message.status !== 'pending' &&
-                isLatestAssistant &&
-                typingComplete
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  {STARTER_PROMPTS.map((prompt, index) => (
+                    <Reveal
+                      key={prompt}
+                      rootRef={listRef}
+                      delayMs={60 + index * 70}
+                    >
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full justify-start text-left sm:w-auto"
+                        disabled={pending}
+                        onClick={() => void send(prompt)}
+                      >
+                        {prompt}
+                      </Button>
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-4">
+                {messages.map((message) => {
+                  const isUser = message.role === 'user'
+                  const isLatestAssistant = message.id === lastAssistantId
+                  const typingComplete =
+                    !isLatestAssistant ||
+                    message.status !== 'complete' ||
+                    Boolean(typingDoneIds[message.id])
+                  const showActions =
+                    !isUser &&
+                    message.status !== 'pending' &&
+                    isLatestAssistant &&
+                    typingComplete
 
-              return (
-                <Reveal
-                  key={message.id}
-                  as="li"
-                  rootRef={listRef}
-                  className={cn(
-                    'flex',
-                    isUser ? 'justify-end' : 'justify-start',
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'max-w-[92%] space-y-2 sm:max-w-[85%]',
-                      isUser ? 'items-end' : 'items-start',
-                    )}
-                  >
-                    <div
+                  return (
+                    <Reveal
+                      key={message.id}
+                      as="li"
+                      rootRef={listRef}
                       className={cn(
-                        'rounded-2xl px-3.5 py-2.5',
-                        isUser
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground',
+                        'flex',
+                        isUser ? 'justify-end' : 'justify-start',
                       )}
                     >
-                      {isUser ? (
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                          {message.content}
-                        </p>
-                      ) : (
-                        <AssistantBody
-                          message={message}
-                          animateTyping={
-                            isLatestAssistant && message.status === 'complete'
-                          }
-                          onTypingProgress={scrollToBottom}
-                          onTypingDone={() => {
-                            setTypingDoneIds((current) =>
-                              current[message.id]
-                                ? current
-                                : { ...current, [message.id]: true },
-                            )
-                          }}
-                        />
-                      )}
-                    </div>
-                    {showActions && (
-                      <div className="flex items-center gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          disabled={!message.content.trim()}
-                          onClick={() => {
-                            void copy(message.content).then(() =>
-                              setCopiedId(message.id),
-                            )
-                          }}
-                          aria-label="Copy answer"
+                      <div
+                        className={cn(
+                          'max-w-[92%] space-y-2 sm:max-w-[85%]',
+                          isUser ? 'items-end' : 'items-start',
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'rounded-2xl px-3.5 py-2.5',
+                            isUser
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground',
+                          )}
                         >
-                          <Copy className="h-3.5 w-3.5" />
-                          {copiedId === message.id ? 'Copied' : 'Copy'}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          disabled={pending}
-                          onClick={() => {
-                            setTypingDoneIds((current) => {
-                              const next = { ...current }
-                              delete next[message.id]
-                              return next
-                            })
-                            void regenerate(message.id)
-                          }}
-                          aria-label="Regenerate answer"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                          Regenerate
-                        </Button>
+                          {isUser ? (
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                              {message.content}
+                            </p>
+                          ) : (
+                            <AssistantBody
+                              message={message}
+                              animateTyping={
+                                isLatestAssistant &&
+                                message.status === 'complete'
+                              }
+                              onTypingProgress={scrollToBottom}
+                              onTypingDone={() => {
+                                setTypingDoneIds((current) =>
+                                  current[message.id]
+                                    ? current
+                                    : { ...current, [message.id]: true },
+                                )
+                              }}
+                            />
+                          )}
+                        </div>
+                        {showActions && (
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={!message.content.trim()}
+                              onClick={() => {
+                                void copy(message.content).then(() =>
+                                  setCopiedId(message.id),
+                                )
+                              }}
+                              aria-label="Copy answer"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                              {copiedId === message.id ? 'Copied' : 'Copy'}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={pending}
+                              onClick={() => {
+                                setTypingDoneIds((current) => {
+                                  const next = { ...current }
+                                  delete next[message.id]
+                                  return next
+                                })
+                                void regenerate(message.id)
+                              }}
+                              aria-label="Regenerate answer"
+                            >
+                              <RefreshCw className="h-3.5 w-3.5" />
+                              Regenerate
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </Reveal>
-              )
-            })}
-          </ul>
-        )}
-      </section>
+                    </Reveal>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
 
-      <form
-        className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
-        onSubmit={handleSubmit}
-      >
-        <LabelledComposer
-          draft={draft}
-          pending={pending}
-          inputRef={inputRef}
-          onDraftChange={setDraft}
-          onKeyDown={handleKeyDown}
-          onStop={stop}
-        />
-      </form>
+          <form
+            className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
+            onSubmit={handleSubmit}
+          >
+            <LabelledComposer
+              draft={draft}
+              pending={pending}
+              inputRef={inputRef}
+              onDraftChange={setDraft}
+              onKeyDown={handleKeyDown}
+              onStop={stop}
+            />
+          </form>
+        </div>
+
+        <aside className="animate-rise-delay flex h-[min(50vh,24rem)] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background/50 lg:h-auto lg:w-[min(100%,28rem)]">
+          <iframe
+            title="3D scene"
+            src="https://supavoxel.com/embed/cmty8vasz05y1fbqybfy1usfw"
+            className="h-full w-full border-0"
+            allowFullScreen
+          />
+        </aside>
+      </div>
     </div>
   )
 }
