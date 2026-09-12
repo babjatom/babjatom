@@ -2,6 +2,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
   type RefObject,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -18,13 +19,35 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Reveal } from './reveal'
+import { useTypewriter } from './use-typewriter'
 import {
   STARTER_PROMPTS,
   useTomiChat,
   type ChatMessage,
 } from './use-tomi-chat'
 
-function AssistantBody({ message }: { message: ChatMessage }) {
+function AssistantBody({
+  message,
+  animateTyping,
+  onTypingProgress,
+  onTypingDone,
+}: {
+  message: ChatMessage
+  animateTyping: boolean
+  onTypingProgress?: () => void
+  onTypingDone?: () => void
+}) {
+  const { displayText, done } = useTypewriter(message.content, {
+    enabled: animateTyping && message.status === 'complete',
+    onProgress: onTypingProgress,
+  })
+
+  useEffect(() => {
+    if (message.status === 'complete' && done) {
+      onTypingDone?.()
+    }
+  }, [done, message.status, onTypingDone])
+
   if (message.status === 'pending') {
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -51,7 +74,13 @@ function AssistantBody({ message }: { message: ChatMessage }) {
 
   return (
     <div className="tomi-md text-sm leading-relaxed">
-      <ReactMarkdown>{message.content}</ReactMarkdown>
+      <ReactMarkdown>{displayText}</ReactMarkdown>
+      {!done && (
+        <span
+          className="ml-0.5 inline-block h-[1em] w-[0.08em] translate-y-[0.1em] animate-pulse bg-foreground/80"
+          aria-hidden
+        />
+      )}
     </div>
   )
 }
@@ -61,14 +90,21 @@ export function AskTomiPage() {
     useTomiChat()
   const [draft, setDraft] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [typingDoneIds, setTypingDoneIds] = useState<Record<string, boolean>>(
+    {},
+  )
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     const node = listRef.current
     if (!node) return
     node.scrollTop = node.scrollHeight
-  }, [messages, pending])
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, pending, scrollToBottom])
 
   useEffect(() => {
     if (!copiedId) return
@@ -118,7 +154,10 @@ export function AskTomiPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={clear}
+              onClick={() => {
+                clear()
+                setTypingDoneIds({})
+              }}
               aria-label="Clear chat"
             >
               <Eraser className="h-4 w-4" />
@@ -163,10 +202,16 @@ export function AskTomiPage() {
           <ul className="flex flex-col gap-4">
             {messages.map((message) => {
               const isUser = message.role === 'user'
+              const isLatestAssistant = message.id === lastAssistantId
+              const typingComplete =
+                !isLatestAssistant ||
+                message.status !== 'complete' ||
+                Boolean(typingDoneIds[message.id])
               const showActions =
                 !isUser &&
                 message.status !== 'pending' &&
-                message.id === lastAssistantId
+                isLatestAssistant &&
+                typingComplete
 
               return (
                 <Reveal
@@ -197,7 +242,20 @@ export function AskTomiPage() {
                           {message.content}
                         </p>
                       ) : (
-                        <AssistantBody message={message} />
+                        <AssistantBody
+                          message={message}
+                          animateTyping={
+                            isLatestAssistant && message.status === 'complete'
+                          }
+                          onTypingProgress={scrollToBottom}
+                          onTypingDone={() => {
+                            setTypingDoneIds((current) =>
+                              current[message.id]
+                                ? current
+                                : { ...current, [message.id]: true },
+                            )
+                          }}
+                        />
                       )}
                     </div>
                     {showActions && (
@@ -222,7 +280,14 @@ export function AskTomiPage() {
                           variant="ghost"
                           size="sm"
                           disabled={pending}
-                          onClick={() => void regenerate(message.id)}
+                          onClick={() => {
+                            setTypingDoneIds((current) => {
+                              const next = { ...current }
+                              delete next[message.id]
+                              return next
+                            })
+                            void regenerate(message.id)
+                          }}
                           aria-label="Regenerate answer"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
