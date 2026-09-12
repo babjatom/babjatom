@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { track } from '@/infrastructure/analytics'
 import { askTomiChat } from '@/infrastructure/tomi-chat-api'
 
 export type ChatRole = 'user' | 'assistant'
@@ -20,6 +21,11 @@ export const STARTER_PROMPTS = [
   'Who is Tomi?',
   'What is his tech stack?',
 ] as const
+
+export type SendOptions = {
+  source?: 'starter' | 'typed'
+  starter_id?: string
+}
 
 function createId() {
   return crypto.randomUUID()
@@ -53,6 +59,7 @@ export function useTomiChat() {
             : message,
         ),
       )
+      track('Ask Tomi Result', { status: 'complete' })
     } catch (error) {
       if (isAbortError(error)) {
         setMessages((current) =>
@@ -66,6 +73,7 @@ export function useTomiChat() {
               : message,
           ),
         )
+        track('Ask Tomi Result', { status: 'cancelled' })
         return
       }
 
@@ -78,6 +86,7 @@ export function useTomiChat() {
             : entry,
         ),
       )
+      track('Ask Tomi Result', { status: 'error' })
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null
@@ -86,9 +95,15 @@ export function useTomiChat() {
     }
   }
 
-  async function send(question: string) {
+  async function send(question: string, options?: SendOptions) {
     const trimmed = question.trim()
     if (!trimmed || pending) return
+
+    const source = options?.source ?? 'typed'
+    track('Ask Tomi Message Sent', {
+      source,
+      ...(options?.starter_id ? { starter_id: options.starter_id } : {}),
+    })
 
     const userId = createId()
     const assistantId = createId()
@@ -114,6 +129,7 @@ export function useTomiChat() {
 
   function stop() {
     if (!pending) return
+    track('Ask Tomi Action', { action: 'stop' })
     abortInFlight()
   }
 
@@ -133,6 +149,8 @@ export function useTomiChat() {
       return
     }
 
+    track('Ask Tomi Action', { action: 'regenerate' })
+
     setMessages((current) =>
       current.map((message) =>
         message.id === assistantId
@@ -145,6 +163,7 @@ export function useTomiChat() {
   }
 
   function clear() {
+    track('Ask Tomi Action', { action: 'clear' })
     abortInFlight()
     setPending(false)
     setMessages([])
@@ -156,6 +175,7 @@ export function useTomiChat() {
 
     if (typeof navigator.clipboard?.writeText === 'function') {
       await navigator.clipboard.writeText(content)
+      track('Ask Tomi Action', { action: 'copy' })
       return
     }
 

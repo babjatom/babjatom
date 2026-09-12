@@ -1,7 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
+import { track } from '@/infrastructure/analytics'
 import { setMatchMediaMatches } from './setup'
 
 function renderApp(path = '/babjatom/') {
@@ -13,6 +14,7 @@ describe('babjatom shell navigation', () => {
   beforeEach(() => {
     window.localStorage.clear()
     setMatchMediaMatches(false)
+    vi.mocked(track).mockClear()
   })
 
   it('renders the home placeholder with pages nav', () => {
@@ -83,6 +85,10 @@ describe('babjatom shell navigation', () => {
     expect(window.localStorage.getItem('theme-playground:theme-id')).toBe(
       'ink-night',
     )
+    expect(track).toHaveBeenCalledWith('Theme Selected', {
+      theme_id: 'ink-night',
+      source: 'preset',
+    })
   })
 
   it('generates a random theme and persists it', async () => {

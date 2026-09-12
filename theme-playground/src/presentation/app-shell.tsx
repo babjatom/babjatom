@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { useTheme } from './theme-provider'
 
@@ -38,6 +39,7 @@ export function AppShell() {
         <div className="flex items-center justify-between gap-3 px-4 py-4">
           <NavLink
             to="/"
+            onClick={() => track('Nav Clicked', { to: '/', source: 'brand' })}
             className={cn(
               'flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
               sidebarCollapsed && 'lg:justify-center lg:w-full',
@@ -97,6 +99,9 @@ export function AppShell() {
                     key={page.to}
                     to={page.to}
                     end={page.end}
+                    onClick={() =>
+                      track('Nav Clicked', { to: page.to, source: 'sidebar' })
+                    }
                     className={({ isActive }) =>
                       cn(
                         'rounded-lg border px-3 py-2 text-sm transition-colors',

@@ -211,7 +211,12 @@ export function AskTomiPage() {
                         variant="secondary"
                         className="w-full justify-start text-left sm:w-auto"
                         disabled={pending}
-                        onClick={() => void send(prompt)}
+                        onClick={() =>
+                          void send(prompt, {
+                            source: 'starter',
+                            starter_id: prompt,
+                          })
+                        }
                       >
                         {prompt}
                       </Button>

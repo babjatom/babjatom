@@ -45,6 +45,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          VITE_MIXPANEL_TOKEN: ${{ secrets.VITE_MIXPANEL_TOKEN }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

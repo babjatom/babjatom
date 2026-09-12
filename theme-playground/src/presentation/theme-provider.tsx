@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ThemeService } from '@/application/theme-service'
 import type { Theme } from '@/domain/theme'
+import { track } from '@/infrastructure/analytics'
 import { createLocalStoragePersistence } from '@/infrastructure/local-storage-persistence'
 import { applyTheme } from './apply-theme'
 
@@ -59,6 +60,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!next) return
     service.selectTheme(next)
     setTheme(next)
+    track('Theme Selected', { theme_id: next.id, source: 'preset' })
   }
 
   const randomizeTheme = () => {
@@ -68,6 +70,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       return [...withoutGenerated, next]
     })
     setTheme(next)
+    track('Theme Selected', { theme_id: next.id, source: 'random' })
   }
 
   const value: ThemeContextValue = {

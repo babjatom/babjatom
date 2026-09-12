@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { track } from '@/infrastructure/analytics'
 
 export function HomePage() {
   return (
@@ -20,7 +21,17 @@ export function HomePage() {
           </p>
           <div className="mt-6">
             <Button asChild>
-              <Link to="/theme-playground">Open Theme Playground</Link>
+              <Link
+                to="/theme-playground"
+                onClick={() =>
+                  track('Nav Clicked', {
+                    to: '/theme-playground',
+                    source: 'home',
+                  })
+                }
+              >
+                Open Theme Playground
+              </Link>
             </Button>
           </div>
         </div>
