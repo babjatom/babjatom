@@ -225,14 +225,19 @@ body {
 }
 
 /* Ask Tomi GLB: soft bottom dissolve so the waist cut is not a hard edge.
-   Overlay is primary — WebGL canvases often ignore CSS masks. */
+   Overlay must sit above the WebGL canvas (composited layer). */
+.voxel-scene {
+  z-index: 0;
+}
+
 .voxel-scene-fade {
+  z-index: 1;
   background: linear-gradient(
     to top,
     hsl(var(--background)) 0%,
-    hsl(var(--background) / 0.92) 18%,
-    hsl(var(--background) / 0.55) 42%,
-    hsl(var(--background) / 0.18) 70%,
+    hsl(var(--background) / 0.96) 28%,
+    hsl(var(--background) / 0.7) 48%,
+    hsl(var(--background) / 0.28) 72%,
     transparent 100%
   );
 }
