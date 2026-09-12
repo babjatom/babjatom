@@ -166,7 +166,9 @@ describe('Ask Tomi chat', () => {
       await screen.findByText('First answer about Tomi.'),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Regenerate answer' }))
+    await user.click(
+      await screen.findByRole('button', { name: 'Regenerate answer' }),
+    )
 
     expect(
       await screen.findByText('Regenerated answer about Tomi.'),
@@ -193,7 +195,9 @@ describe('Ask Tomi chat', () => {
       ),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Copy answer' }))
+    await user.click(
+      await screen.findByRole('button', { name: 'Copy answer' }),
+    )
 
     await waitFor(() => {
       expect(clipboardWrite).toHaveBeenCalledWith(

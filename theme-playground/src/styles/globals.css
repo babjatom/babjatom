@@ -223,3 +223,21 @@ body {
 .tomi-md :where(strong) {
   font-weight: 600;
 }
+
+/* Ask Tomi GLB: soft bottom dissolve so the waist cut is not a hard edge.
+   Overlay must sit above the WebGL canvas (composited layer). */
+.voxel-scene {
+  z-index: 0;
+}
+
+.voxel-scene-fade {
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    hsl(var(--background)) 0%,
+    hsl(var(--background) / 0.98) 36%,
+    hsl(var(--background) / 0.78) 55%,
+    hsl(var(--background) / 0.32) 76%,
+    transparent 100%
+  );
+}

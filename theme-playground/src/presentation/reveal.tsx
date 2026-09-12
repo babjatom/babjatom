@@ -1,5 +1,5 @@
 import {
-  type ElementType,
+  createElement,
   type ReactNode,
   type RefObject,
   useEffect,
@@ -8,6 +8,9 @@ import {
 } from 'react'
 import { cn } from '@/lib/utils'
 
+/** Intrinsic tags only — avoids React Three Fiber JSX IntrinsicElements widening `ElementType` to `never`. */
+type RevealTag = 'div' | 'p' | 'li' | 'span' | 'section'
+
 type RevealProps = {
   children: ReactNode
   className?: string
@@ -15,8 +18,8 @@ type RevealProps = {
   delayMs?: number
   /** Scroll root for IntersectionObserver. Defaults to the viewport. */
   rootRef?: RefObject<Element | null>
-  /** HTML/SVG tag to render. Defaults to `div`. */
-  as?: ElementType
+  /** HTML tag to render. Defaults to `div`. */
+  as?: RevealTag
   /** Only animate the first time the element enters view. */
   once?: boolean
 }
@@ -69,13 +72,13 @@ export function Reveal({
     return () => observer.disconnect()
   }, [once, rootRef, visible])
 
-  return (
-    <Tag
-      ref={ref}
-      className={cn(visible ? 'animate-fade-in-up' : 'reveal-pending', className)}
-      style={delayMs > 0 ? { animationDelay: `${delayMs}ms` } : undefined}
-    >
-      {children}
-    </Tag>
+  return createElement(
+    Tag,
+    {
+      ref,
+      className: cn(visible ? 'animate-fade-in-up' : 'reveal-pending', className),
+      style: delayMs > 0 ? { animationDelay: `${delayMs}ms` } : undefined,
+    },
+    children,
   )
 }
