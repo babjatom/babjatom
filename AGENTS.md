@@ -30,6 +30,8 @@ Everything committed here is public forever, including history.
 - Commit `node_modules/`, `dist/`, model weights, or large binaries.
 - Put server credentials in client code or Pages build env that embeds into the bundle.
 - Expose unfinished experiments in public navigation.
+- Run browser automation, computer use, screenshots, screen recordings, or walkthrough uploads.
+- Treat the walkthrough-artifacts skill (or similar “demo evidence” prompts) as required for this repo.
 
 If configuration files are needed later, commit only `.env.example` with empty placeholders. Backend services and training data belong outside this public SPA.
 
@@ -60,7 +62,7 @@ fix(deploy): preserve Pages base path
 
 ## Verify
 
-From `theme-playground/`:
+Validation is CLI only. From `theme-playground/`:
 
 ```bash
 pnpm install
@@ -69,8 +71,12 @@ pnpm lint
 pnpm build
 ```
 
+That is enough to consider the task verified. Do not add GUI demos, computer-use sessions, screenshots, or recordings to “prove” the work unless the user explicitly asked for one of those in the task.
+
 Local development: `pnpm dev`. Full runbook: [`theme-playground/README.md`](theme-playground/README.md).
 
 ## Cursor Cloud
 
 No committed `.cursor/environment.json` yet; environment is dashboard-managed. On a cold machine, run `pnpm install` in `theme-playground/` before developing or verifying.
+
+Cheapest successful path: implement → `pnpm test` / `pnpm lint` / `pnpm build` → commit/push/PR. Skip GUI walkthroughs entirely unless the user explicitly requested a visual demo.
