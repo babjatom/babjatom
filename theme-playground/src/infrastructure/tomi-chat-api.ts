@@ -47,7 +47,7 @@ export async function askTomiChat(
   } catch {
     throw new TomiChatError(
       response.ok
-        ? 'Invalid response from Tomi AI.'
+        ? 'Invalid response from Ask Tomi.'
         : `Request failed (${response.status}).`,
       response.status,
     )

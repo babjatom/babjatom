@@ -2,6 +2,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
   type RefObject,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -17,13 +18,36 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Reveal } from './reveal'
+import { useTypewriter } from './use-typewriter'
 import {
   STARTER_PROMPTS,
   useTomiChat,
   type ChatMessage,
 } from './use-tomi-chat'
 
-function AssistantBody({ message }: { message: ChatMessage }) {
+function AssistantBody({
+  message,
+  animateTyping,
+  onTypingProgress,
+  onTypingDone,
+}: {
+  message: ChatMessage
+  animateTyping: boolean
+  onTypingProgress?: () => void
+  onTypingDone?: () => void
+}) {
+  const { displayText, done } = useTypewriter(message.content, {
+    enabled: animateTyping && message.status === 'complete',
+    onProgress: onTypingProgress,
+  })
+
+  useEffect(() => {
+    if (message.status === 'complete' && done) {
+      onTypingDone?.()
+    }
+  }, [done, message.status, onTypingDone])
+
   if (message.status === 'pending') {
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -50,24 +74,37 @@ function AssistantBody({ message }: { message: ChatMessage }) {
 
   return (
     <div className="tomi-md text-sm leading-relaxed">
-      <ReactMarkdown>{message.content}</ReactMarkdown>
+      <ReactMarkdown>{displayText}</ReactMarkdown>
+      {!done && (
+        <span
+          className="ml-0.5 inline-block h-[1em] w-[0.08em] translate-y-[0.1em] animate-pulse bg-foreground/80"
+          aria-hidden
+        />
+      )}
     </div>
   )
 }
 
-export function TomiAiPage() {
+export function AskTomiPage() {
   const { messages, pending, send, stop, regenerate, clear, copy } =
     useTomiChat()
   const [draft, setDraft] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [typingDoneIds, setTypingDoneIds] = useState<Record<string, boolean>>(
+    {},
+  )
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     const node = listRef.current
     if (!node) return
     node.scrollTop = node.scrollHeight
-  }, [messages, pending])
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, pending, scrollToBottom])
 
   useEffect(() => {
     if (!copiedId) return
@@ -105,7 +142,7 @@ export function TomiAiPage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Tomi AI
+              Ask Tomi
             </h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">
               Ask about Tomi’s experience, stack, or approach. Each question is
@@ -117,7 +154,10 @@ export function TomiAiPage() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={clear}
+              onClick={() => {
+                clear()
+                setTypingDoneIds({})
+              }}
               aria-label="Clear chat"
             >
               <Eraser className="h-4 w-4" />
@@ -135,21 +175,26 @@ export function TomiAiPage() {
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col justify-center gap-4">
-            <p className="text-sm text-muted-foreground">
+            <Reveal as="p" className="text-sm text-muted-foreground">
               Start with a suggested question, or type your own below.
-            </p>
+            </Reveal>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {STARTER_PROMPTS.map((prompt) => (
-                <Button
+              {STARTER_PROMPTS.map((prompt, index) => (
+                <Reveal
                   key={prompt}
-                  type="button"
-                  variant="secondary"
-                  className="justify-start text-left"
-                  disabled={pending}
-                  onClick={() => void send(prompt)}
+                  rootRef={listRef}
+                  delayMs={60 + index * 70}
                 >
-                  {prompt}
-                </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full justify-start text-left sm:w-auto"
+                    disabled={pending}
+                    onClick={() => void send(prompt)}
+                  >
+                    {prompt}
+                  </Button>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -157,14 +202,22 @@ export function TomiAiPage() {
           <ul className="flex flex-col gap-4">
             {messages.map((message) => {
               const isUser = message.role === 'user'
+              const isLatestAssistant = message.id === lastAssistantId
+              const typingComplete =
+                !isLatestAssistant ||
+                message.status !== 'complete' ||
+                Boolean(typingDoneIds[message.id])
               const showActions =
                 !isUser &&
                 message.status !== 'pending' &&
-                message.id === lastAssistantId
+                isLatestAssistant &&
+                typingComplete
 
               return (
-                <li
+                <Reveal
                   key={message.id}
+                  as="li"
+                  rootRef={listRef}
                   className={cn(
                     'flex',
                     isUser ? 'justify-end' : 'justify-start',
@@ -189,7 +242,20 @@ export function TomiAiPage() {
                           {message.content}
                         </p>
                       ) : (
-                        <AssistantBody message={message} />
+                        <AssistantBody
+                          message={message}
+                          animateTyping={
+                            isLatestAssistant && message.status === 'complete'
+                          }
+                          onTypingProgress={scrollToBottom}
+                          onTypingDone={() => {
+                            setTypingDoneIds((current) =>
+                              current[message.id]
+                                ? current
+                                : { ...current, [message.id]: true },
+                            )
+                          }}
+                        />
                       )}
                     </div>
                     {showActions && (
@@ -214,7 +280,14 @@ export function TomiAiPage() {
                           variant="ghost"
                           size="sm"
                           disabled={pending}
-                          onClick={() => void regenerate(message.id)}
+                          onClick={() => {
+                            setTypingDoneIds((current) => {
+                              const next = { ...current }
+                              delete next[message.id]
+                              return next
+                            })
+                            void regenerate(message.id)
+                          }}
                           aria-label="Regenerate answer"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
@@ -223,7 +296,7 @@ export function TomiAiPage() {
                       </div>
                     )}
                   </div>
-                </li>
+                </Reveal>
               )
             })}
           </ul>
@@ -264,12 +337,12 @@ function LabelledComposer({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="tomi-ai-question" className="sr-only">
+      <label htmlFor="ask-tomi-question" className="sr-only">
         Question
       </label>
       <textarea
         ref={inputRef}
-        id="tomi-ai-question"
+        id="ask-tomi-question"
         name="question"
         rows={2}
         value={draft}

@@ -9,16 +9,16 @@ function renderApp(path = '/babjatom/') {
   return render(<App />)
 }
 
-async function openTomiAi(
+async function openAskTomi(
   user: ReturnType<typeof userEvent.setup>,
   path = '/babjatom/',
 ) {
   renderApp(path)
   const pagesNav = screen.getByRole('navigation', { name: /pages/i })
-  await user.click(within(pagesNav).getByRole('link', { name: 'Tomi AI' }))
+  await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
 }
 
-describe('Tomi AI chat', () => {
+describe('Ask Tomi chat', () => {
   beforeEach(() => {
     window.localStorage.clear()
     vi.stubGlobal(
@@ -38,9 +38,9 @@ describe('Tomi AI chat', () => {
 
   it('shows starter prompts on the empty state', async () => {
     const user = userEvent.setup()
-    await openTomiAi(user)
+    await openAskTomi(user)
 
-    expect(screen.getByRole('heading', { name: 'Tomi AI' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Who is Tomi?' }),
     ).toBeInTheDocument()
@@ -54,7 +54,7 @@ describe('Tomi AI chat', () => {
 
   it('sends a starter prompt and renders the answer', async () => {
     const user = userEvent.setup()
-    await openTomiAi(user)
+    await openAskTomi(user)
 
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
 
@@ -78,7 +78,7 @@ describe('Tomi AI chat', () => {
 
   it('submits a typed question from the composer', async () => {
     const user = userEvent.setup()
-    await openTomiAi(user)
+    await openAskTomi(user)
 
     await user.type(
       screen.getByLabelText('Question'),
@@ -106,7 +106,7 @@ describe('Tomi AI chat', () => {
 
   it('clears the conversation', async () => {
     const user = userEvent.setup()
-    await openTomiAi(user)
+    await openAskTomi(user)
 
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
     expect(
@@ -139,7 +139,7 @@ describe('Tomi AI chat', () => {
       ),
     )
 
-    await openTomiAi(user)
+    await openAskTomi(user)
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
     expect(await screen.findByRole('button', { name: 'Stop' })).toBeInTheDocument()
 
@@ -160,7 +160,7 @@ describe('Tomi AI chat', () => {
       )
     vi.stubGlobal('fetch', fetchMock)
 
-    await openTomiAi(user)
+    await openAskTomi(user)
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
     expect(
       await screen.findByText('First answer about Tomi.'),
@@ -184,7 +184,7 @@ describe('Tomi AI chat', () => {
       value: { writeText: clipboardWrite },
     })
 
-    await openTomiAi(user)
+    await openAskTomi(user)
 
     await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
     expect(
@@ -205,9 +205,9 @@ describe('Tomi AI chat', () => {
 
   it('is reachable from shell navigation', async () => {
     const user = userEvent.setup()
-    await openTomiAi(user)
+    await openAskTomi(user)
 
-    expect(screen.getByRole('heading', { name: 'Tomi AI' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Who is Tomi?' }),
     ).toBeInTheDocument()

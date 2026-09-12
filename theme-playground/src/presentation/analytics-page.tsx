@@ -1,4 +1,5 @@
 import { AnalyticsCharts } from './analytics-charts'
+import { Reveal } from './reveal'
 import { VisitsDataTable } from './visits-data-table'
 
 export function AnalyticsPage() {
@@ -15,7 +16,7 @@ export function AnalyticsPage() {
         </p>
       </header>
 
-      <section className="animate-rise-delay flex flex-col gap-3">
+      <Reveal as="section" className="flex flex-col gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Recent visits</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -23,9 +24,9 @@ export function AnalyticsPage() {
           </p>
         </div>
         <VisitsDataTable />
-      </section>
+      </Reveal>
 
-      <section className="flex flex-col gap-3">
+      <Reveal as="section" className="flex flex-col gap-3" delayMs={60}>
         <div>
           <h2 className="font-display text-2xl font-semibold">Charts</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -33,7 +34,7 @@ export function AnalyticsPage() {
           </p>
         </div>
         <AnalyticsCharts />
-      </section>
+      </Reveal>
     </div>
   )
 }

@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { Reveal } from './reveal'
 import { useTheme } from './theme-provider'
 import { VisitsDataTable } from './visits-data-table'
 
@@ -133,7 +134,7 @@ export function ComponentShowcase() {
         </Card>
       </section>
 
-      <section className="animate-rise-delay flex flex-col gap-3">
+      <Reveal as="section" className="flex flex-col gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Recent visits</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -142,30 +143,34 @@ export function ComponentShowcase() {
           </p>
         </div>
         <VisitsDataTable />
-      </section>
+      </Reveal>
 
-      <section className="rounded-2xl border border-dashed border-border/80 bg-card/50 p-6">
+      <Reveal
+        as="section"
+        className="rounded-2xl border border-dashed border-border/80 bg-card/50 p-6"
+        delayMs={60}
+      >
         <h2 className="font-display text-2xl font-semibold">Visual effects</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Mesh gradients, soft pulses, and rise-in motion are pure CSS — they
-          recolor automatically when theme tokens change.
+          Mesh gradients, soft pulses, and fade-in-up motion are pure CSS —
+          they recolor automatically when theme tokens change.
         </p>
         <Separator className="my-4" />
         <div className="grid gap-4 sm:grid-cols-3">
           {['Primary wash', 'Accent bloom', 'Muted haze'].map((label, index) => (
-            <div
+            <Reveal
               key={label}
               className="theme-mesh rounded-xl border border-border/60 p-5"
-              style={{ animationDelay: `${index * 120}ms` }}
+              delayMs={index * 90}
             >
               <p className="font-medium">{label}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 CSS-variable driven
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
-      </section>
+      </Reveal>
     </div>
   )
 }

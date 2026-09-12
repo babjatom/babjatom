@@ -4,7 +4,7 @@ import { AppShell } from '@/presentation/app-shell'
 import { ComponentShowcase } from '@/presentation/component-showcase'
 import { HomePage } from '@/presentation/home-page'
 import { ThemeProvider } from '@/presentation/theme-provider'
-import { TomiAiPage } from '@/presentation/tomi-ai-page'
+import { AskTomiPage } from '@/presentation/ask-tomi-page'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 
@@ -17,7 +17,8 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="theme-playground" element={<ComponentShowcase />} />
             <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="tomi-ai" element={<TomiAiPage />} />
+            <Route path="ask-tomi" element={<AskTomiPage />} />
+            <Route path="tomi-ai" element={<Navigate to="/ask-tomi" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
