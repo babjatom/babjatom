@@ -1,14 +1,15 @@
-# Theme Playground
+# Tomi Playground
 
-A static shadcn/ui theme playground demonstrating how the same component system can be transformed through different visual themes.
+A Vite + React SPA for babjatom: CSS-variable themes, analytics charts, and Ask Tomi.
 
 The app in this folder is served from GitHub Pages with routes:
 
 - `/` — babjatom home (shared shell + placeholder)
 - `/theme-playground` — component showcase and visits table
 - `/analytics` — visits table plus area, bar, line, pie, radar, radial, and tooltip charts
+- `/ask-tomi` — Ask Tomi chat (`/tomi-ai` redirects here)
 
-The sidebar **Pages** menu lists Theme Playground first, then Analytics, with **Themes** below.
+The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with **Themes** below.
 
 ## Features
 
@@ -39,7 +40,7 @@ The sidebar **Pages** menu lists Theme Playground first, then Analytics, with **
 
 ## Development
 
-From the `theme-playground/` directory:
+From the `tomi-playground/` directory:
 
 ```bash
 pnpm install
@@ -116,7 +117,7 @@ For GitHub Pages, add a repository secret named `VITE_MIXPANEL_TOKEN` (Mixpanel 
 
 ## Deployment
 
-Pushes to the `main` branch run `.github/workflows/deploy.yml`, which installs dependencies, runs the test suite, builds the Vite app, and deploys `theme-playground/dist/` to GitHub Pages.
+Pushes to the `main` branch run `.github/workflows/deploy.yml`, which installs dependencies, runs the test suite, builds the Vite app, and deploys `tomi-playground/dist/` to GitHub Pages.
 
 The workflow fails if tests or the production build fail.
 
