@@ -47,6 +47,7 @@ describe('analytics', () => {
     expect(initMock).toHaveBeenCalledWith('test-token', {
       track_pageview: false,
       persistence: 'localStorage',
+      api_host: 'https://api-eu.mixpanel.com',
     })
     expect(trackMock).toHaveBeenCalledWith('Page Viewed', {
       path: '/ask-tomi',
