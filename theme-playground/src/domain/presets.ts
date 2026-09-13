@@ -1,6 +1,27 @@
 import { createTheme, type Theme } from './theme'
 
 export const presetThemes: Theme[] = [
+  // Derived from generateRandomTheme(87) — warm coral light palette.
+  createTheme('ember-day', 'Ember Day', {
+    background: '16 12% 96%',
+    foreground: '16 28% 14%',
+    card: '16 31% 99%',
+    'card-foreground': '16 28% 14%',
+    primary: '16 63% 44%',
+    'primary-foreground': '16 24% 100%',
+    secondary: '196 15% 91%',
+    'secondary-foreground': '16 28% 14%',
+    muted: '196 15% 91%',
+    'muted-foreground': '16 14% 37%',
+    accent: '48 63% 43%',
+    'accent-foreground': '16 24% 100%',
+    destructive: '0 71% 48%',
+    'destructive-foreground': '0 0% 100%',
+    border: '16 19% 84%',
+    input: '16 19% 84%',
+    ring: '16 63% 44%',
+    radius: '1.25rem',
+  }),
   createTheme('slate-day', 'Slate Day', {
     background: '210 20% 98%',
     foreground: '222 47% 11%',
@@ -83,7 +104,7 @@ export const presetThemes: Theme[] = [
   }),
 ]
 
-export const DEFAULT_THEME_ID = 'ink-night'
+export const DEFAULT_THEME_ID = 'ember-day'
 
 export function findPresetTheme(id: string): Theme | undefined {
   return presetThemes.find((theme) => theme.id === id)

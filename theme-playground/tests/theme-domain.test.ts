@@ -17,6 +17,12 @@ describe('theme domain', () => {
     expect(findPresetTheme(DEFAULT_THEME_ID)?.id).toBe(DEFAULT_THEME_ID)
   })
 
+  it('keeps ember-day aligned with random seed 87', () => {
+    const seeded = generateRandomTheme(87)
+    const ember = findPresetTheme('ember-day')!
+    expect(ember.tokens).toEqual(seeded.tokens)
+  })
+
   it('generates deterministic random themes from a seed', () => {
     const a = generateRandomTheme(42)
     const b = generateRandomTheme(42)
