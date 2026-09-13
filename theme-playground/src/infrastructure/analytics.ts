@@ -21,7 +21,7 @@ export type AnalyticsEventMap = {
     status: 'complete' | 'error' | 'cancelled'
   }
   'Voxel Scene Loaded': {
-    status: 'ok' | 'error'
+    status: 'ok' | 'error' | 'unsupported'
   }
   'Visits Table Interacted': {
     action: 'sort' | 'select' | 'reorder' | 'row_action'
