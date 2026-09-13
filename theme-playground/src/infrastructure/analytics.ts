@@ -46,6 +46,8 @@ export function initMixpanel(): void {
   mixpanel.init(token, {
     track_pageview: false,
     persistence: 'localStorage',
+    // Project is hosted in the EU (eu.mixpanel.com).
+    api_host: 'https://api-eu.mixpanel.com',
   })
   enabled = true
 }
