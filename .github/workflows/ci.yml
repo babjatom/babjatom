@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: theme-playground
+        working-directory: tomi-playground
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: theme-playground/pnpm-lock.yaml
+          cache-dependency-path: tomi-playground/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

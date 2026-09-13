@@ -1,7 +1,7 @@
 import type { ThemePersistence } from '@/application/ports'
 
-const THEME_ID_KEY = 'theme-playground:theme-id'
-const CUSTOM_THEME_KEY = 'theme-playground:custom-theme'
+const THEME_ID_KEY = 'tomi-playground:theme-id'
+const CUSTOM_THEME_KEY = 'tomi-playground:custom-theme'
 
 export function createLocalStoragePersistence(
   storage: Storage = window.localStorage,

@@ -82,7 +82,7 @@ describe('babjatom shell navigation', () => {
 
     await user.click(screen.getByRole('button', { name: /ink night/i }))
     expect(document.documentElement.dataset.theme).toBe('ink-night')
-    expect(window.localStorage.getItem('theme-playground:theme-id')).toBe(
+    expect(window.localStorage.getItem('tomi-playground:theme-id')).toBe(
       'ink-night',
     )
     expect(track).toHaveBeenCalledWith('Theme Selected', {
@@ -98,11 +98,11 @@ describe('babjatom shell navigation', () => {
     await user.click(screen.getByRole('button', { name: /random theme/i }))
     const themeId = document.documentElement.dataset.theme
     expect(themeId).toMatch(/^random-/)
-    expect(window.localStorage.getItem('theme-playground:theme-id')).toBe(
+    expect(window.localStorage.getItem('tomi-playground:theme-id')).toBe(
       themeId,
     )
     expect(
-      window.localStorage.getItem('theme-playground:custom-theme'),
+      window.localStorage.getItem('tomi-playground:custom-theme'),
     ).toContain(themeId)
   })
 })
