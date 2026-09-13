@@ -1,6 +1,27 @@
 import { createTheme, type Theme } from './theme'
 
 export const presetThemes: Theme[] = [
+  // Dark olive/moss — cool undertone to sit with the steel-blue bust (~hue 200).
+  createTheme('olive-night', 'Olive Night', {
+    background: '150 18% 8%',
+    foreground: '90 12% 92%',
+    card: '150 16% 11%',
+    'card-foreground': '90 12% 92%',
+    primary: '98 38% 46%',
+    'primary-foreground': '150 18% 8%',
+    secondary: '155 12% 16%',
+    'secondary-foreground': '90 12% 92%',
+    muted: '155 12% 16%',
+    'muted-foreground': '145 10% 62%',
+    accent: '185 28% 42%',
+    'accent-foreground': '90 12% 96%',
+    destructive: '0 65% 48%',
+    'destructive-foreground': '0 0% 100%',
+    border: '150 12% 20%',
+    input: '150 12% 20%',
+    ring: '98 38% 46%',
+    radius: '0.85rem',
+  }),
   // Derived from generateRandomTheme(87) — warm coral light palette.
   createTheme('ember-day', 'Ember Day', {
     background: '16 12% 96%',
@@ -104,7 +125,7 @@ export const presetThemes: Theme[] = [
   }),
 ]
 
-export const DEFAULT_THEME_ID = 'ember-day'
+export const DEFAULT_THEME_ID = 'olive-night'
 
 export function findPresetTheme(id: string): Theme | undefined {
   return presetThemes.find((theme) => theme.id === id)
