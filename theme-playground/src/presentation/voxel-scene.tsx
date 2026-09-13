@@ -1,8 +1,9 @@
-import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import type { Group } from 'three'
 import { track } from '@/infrastructure/analytics'
+import { isWebGLAvailable } from '@/infrastructure/webgl'
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tomi.glb`
 /** Radians per second — steady spin, a bit quicker than a lazy turntable. */
@@ -48,17 +49,25 @@ function TomiModel() {
   )
 }
 
-function VoxelSceneError() {
+function VoxelSceneFallback({ reason }: { reason: 'unsupported' | 'error' }) {
   useEffect(() => {
-    track('Voxel Scene Loaded', { status: 'error' })
-  }, [])
+    track('Voxel Scene Loaded', { status: reason })
+  }, [reason])
 
-  return null
+  return (
+    <div className="flex h-full w-full items-center justify-center px-4 text-center">
+      <p className="max-w-[14rem] text-sm text-muted-foreground">
+        {reason === 'unsupported'
+          ? '3D preview needs WebGL. Check that your GPU drivers are working, then refresh.'
+          : '3D preview failed to load.'}
+      </p>
+    </div>
+  )
 }
 
-/** Minimal error boundary for GLB load failures. */
-class ModelErrorBoundary extends Component<
-  { children: ReactNode },
+/** Catches sync render failures from Canvas / the GLB tree. */
+class SceneErrorBoundary extends Component<
+  { children: ReactNode; onError: () => void },
   { hasError: boolean }
 > {
   state = { hasError: false }
@@ -67,36 +76,54 @@ class ModelErrorBoundary extends Component<
     return { hasError: true }
   }
 
+  componentDidCatch() {
+    this.props.onError()
+  }
+
   render() {
-    if (this.state.hasError) {
-      return <VoxelSceneError />
-    }
+    // Parent swaps in VoxelSceneFallback once `onError` flips state.
+    if (this.state.hasError) return null
     return this.props.children
   }
 }
 
-useGLTF.preload(MODEL_URL)
+function VoxelCanvas() {
+  useEffect(() => {
+    useGLTF.preload(MODEL_URL)
+  }, [])
+
+  return (
+    <Canvas
+      // Slightly lower + farther camera frames a bust in a tall aspect ratio.
+      camera={{ position: [0.55, 0.12, 1.55], fov: 32 }}
+      dpr={[1, 1.75]}
+      gl={{ antialias: true, alpha: true }}
+    >
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[4, 6, 3]} intensity={1.15} />
+      <hemisphereLight intensity={0.35} groundColor="#444444" />
+      <CameraFrame />
+      <Suspense fallback={null}>
+        <TomiModel />
+      </Suspense>
+    </Canvas>
+  )
+}
 
 export function VoxelScene() {
+  const [failed, setFailed] = useState(false)
+  const webglOk = useMemo(() => isWebGLAvailable(), [])
+
   return (
     <div className="relative h-full w-full" role="img" aria-label="3D Tomi scene">
       <div className="voxel-scene absolute inset-0">
-        <Canvas
-          // Slightly lower + farther camera frames a bust in a tall aspect ratio.
-          camera={{ position: [0.55, 0.12, 1.55], fov: 32 }}
-          dpr={[1, 1.75]}
-          gl={{ antialias: true, alpha: true }}
-        >
-          <ambientLight intensity={0.9} />
-          <directionalLight position={[4, 6, 3]} intensity={1.15} />
-          <hemisphereLight intensity={0.35} groundColor="#444444" />
-          <CameraFrame />
-          <Suspense fallback={null}>
-            <ModelErrorBoundary>
-              <TomiModel />
-            </ModelErrorBoundary>
-          </Suspense>
-        </Canvas>
+        {!webglOk || failed ? (
+          <VoxelSceneFallback reason={webglOk ? 'error' : 'unsupported'} />
+        ) : (
+          <SceneErrorBoundary onError={() => setFailed(true)}>
+            <VoxelCanvas />
+          </SceneErrorBoundary>
+        )}
       </div>
       {/* Soft theme fade — hides the waist cutoff (shorter so the bust stays visible) */}
       <div
