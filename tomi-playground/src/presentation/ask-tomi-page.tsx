@@ -364,10 +364,15 @@ function LabelledComposer({
         autoComplete="off"
         className="min-h-[2.75rem] w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       />
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">
-          Enter to send · Shift+Enter for a new line
-        </p>
+      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            Prototype — don’t take the results seriously.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Enter to send · Shift+Enter for a new line
+          </p>
+        </div>
         {pending ? (
           <Button type="button" variant="secondary" onClick={onStop}>
             <Square className="h-3.5 w-3.5" />

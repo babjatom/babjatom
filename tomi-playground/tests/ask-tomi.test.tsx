@@ -58,6 +58,9 @@ describe('Ask Tomi chat', () => {
 
     expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(
+      screen.getByText(/prototype — don’t take the results seriously/i),
+    ).toBeInTheDocument()
+    expect(
       screen.getByRole('button', { name: 'Who is Tomi?' }),
     ).toBeInTheDocument()
     expect(
