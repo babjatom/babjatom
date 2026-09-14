@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react'
 import { track } from '@/infrastructure/analytics'
-import { askTomiChat } from '@/infrastructure/tomi-chat-api'
+import {
+  askTomiChat,
+  getOrCreateChatSessionId,
+  rotateChatSessionId,
+} from '@/infrastructure/tomi-chat-api'
 
 export type ChatRole = 'user' | 'assistant'
 
@@ -51,7 +55,12 @@ export function useTomiChat() {
     setPending(true)
 
     try {
-      const answer = await askTomiChat(question, controller.signal)
+      const sessionId = getOrCreateChatSessionId()
+      const answer = await askTomiChat(
+        question,
+        controller.signal,
+        sessionId,
+      )
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantId
@@ -167,6 +176,7 @@ export function useTomiChat() {
     abortInFlight()
     setPending(false)
     setMessages([])
+    rotateChatSessionId()
   }
 
   async function copy(content: string) {

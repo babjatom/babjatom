@@ -154,8 +154,8 @@ export function AskTomiPage() {
               Ask Tomi
             </h1>
             <p className="mt-1 hidden max-w-2xl text-sm text-muted-foreground sm:mt-2 sm:block sm:text-base">
-              Ask about Tomi’s experience, stack, or approach. Each question is
-              answered independently.
+              Ask about Tomi’s experience, stack, or approach. Follow-ups in this
+              chat can refer to earlier answers for about 30 minutes.
             </p>
           </div>
           {messages.length > 0 && (
