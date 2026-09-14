@@ -43,6 +43,19 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
   })
 
+  it('collapses the pages menu after selecting a menu item on mobile', async () => {
+    const user = userEvent.setup()
+    setMatchMediaMatches(true)
+    renderApp('/babjatom/')
+
+    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))
+
+    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Analytics' })).toBeInTheDocument()
+  })
+
   it('navigates to the theme playground route', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
