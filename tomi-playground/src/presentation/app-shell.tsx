@@ -123,12 +123,13 @@ export function AppShell() {
               </p>
               <div className="flex flex-col gap-2">
                 {themes.map((item) => (
-                  <button
+                  <Button
                     key={item.id}
                     type="button"
+                    variant="ghost"
                     onClick={() => selectTheme(item.id)}
                     className={cn(
-                      'rounded-lg border px-3 py-2 text-left text-sm transition-colors',
+                      'h-auto w-full flex-col items-start rounded-lg border px-3 py-2 text-left',
                       item.id === theme.id
                         ? 'border-primary bg-primary/10 text-foreground'
                         : 'border-transparent bg-secondary/50 hover:bg-secondary',
@@ -140,7 +141,7 @@ export function AppShell() {
                         Generated
                       </span>
                     )}
-                  </button>
+                  </Button>
                 ))}
               </div>
               <Separator className="my-4" />

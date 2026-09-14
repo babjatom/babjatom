@@ -2,8 +2,6 @@ import {
   type FormEvent,
   type KeyboardEvent,
   type RefObject,
-  lazy,
-  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -28,10 +26,6 @@ import {
   useTomiChat,
   type ChatMessage,
 } from './use-tomi-chat'
-
-const VoxelScene = lazy(() =>
-  import('./voxel-scene').then((module) => ({ default: module.VoxelScene })),
-)
 
 function AssistantBody({
   message,
@@ -176,27 +170,13 @@ export function AskTomiPage() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4 lg:flex-row">
-        {/* Model first on mobile; chat uses lg:order-first so desktop stays chat | model */}
-        <aside className="animate-rise-delay relative order-1 flex h-[9.5rem] shrink-0 overflow-hidden rounded-xl border border-border/70 bg-background sm:h-44 lg:order-2 lg:h-auto lg:w-[min(100%,28rem)]">
-          <Suspense
-            fallback={
-              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                Loading 3D…
-              </div>
-            }
-          >
-            <VoxelScene />
-          </Suspense>
-        </aside>
-
-        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col gap-3 sm:gap-4 lg:order-1">
-          <section
-            ref={listRef}
-            className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
-            aria-live="polite"
-            aria-relevant="additions"
-          >
+      <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
+        <section
+          ref={listRef}
+          className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
             {messages.length === 0 ? (
               <div className="flex h-full flex-col justify-center gap-4">
                 <Reveal as="p" className="text-sm text-muted-foreground">
@@ -331,23 +311,21 @@ export function AskTomiPage() {
                 })}
               </ul>
             )}
-          </section>
+        </section>
 
-          <form
-            className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
-            onSubmit={handleSubmit}
-          >
-            <LabelledComposer
-              draft={draft}
-              pending={pending}
-              inputRef={inputRef}
-              onDraftChange={setDraft}
-              onKeyDown={handleKeyDown}
-              onStop={stop}
-            />
-          </form>
-        </div>
-
+        <form
+          className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
+          onSubmit={handleSubmit}
+        >
+          <LabelledComposer
+            draft={draft}
+            pending={pending}
+            inputRef={inputRef}
+            onDraftChange={setDraft}
+            onKeyDown={handleKeyDown}
+            onStop={stop}
+          />
+        </form>
       </div>
     </div>
   )

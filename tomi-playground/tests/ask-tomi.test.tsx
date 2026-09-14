@@ -281,15 +281,14 @@ describe('Ask Tomi chat', () => {
     expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
-  it('shows the 3D scene before the chat composer on the page', async () => {
+  it('does not mount the 3D scene on the page', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    const scene = screen.getByRole('img', { name: /3d tomi scene/i })
-    const question = screen.getByLabelText('Question')
     expect(
-      scene.compareDocumentPosition(question) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
+      screen.queryByRole('img', { name: /3d tomi scene/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Question')).toBeInTheDocument()
   })
 
   it('is reachable from shell navigation', async () => {
