@@ -17,7 +17,7 @@ export const PENDING_STATUS_GENERIC = [
   'Tomi is freaking out because of the cloud bill…',
 ] as const
 
-export const PENDING_STATUS_INTERVAL_MS = 800
+export const PENDING_STATUS_INTERVAL_MS = 1600
 
 /**
  * Rotates playful pending status lines: primary set once, then loops generics.
