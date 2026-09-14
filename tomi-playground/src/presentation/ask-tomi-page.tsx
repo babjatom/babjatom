@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Reveal } from './reveal'
+import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
   STARTER_PROMPTS,
@@ -47,6 +48,7 @@ function AssistantBody({
     enabled: animateTyping && message.status === 'complete',
     onProgress: onTypingProgress,
   })
+  const pendingStatus = usePendingStatus(message.status === 'pending')
 
   useEffect(() => {
     if (message.status === 'complete' && done) {
@@ -58,7 +60,8 @@ function AssistantBody({
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
         <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-        Thinking…
+        <span aria-hidden>{pendingStatus}</span>
+        <span className="sr-only">Tomi is thinking</span>
       </p>
     )
   }
