@@ -8,8 +8,9 @@ The app in this folder is served from GitHub Pages with routes:
 - `/theme-playground` — component showcase and visits table
 - `/analytics` — visits table plus area, bar, line, pie, radar, radial, and tooltip charts
 - `/ask-tomi` — Ask Tomi chat (`/tomi-ai` redirects here)
+- `/privacy` — short privacy note (hosting, Ask Tomi, profile pixel)
 
-The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with **Themes** below.
+The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with **Themes** below. A **Privacy** link sits under the sidebar footer.
 
 ## Features
 
@@ -22,7 +23,8 @@ The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with
 - responsive mobile layout
 - CSS-based visual effects
 - localStorage theme persistence
-- Mixpanel product analytics (optional via `VITE_MIXPANEL_TOKEN`)
+- Mixpanel product analytics (optional locally; off on GitHub Pages)
+- Self-hosted Outfit / Fraunces fonts (no Google Fonts CDN)
 - Vitest + React Testing Library
 - GitHub Pages deployment
 
@@ -111,9 +113,12 @@ The Theme domain can be unit-tested and reused without mounting the UI.
 
 ## Analytics
 
-Mixpanel is optional. Copy `.env.example` to `.env` and set `VITE_MIXPANEL_TOKEN` for local tracking. Without a token, analytics no-ops.
+Mixpanel is optional for local development only. Copy `.env.example` to `.env`
+and set `VITE_MIXPANEL_TOKEN` if you want tracking while developing. Without a
+token, analytics no-ops.
 
-For GitHub Pages, add a repository secret named `VITE_MIXPANEL_TOKEN` (Mixpanel project token). The deploy workflow injects it into the production build. Do not commit real tokens.
+The GitHub Pages deploy workflow does **not** inject a Mixpanel token, so the
+public site ships without product analytics trackers.
 
 ## Deployment
 
