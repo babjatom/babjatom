@@ -29,6 +29,7 @@ import { Switch } from '@/components/ui/switch'
 import { track } from '@/infrastructure/analytics'
 import { Reveal } from './reveal'
 import { useTheme } from './theme-provider'
+import { ThemeSwitcher } from './theme-switcher'
 import { VisitsDataTable } from './visits-data-table'
 
 export function ComponentShowcase() {
@@ -50,6 +51,7 @@ export function ComponentShowcase() {
             The same shadcn/ui component system, reshaped only by semantic CSS
             variables — switch themes without duplicating components.
           </p>
+          <ThemeSwitcher className="mt-5" />
         </div>
       </header>
 
