@@ -86,7 +86,7 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
     expect(
-      screen.getByRole('button', { name: 'Who is Tomi?' }),
+      screen.getByRole('button', { name: 'Who are you?' }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
   })
