@@ -67,10 +67,30 @@ describe('Ask Tomi chat', () => {
       screen.getAllByRole('link', { name: 'Privacy' }).length,
     ).toBeGreaterThanOrEqual(1)
     expect(
-      screen.getByRole('button', { name: 'Who is Tomi?' }),
+      screen.getByRole('button', { name: 'Who are you?' }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'What is his tech stack?' }),
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'How do you structure a React + TypeScript app?',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'What’s your approach to testing and CI?',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'How do you design APIs and data models?',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'What have you shipped end-to-end recently?',
+      }),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
@@ -84,11 +104,11 @@ describe('Ask Tomi chat', () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
 
     expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
       source: 'starter',
-      starter_id: 'Who is Tomi?',
+      starter_id: 'Who are you?',
     })
 
     await waitFor(() => {
@@ -101,7 +121,7 @@ describe('Ask Tomi chat', () => {
     })
 
     const body = getChatRequestBody()
-    expect(body.question).toBe('Who is Tomi?')
+    expect(body.question).toBe('Who are you?')
     expect(body.session_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     )
@@ -112,7 +132,7 @@ describe('Ask Tomi chat', () => {
         'Tomi is a full-stack engineer based in Prague.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Who is Tomi?')).toBeInTheDocument()
+    expect(screen.getByText('Who are you?')).toBeInTheDocument()
   })
 
   it('submits a typed question from the composer', async () => {
@@ -146,7 +166,7 @@ describe('Ask Tomi chat', () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     expect(
       await screen.findByText(
         'Tomi is a full-stack engineer based in Prague.',
@@ -173,7 +193,7 @@ describe('Ask Tomi chat', () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     expect(
       await screen.findByText(
         'Tomi is a full-stack engineer based in Prague.',
@@ -188,10 +208,10 @@ describe('Ask Tomi chat', () => {
       screen.queryByText('Tomi is a full-stack engineer based in Prague.'),
     ).not.toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Who is Tomi?' }),
+      screen.getByRole('button', { name: 'Who are you?' }),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     await waitFor(() => {
       expect(vi.mocked(fetch).mock.calls).toHaveLength(2)
     })
@@ -215,7 +235,7 @@ describe('Ask Tomi chat', () => {
     )
 
     await openAskTomi(user)
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     expect(await screen.findByRole('button', { name: 'Stop' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Stop' }))
@@ -236,7 +256,7 @@ describe('Ask Tomi chat', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await openAskTomi(user)
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     expect(
       await screen.findByText('First answer about Tomi.'),
     ).toBeInTheDocument()
@@ -271,7 +291,7 @@ describe('Ask Tomi chat', () => {
 
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Who is Tomi?' }))
+    await user.click(screen.getByRole('button', { name: 'Who are you?' }))
     expect(
       await screen.findByText(
         'Tomi is a full-stack engineer based in Prague.',
@@ -306,7 +326,7 @@ describe('Ask Tomi chat', () => {
 
     expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Who is Tomi?' }),
+      screen.getByRole('button', { name: 'Who are you?' }),
     ).toBeInTheDocument()
   })
 })
