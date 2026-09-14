@@ -99,9 +99,10 @@ export function AppShell() {
                     key={page.to}
                     to={page.to}
                     end={page.end}
-                    onClick={() =>
+                    onClick={() => {
                       track('Nav Clicked', { to: page.to, source: 'sidebar' })
-                    }
+                      if (window.innerWidth < 1024) setSidebarCollapsed(true)
+                    }}
                     className={({ isActive }) =>
                       cn(
                         'rounded-lg border px-3 py-2 text-sm transition-colors',
