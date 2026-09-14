@@ -170,6 +170,39 @@ export function AppShell() {
               >
                 <Dices className="h-4 w-4" />
               </Button>
+              <NavLink
+                to="/privacy"
+                onClick={() =>
+                  track('Nav Clicked', { to: '/privacy', source: 'sidebar' })
+                }
+                className={({ isActive }) =>
+                  cn(
+                    'mt-2 text-[10px] text-muted-foreground underline-offset-2 hover:underline',
+                    isActive && 'text-foreground underline',
+                  )
+                }
+              >
+                Privacy
+              </NavLink>
+            </div>
+          )}
+
+          {!sidebarCollapsed && (
+            <div className="mt-6 border-t border-border/60 pt-4">
+              <NavLink
+                to="/privacy"
+                onClick={() =>
+                  track('Nav Clicked', { to: '/privacy', source: 'sidebar' })
+                }
+                className={({ isActive }) =>
+                  cn(
+                    'text-xs text-muted-foreground underline-offset-4 hover:underline',
+                    isActive && 'text-foreground underline',
+                  )
+                }
+              >
+                Privacy
+              </NavLink>
             </div>
           )}
         </div>

@@ -61,6 +61,12 @@ describe('Ask Tomi chat', () => {
       screen.getByText(/prototype — don’t take the results seriously/i),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(/messages go to a cloudflare worker/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByRole('link', { name: 'Privacy' }).length,
+    ).toBeGreaterThanOrEqual(1)
+    expect(
       screen.getByRole('button', { name: 'Who is Tomi?' }),
     ).toBeInTheDocument()
     expect(
