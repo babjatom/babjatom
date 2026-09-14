@@ -16,6 +16,7 @@ import {
   SendHorizontal,
   Square,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Reveal } from './reveal'
@@ -368,6 +369,16 @@ function LabelledComposer({
         <div className="min-w-0 space-y-0.5">
           <p className="text-[11px] leading-snug text-muted-foreground">
             Prototype — don’t take the results seriously.
+          </p>
+          <p className="text-[11px] leading-snug text-muted-foreground">
+            Messages go to a Cloudflare Worker to generate a reply. Don’t send
+            secrets.{' '}
+            <Link
+              to="/privacy"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              Privacy
+            </Link>
           </p>
           <p className="text-xs text-muted-foreground">
             Enter to send · Shift+Enter for a new line
