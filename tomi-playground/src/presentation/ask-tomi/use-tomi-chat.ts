@@ -22,7 +22,6 @@ export type ChatMessage = {
 }
 
 export const STARTER_PROMPTS = [
-  'Who are you?',
   'What’s your tech stack?',
   'How do you structure a React + TypeScript app?',
   'What’s your approach to testing and CI?',

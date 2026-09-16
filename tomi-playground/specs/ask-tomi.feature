@@ -14,7 +14,7 @@ Feature: Ask Tomi
 
   Scenario: Visitor sends a starter prompt
     Given I am on the Ask Tomi page
-    When I choose the "Who are you?" starter prompt
+    When I choose the "What’s your tech stack?" starter prompt
     Then I should see my question in the chat
     And I should see the assistant answer
 

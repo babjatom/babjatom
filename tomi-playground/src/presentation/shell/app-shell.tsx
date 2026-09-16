@@ -247,16 +247,6 @@ export function AppShell() {
           )}
         </div>
 
-        {sidebarCollapsed && (
-          <div className="flex gap-2 px-4 pb-4 lg:hidden">
-            <Button className="flex-1" onClick={() => setSidebarCollapsed(false)}>
-              Show menu
-            </Button>
-            <Button variant="outline" onClick={randomizeTheme}>
-              <Dices className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </aside>
 
       <main className="px-3 py-3 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
