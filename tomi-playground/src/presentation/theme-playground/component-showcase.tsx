@@ -27,9 +27,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { track } from '@/infrastructure/analytics'
-import { Reveal } from './reveal'
-import { useTheme } from './theme-provider'
-import { VisitsDataTable } from './visits-data-table'
+import { Reveal } from '@/presentation/shared/reveal'
+import { VisitsDataTable } from '@/presentation/shared/visits-data-table'
+import { useTheme } from '@/presentation/theme/theme-provider'
 
 export function ComponentShowcase() {
   const { theme } = useTheme()

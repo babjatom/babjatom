@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { track } from '@/infrastructure/analytics'
 import { isWebGLAvailable } from '@/infrastructure/webgl'
-import { VoxelScene } from '@/presentation/voxel-scene'
+import { VoxelScene } from '@/presentation/ask-tomi/voxel-scene'
 
 vi.mock('@react-three/fiber', () => ({
   Canvas: () => {

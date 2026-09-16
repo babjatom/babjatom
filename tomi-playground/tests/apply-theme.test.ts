@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyThemeTokens } from '@/presentation/apply-theme'
+import { applyThemeTokens } from '@/presentation/theme/apply-theme'
 import { findPresetTheme, DEFAULT_THEME_ID } from '@/domain/presets'
 
 describe('applyThemeTokens', () => {

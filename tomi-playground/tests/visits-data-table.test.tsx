@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { VisitsDataTable } from '@/presentation/visits-data-table'
+import { VisitsDataTable } from '@/presentation/shared/visits-data-table'
 
 describe('VisitsDataTable', () => {
   it('renders visit columns and mock rows', () => {
