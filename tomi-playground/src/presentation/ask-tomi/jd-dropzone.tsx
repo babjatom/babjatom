@@ -62,11 +62,16 @@ export function JdDropzone({
   const accept = JD_ALLOWED_EXTENSIONS.join(',')
 
   return (
-    <div className={cn('flex min-h-0 flex-1 flex-col gap-2', className)}>
+    <div
+      className={cn(
+        'flex flex-col gap-2 sm:min-h-0 sm:flex-1',
+        className,
+      )}
+    >
       <div
         aria-label="Job description drop zone"
         className={cn(
-          'flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-card/60 px-4 py-8 text-center outline-none transition-colors',
+          'flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-card/60 px-3 py-5 text-center outline-none transition-colors sm:min-h-0 sm:flex-1 sm:px-4 sm:py-8',
           dragging && 'border-primary bg-primary/5',
           disabled
             ? 'cursor-not-allowed opacity-50'
@@ -91,26 +96,31 @@ export function JdDropzone({
         onDrop={handleDrop}
       >
         <FileText
-          className="h-8 w-8 text-muted-foreground"
+          className="h-6 w-6 text-muted-foreground sm:h-8 sm:w-8"
           aria-hidden
         />
-        <p className="mt-3 font-display tracking-[0.28em] text-foreground">
-          <span className="text-3xl font-bold leading-none">J</span>
-          <span className="text-sm font-light uppercase leading-none">ob</span>{' '}
-          <span className="text-3xl font-bold leading-none">D</span>
-          <span className="text-sm font-light uppercase leading-none">
+        <p className="mt-2 font-display tracking-[0.14em] text-foreground sm:mt-3 sm:tracking-[0.28em]">
+          <span className="text-2xl font-bold leading-none sm:text-3xl">J</span>
+          <span className="text-xs font-light uppercase leading-none sm:text-sm">
+            ob
+          </span>{' '}
+          <span className="text-2xl font-bold leading-none sm:text-3xl">D</span>
+          <span className="text-xs font-light uppercase leading-none sm:text-sm">
             escriptions
           </span>
         </p>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        <p className="mt-1.5 hidden max-w-sm text-sm text-muted-foreground sm:mt-2 sm:block">
           Tomi AI will analyze JDs and respond with relevant matches and a
           tailored CV.
         </p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <p className="text-sm font-medium tracking-wide text-foreground">
+        <p className="mt-1.5 max-w-xs text-xs text-muted-foreground sm:hidden">
+          Analyze JDs for matches and a tailored CV.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:mt-4">
+          <p className="hidden text-sm font-medium tracking-wide text-foreground sm:inline">
             Drag &amp; Drop
           </p>
-          <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
+          <span className="hidden text-xs font-semibold tracking-[0.18em] text-muted-foreground sm:inline">
             or
           </span>
           <Button
@@ -125,7 +135,7 @@ export function JdDropzone({
             Upload
           </Button>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-2 text-[10px] leading-snug text-muted-foreground sm:mt-3 sm:text-xs">
           PDF, DOCX, or TXT · up to {JD_MAX_FILES} files ·{' '}
           {formatJdFileSize(JD_MAX_FILE_BYTES)} each
         </p>

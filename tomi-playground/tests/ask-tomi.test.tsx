@@ -124,11 +124,10 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByLabelText('Job description drop zone'),
     ).toBeInTheDocument()
-    expect(screen.getByText('Drag & Drop')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument()
     expect(
       screen.getByText((_, element) => element?.textContent === 'Job Descriptions'),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()

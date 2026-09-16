@@ -181,7 +181,7 @@ export function AskTomiPage() {
           aria-relevant="additions"
         >
             {messages.length === 0 ? (
-              <div className="flex h-full min-h-0 flex-col gap-4">
+              <div className="flex flex-col gap-4 sm:h-full sm:min-h-0">
                 <Reveal as="p" className="shrink-0 text-sm text-muted-foreground">
                   Start with a suggested question, drop a job description, or
                   type your own below.
@@ -221,7 +221,7 @@ export function AskTomiPage() {
                 <Reveal
                   rootRef={listRef}
                   delayMs={540}
-                  className="flex min-h-0 flex-1 flex-col"
+                  className="flex min-h-0 flex-col sm:flex-1"
                 >
                   <JdDropzone
                     disabled={pending}
