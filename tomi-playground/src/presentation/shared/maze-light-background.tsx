@@ -8,8 +8,8 @@ import {
 } from '@/domain/maze'
 import { cn } from '@/lib/utils'
 
-const LOOP_MS = 16000
-const TRAIL_FRACTION = 0.14
+const SPEED_PX_PER_SEC = 280
+const TRAIL_PX = 160
 
 function prefersReducedMotion() {
   return (
@@ -34,7 +34,7 @@ function drawFrame(
   scene: MazeScene,
   width: number,
   height: number,
-  headT: number,
+  headDist: number,
 ) {
   const primary = readChannel('--primary')
   const accent = readChannel('--accent')
@@ -57,6 +57,10 @@ function drawFrame(
   if (path.length < 2) return
 
   const metrics = pathMetrics(path)
+  const total = Math.max(metrics.total, 1)
+  const clampedHead = ((headDist % total) + total) % total
+  const headT = clampedHead / total
+  const trailStartT = Math.max(0, clampedHead - TRAIL_PX) / total
 
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
@@ -71,12 +75,7 @@ function drawFrame(
   ctx.lineWidth = 1.5
   ctx.stroke()
 
-  const trail = trailAlongPath(
-    path,
-    Math.max(0, headT - TRAIL_FRACTION),
-    headT,
-    metrics,
-  )
+  const trail = trailAlongPath(path, trailStartT, headT, metrics)
   if (trail.length >= 2) {
     ctx.beginPath()
     ctx.moveTo(trail[0].x, trail[0].y)
@@ -109,7 +108,8 @@ type MazeLightBackgroundProps = {
 }
 
 /**
- * Fixed ambient canvas: random maze walls + light traveling the solution path.
+ * Fixed ambient canvas: random maze walls + light traveling the solution path
+ * at a constant pixels-per-second speed.
  */
 export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -138,11 +138,24 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       scene = buildMazeScene({ width, height })
     }
 
+    const headDistanceAt = (timeMs: number) => {
+      if (prefersReducedMotion()) {
+        const total = pathMetrics(scene.path).total
+        return total * 0.4
+      }
+      return (timeMs / 1000) * SPEED_PX_PER_SEC
+    }
+
     const paint = (time: number) => {
       if (disposed) return
       const reduced = prefersReducedMotion()
-      const headT = reduced ? 0.4 : (time % LOOP_MS) / LOOP_MS
-      drawFrame(ctx, scene, window.innerWidth, window.innerHeight, headT)
+      drawFrame(
+        ctx,
+        scene,
+        window.innerWidth,
+        window.innerHeight,
+        headDistanceAt(time),
+      )
       if (!reduced) {
         frameId = requestAnimationFrame(paint)
       }
@@ -153,14 +166,26 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       resizeTimer = window.setTimeout(() => {
         sizeCanvas()
         if (prefersReducedMotion()) {
-          drawFrame(ctx, scene, window.innerWidth, window.innerHeight, 0.4)
+          drawFrame(
+            ctx,
+            scene,
+            window.innerWidth,
+            window.innerHeight,
+            headDistanceAt(0),
+          )
         }
       }, 120)
     }
 
     sizeCanvas()
     if (prefersReducedMotion()) {
-      drawFrame(ctx, scene, window.innerWidth, window.innerHeight, 0.4)
+      drawFrame(
+        ctx,
+        scene,
+        window.innerWidth,
+        window.innerHeight,
+        headDistanceAt(0),
+      )
     } else {
       frameId = requestAnimationFrame(paint)
     }
