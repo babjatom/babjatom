@@ -78,24 +78,27 @@ function ChartCard({
   children: ReactNode
 }) {
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="min-w-0">{children}</CardContent>
     </Card>
   )
 }
 
 export function AnalyticsCharts() {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid min-w-0 gap-6 md:grid-cols-2">
       <ChartCard
         title="Area"
         description="Stacked area chart for desktop vs mobile visits."
       >
-        <ChartContainer config={trendConfig} className="min-h-[220px] w-full">
+        <ChartContainer
+          config={trendConfig}
+          className="min-h-[220px] w-full min-w-0"
+        >
           <AreaChart data={visitsTrend} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -130,7 +133,10 @@ export function AnalyticsCharts() {
         title="Bar"
         description="Grouped bar chart comparing monthly traffic."
       >
-        <ChartContainer config={trendConfig} className="min-h-[220px] w-full">
+        <ChartContainer
+          config={trendConfig}
+          className="min-h-[220px] w-full min-w-0"
+        >
           <BarChart data={visitsTrend} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -151,7 +157,10 @@ export function AnalyticsCharts() {
         title="Line"
         description="Line chart with tooltip for trend inspection."
       >
-        <ChartContainer config={trendConfig} className="min-h-[220px] w-full">
+        <ChartContainer
+          config={trendConfig}
+          className="min-h-[220px] w-full min-w-0"
+        >
           <LineChart data={visitsTrend} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -187,7 +196,7 @@ export function AnalyticsCharts() {
       <ChartCard title="Pie" description="Country share of visitors.">
         <ChartContainer
           config={pieConfig}
-          className="mx-auto aspect-square max-h-[260px]"
+          className="mx-auto aspect-square max-h-[260px] w-full min-w-0"
         >
           <PieChart>
             <ChartTooltip
@@ -205,7 +214,7 @@ export function AnalyticsCharts() {
       <ChartCard title="Radar" description="Engagement metrics comparison.">
         <ChartContainer
           config={radarConfig}
-          className="mx-auto aspect-square max-h-[280px]"
+          className="mx-auto aspect-square max-h-[280px] w-full min-w-0"
         >
           <RadarChart data={radarMetrics}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
@@ -231,7 +240,7 @@ export function AnalyticsCharts() {
       <ChartCard title="Radial" description="Browser mix as a radial bar chart.">
         <ChartContainer
           config={radialConfig}
-          className="mx-auto aspect-square max-h-[280px]"
+          className="mx-auto aspect-square max-h-[280px] w-full min-w-0"
         >
           <RadialBarChart
             data={radialProgress}
@@ -255,7 +264,10 @@ export function AnalyticsCharts() {
         title="Tooltip"
         description="Dedicated tooltip demo on a compact line chart."
       >
-        <ChartContainer config={trendConfig} className="min-h-[220px] w-full">
+        <ChartContainer
+          config={trendConfig}
+          className="min-h-[220px] w-full min-w-0"
+        >
           <LineChart data={visitsTrend} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis
