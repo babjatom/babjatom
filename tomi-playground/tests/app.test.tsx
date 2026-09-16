@@ -22,13 +22,22 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByRole('heading', { name: /welcome/i })).toBeInTheDocument()
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
-    expect(
-      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
-    ).toBeInTheDocument()
-    expect(
-      within(pagesNav).getByRole('link', { name: 'Ask Tomi' }),
-    ).toBeInTheDocument()
+    const links = within(pagesNav).getAllByRole('link')
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Home',
+      'Theme Playground',
+      'Analytics',
+      'Ask Tomi',
+    ])
     expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
+
+    const brand = screen.getByRole('link', { name: 'babjatom on GitHub' })
+    expect(brand).toHaveAttribute('href', 'https://github.com/babjatom')
+    expect(brand).toHaveAttribute('target', '_blank')
+
+    expect(
+      screen.getByRole('link', { name: 'Follow @babjatom on GitHub' }),
+    ).toHaveAttribute('href', 'https://github.com/babjatom')
   })
 
   it('keeps the pages menu collapsed on mobile viewports', async () => {

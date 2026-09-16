@@ -7,6 +7,12 @@ vi.mock('@/infrastructure/analytics', () => ({
   __resetAnalyticsForTests: vi.fn(),
 }))
 
+vi.mock('github-buttons', () => ({
+  render: () => {
+    // Keep the Follow anchor in jsdom; skip GitHub Buttons iframes.
+  },
+}))
+
 class ResizeObserverMock {
   observe() {}
   unobserve() {}

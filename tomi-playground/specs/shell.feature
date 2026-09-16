@@ -4,8 +4,10 @@ Feature: Shell navigation
   Scenario: Home shows the pages menu
     Given I am on the home page
     Then I should see a welcome heading
-    And the pages menu should list Theme Playground, Analytics, and Ask Tomi
+    And the pages menu should list Home, Theme Playground, Analytics, and Ask Tomi
     And I should see a control to generate a random theme
+    And the brand should link to GitHub
+    And I should see a Follow control with a followers count
 
   Scenario: Mobile pages menu starts collapsed
     Given I am on a mobile viewport

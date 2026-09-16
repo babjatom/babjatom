@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
+import { GITHUB_PROFILE_URL, GitHubFollowButton } from './github-follow-button'
 import { useTheme } from './theme-provider'
 
 const pages = [
+  { to: '/', label: 'Home', end: true },
   { to: '/theme-playground', label: 'Theme Playground', end: false },
   { to: '/analytics', label: 'Analytics', end: false },
   { to: '/ask-tomi', label: 'Ask Tomi', end: false },
@@ -45,31 +47,49 @@ export function AppShell() {
         )}
       >
         <div className="flex items-center justify-between gap-3 px-4 py-4">
-          <NavLink
-            to="/"
-            onClick={() => {
-              track('Nav Clicked', { to: '/', source: 'brand' })
-              closeMobileMenu()
-            }}
+          <div
             className={cn(
-              'flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              sidebarCollapsed && 'lg:justify-center lg:w-full',
+              'flex min-w-0 items-center gap-3',
+              sidebarCollapsed && 'lg:w-full lg:justify-center',
             )}
           >
-            <div className="theme-orb flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <a
+              href={GITHUB_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                track('Nav Clicked', {
+                  to: GITHUB_PROFILE_URL,
+                  source: 'brand',
+                })
+                closeMobileMenu()
+              }}
+              className="theme-orb flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="babjatom on GitHub"
+            >
               <SwatchBook className="h-5 w-5" />
-            </div>
+            </a>
             {!sidebarCollapsed && (
-              <div className="animate-rise">
-                <p className="font-display text-lg font-semibold leading-none">
+              <div className="animate-rise flex min-w-0 flex-col">
+                <a
+                  href={GITHUB_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    track('Nav Clicked', {
+                      to: GITHUB_PROFILE_URL,
+                      source: 'brand',
+                    })
+                    closeMobileMenu()
+                  }}
+                  className="font-display text-lg font-semibold leading-none outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   babjatom
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  shadcn/ui · CSS variables
-                </p>
+                </a>
+                <GitHubFollowButton />
               </div>
             )}
-          </NavLink>
+          </div>
           <Button
             variant="ghost"
             size="icon"

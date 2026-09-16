@@ -20,6 +20,7 @@ describe('Analytics page', () => {
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     const links = within(pagesNav).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
+      'Home',
       'Theme Playground',
       'Analytics',
       'Ask Tomi',

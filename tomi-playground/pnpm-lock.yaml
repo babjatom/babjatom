@@ -68,6 +68,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      github-buttons:
+        specifier: ^2.33.0
+        version: 2.33.0
       lucide-react:
         specifier: ^1.42.0
         version: 1.42.0(react@19.2.8)
@@ -1485,6 +1488,9 @@ packages:
   get-nonce@1.0.1:
     resolution: {integrity: sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==}
     engines: {node: '>=6'}
+
+  github-buttons@2.33.0:
+    resolution: {integrity: sha512-+WQ+r3nSM2/NGBo17LaQ2evPOEjXUmSLzFuZzpz9rCzwa7HrmIDQCaMx6uTsfL1aW7/bmBd5slREkCp3XKpuFw==}
 
   glsl-noise@0.0.0:
     resolution: {integrity: sha512-b/ZCF6amfAUb7dJM/MxRs7AetQEahYzJ8PtgfrmEdtw6uyGOr+ZSGtgjFm6mfsBkxJ4d2W7kg+Nlqzqvn3Bc0w==}
@@ -3564,6 +3570,8 @@ snapshots:
     optional: true
 
   get-nonce@1.0.1: {}
+
+  github-buttons@2.33.0: {}
 
   glsl-noise@0.0.0: {}
 
