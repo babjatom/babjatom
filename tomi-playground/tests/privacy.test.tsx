@@ -19,9 +19,11 @@ describe('Privacy page', () => {
 
   it('links Privacy from the shell and discloses hosting, Ask Tomi, and the profile pixel', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    const { container } = renderApp('/babjatom/')
 
-    await user.click(screen.getByRole('link', { name: 'Privacy' }))
+    const aside = container.querySelector('aside')
+    expect(aside).toBeTruthy()
+    await user.click(within(aside as HTMLElement).getByRole('link', { name: 'Privacy' }))
 
     expect(screen.getByRole('heading', { name: 'Privacy' })).toBeInTheDocument()
     expect(
@@ -44,20 +46,15 @@ describe('Privacy page', () => {
 
   it('is reachable from Ask Tomi composer disclosure', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
-
-    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
-    await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
+    const { container } = renderApp('/babjatom/')
 
     expect(
       screen.getByText(/messages go to a cloudflare worker/i),
     ).toBeInTheDocument()
 
-    const composerPrivacy = screen
-      .getAllByRole('link', { name: 'Privacy' })
-      .find((link) => link.getAttribute('href')?.endsWith('/privacy'))
-    expect(composerPrivacy).toBeTruthy()
-    await user.click(composerPrivacy!)
+    const main = container.querySelector('main')
+    expect(main).toBeTruthy()
+    await user.click(within(main as HTMLElement).getByRole('link', { name: 'Privacy' }))
     expect(screen.getByRole('heading', { name: 'Privacy' })).toBeInTheDocument()
   })
 })

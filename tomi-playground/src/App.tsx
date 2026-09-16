@@ -3,7 +3,6 @@ import { AnalyticsPage } from '@/presentation/analytics-page'
 import { AppShell } from '@/presentation/app-shell'
 import { AskTomiPage } from '@/presentation/ask-tomi-page'
 import { ComponentShowcase } from '@/presentation/component-showcase'
-import { HomePage } from '@/presentation/home-page'
 import { PageViewTracker } from '@/presentation/page-view-tracker'
 import { PrivacyPage } from '@/presentation/privacy-page'
 import { ThemeProvider } from '@/presentation/theme-provider'
@@ -17,12 +16,12 @@ export default function App() {
         <PageViewTracker />
         <Routes>
           <Route element={<AppShell />}>
-            <Route index element={<HomePage />} />
+            <Route index element={<AskTomiPage />} />
             <Route path="theme-playground" element={<ComponentShowcase />} />
             <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="ask-tomi" element={<AskTomiPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="tomi-ai" element={<Navigate to="/ask-tomi" replace />} />
+            <Route path="ask-tomi" element={<Navigate to="/" replace />} />
+            <Route path="tomi-ai" element={<Navigate to="/" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
