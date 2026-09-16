@@ -4,10 +4,10 @@ A Vite + React SPA for babjatom: CSS-variable themes, analytics charts, and Ask 
 
 The app in this folder is served from GitHub Pages with routes:
 
-- `/` — babjatom home (shared shell + placeholder)
+- `/` — Ask Tomi chat (site home)
 - `/theme-playground` — component showcase and visits table
 - `/analytics` — visits table plus area, bar, line, pie, radar, radial, and tooltip charts
-- `/ask-tomi` — Ask Tomi chat (`/tomi-ai` redirects here)
+- `/ask-tomi` and `/tomi-ai` — redirect to `/`
 - `/privacy` — short privacy note (hosting, Ask Tomi, profile pixel)
 
 The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with **Themes** below. A **Privacy** link sits under the sidebar footer.

@@ -17,9 +17,10 @@ describe('babjatom shell navigation', () => {
     vi.mocked(track).mockClear()
   })
 
-  it('renders the home placeholder with pages nav', () => {
+  it('renders Ask Tomi as the home page with pages nav', () => {
     renderApp('/babjatom/')
-    expect(screen.getByRole('heading', { name: /welcome/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Question')).toBeInTheDocument()
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     expect(
@@ -70,13 +71,14 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByText(/recent visits/i)).toBeInTheDocument()
   })
 
-  it('navigates to the Ask Tomi chat route', async () => {
+  it('navigates to Ask Tomi home from the pages menu', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/babjatom/theme-playground')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
 
+    expect(window.location.pathname).not.toMatch(/ask-tomi/)
     expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
     expect(
@@ -89,6 +91,14 @@ describe('babjatom shell navigation', () => {
       screen.getByRole('button', { name: 'Who are you?' }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
+  })
+
+  it('redirects the legacy Ask Tomi URL to home', () => {
+    renderApp('/babjatom/ask-tomi')
+
+    expect(window.location.pathname).not.toMatch(/ask-tomi/)
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Question')).toBeInTheDocument()
   })
 
   it('switches themes from the sidebar', async () => {

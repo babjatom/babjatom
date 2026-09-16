@@ -1,9 +1,10 @@
 Feature: Shell navigation
   Visitors move between playground pages from the shared babjatom shell.
+  Ask Tomi is the home page.
 
-  Scenario: Home shows the pages menu
+  Scenario: Home is Ask Tomi with the pages menu
     Given I am on the home page
-    Then I should see a welcome heading
+    Then I should see the Ask Tomi chat
     And the pages menu should list Theme Playground, Analytics, and Ask Tomi
     And I should see a control to generate a random theme
 
@@ -21,7 +22,13 @@ Feature: Shell navigation
     And I should see recent visits
 
   Scenario: Visitor opens Ask Tomi from the pages menu
-    Given I am on the home page
+    Given I am on the Theme Playground page
     When I open Ask Tomi from the pages menu
-    Then I should see the Ask Tomi chat
+    Then I should be on the home page
+    And I should see the Ask Tomi chat
     And the Ask button should be disabled until I enter a question
+
+  Scenario: Legacy Ask Tomi URL redirects to home
+    Given I open the legacy Ask Tomi URL
+    Then I should be on the home page
+    And I should see the Ask Tomi chat
