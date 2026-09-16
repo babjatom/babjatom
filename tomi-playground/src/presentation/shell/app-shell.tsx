@@ -226,7 +226,7 @@ export function AppShell() {
                 babjatom
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                shadcn/ui · CSS variables
+                Tomi Babjak · Full Stack Engineer
               </p>
             </div>
           </NavLink>
