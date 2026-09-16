@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
+import { useFont } from '@/presentation/font/font-provider'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 const pages = [
@@ -29,6 +30,7 @@ export function AppShell() {
     selectTheme,
     randomizeTheme,
   } = useTheme()
+  const { font, fonts, selectFont } = useFont()
 
   const closeMobileMenu = () => {
     if (window.matchMedia(MOBILE_BREAKPOINT).matches) {
@@ -161,6 +163,30 @@ export function AppShell() {
                 <Dices className="h-4 w-4" />
                 Random theme
               </Button>
+
+              <Separator className="my-4" />
+
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Fonts
+              </p>
+              <div className="flex flex-col gap-2" role="group" aria-label="Fonts">
+                {fonts.map((item) => (
+                  <Button
+                    key={item.id}
+                    type="button"
+                    variant="ghost"
+                    onClick={() => selectFont(item.id)}
+                    className={cn(
+                      'h-auto w-full flex-col items-start rounded-lg border px-3 py-2 text-left',
+                      item.id === font.id
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-transparent bg-secondary/50 hover:bg-secondary',
+                    )}
+                  >
+                    <span className="font-medium">{item.name}</span>
+                  </Button>
+                ))}
+              </div>
             </>
           )}
 

@@ -130,4 +130,48 @@ describe('babjatom shell navigation', () => {
       window.localStorage.getItem('tomi-playground:custom-theme'),
     ).toContain(themeId)
   })
+
+  it('switches fonts from the sidebar and persists them', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    expect(document.documentElement.dataset.font).toBe('exo-2')
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+    expect(document.documentElement.dataset.font).toBe('classic')
+    expect(window.localStorage.getItem('tomi-playground:font-id')).toBe(
+      'classic',
+    )
+    expect(track).toHaveBeenCalledWith('Font Selected', { font_id: 'classic' })
+  })
+
+  it('keeps the selected font when switching themes', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+    await user.click(screen.getByRole('button', { name: /ink night/i }))
+
+    expect(document.documentElement.dataset.theme).toBe('ink-night')
+    expect(document.documentElement.dataset.font).toBe('classic')
+  })
+
+  it('shows a typography sample for the active font on Theme Playground', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+
+    expect(
+      screen.getByRole('region', {
+        name: /typography sample for classic/i,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/display heading in classic/i),
+    ).toBeInTheDocument()
+  })
 })

@@ -26,6 +26,7 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 | --- | --- |
 | `shell.feature` | `tests/app.test.tsx` |
 | `themes.feature` | `tests/app.test.tsx`, `tests/theme-service.test.ts`, `tests/theme-domain.test.ts` |
+| `fonts.feature` | `tests/app.test.tsx`, `tests/font-service.test.ts`, `tests/font-domain.test.ts`, `tests/apply-font.test.ts` |
 | `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx` |
 | `analytics.feature` | `tests/analytics.test.tsx` |
 | `ask-tomi.feature` | `tests/ask-tomi.test.tsx` |

@@ -10,6 +10,9 @@ export type AnalyticsEventMap = {
     theme_id: string
     source: 'preset' | 'random'
   }
+  'Font Selected': {
+    font_id: string
+  }
   'Ask Tomi Message Sent': {
     source: 'starter' | 'typed'
     starter_id?: string

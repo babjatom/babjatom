@@ -27,12 +27,14 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { track } from '@/infrastructure/analytics'
+import { useFont } from '@/presentation/font/font-provider'
 import { Reveal } from '@/presentation/shared/reveal'
 import { VisitsDataTable } from '@/presentation/shared/visits-data-table'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 export function ComponentShowcase() {
   const { theme } = useTheme()
+  const { font } = useFont()
   const [notifications, setNotifications] = useState(true)
 
   return (
@@ -41,17 +43,42 @@ export function ComponentShowcase() {
         <div className="theme-mesh absolute inset-0 opacity-80" />
         <div className="relative px-6 py-10 sm:px-10">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary-foreground/90 mix-blend-difference">
-            Active · {theme.name}
+            Active · {theme.name} · {font.name}
           </p>
           <h1 className="font-display mt-3 max-w-2xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Theme Playground
           </h1>
           <p className="mt-3 max-w-xl text-base text-foreground/80 sm:text-lg">
-            The same shadcn/ui component system, reshaped only by semantic CSS
-            variables — switch themes without duplicating components.
+            The same shadcn/ui component system, reshaped by semantic CSS
+            variables for color and type — switch themes and fonts without
+            duplicating components.
           </p>
         </div>
       </header>
+
+      <section
+        className="animate-rise-delay"
+        role="region"
+        aria-label={`Typography sample for ${font.name}`}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Typography · {font.name}</CardTitle>
+            <CardDescription>
+              Display and body stacks from the active font preset.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="font-display text-3xl font-bold tracking-tight">
+              Display heading in {font.name}
+            </p>
+            <p className="text-base text-foreground/85">
+              Body copy uses the same preset so you can compare readability
+              while you switch fonts from the sidebar.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       <section className="animate-rise-delay grid gap-6 md:grid-cols-2">
         <Card>
