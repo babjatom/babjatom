@@ -38,10 +38,22 @@ describe('babjatom shell navigation', () => {
     renderApp('/babjatom/')
 
     expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /show menu/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /toggle sidebar/i })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
+  })
+
+  it('dismisses the mobile menu when tapping outside', async () => {
+    const user = userEvent.setup()
+    setMatchMediaMatches(true)
+    renderApp('/babjatom/')
+
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
+    expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /dismiss menu/i }))
+    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
   })
 
   it('collapses the menu on mobile when a nav link is clicked', async () => {
@@ -49,7 +61,7 @@ describe('babjatom shell navigation', () => {
     setMatchMediaMatches(true)
     renderApp('/babjatom/')
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     expect(pagesNav).toBeInTheDocument()
 
@@ -88,7 +100,7 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
     expect(
-      screen.getByRole('button', { name: 'Who are you?' }),
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
   })
@@ -129,5 +141,49 @@ describe('babjatom shell navigation', () => {
     expect(
       window.localStorage.getItem('tomi-playground:custom-theme'),
     ).toContain(themeId)
+  })
+
+  it('switches fonts from the sidebar and persists them', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    expect(document.documentElement.dataset.font).toBe('exo-2')
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+    expect(document.documentElement.dataset.font).toBe('classic')
+    expect(window.localStorage.getItem('tomi-playground:font-id')).toBe(
+      'classic',
+    )
+    expect(track).toHaveBeenCalledWith('Font Selected', { font_id: 'classic' })
+  })
+
+  it('keeps the selected font when switching themes', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+    await user.click(screen.getByRole('button', { name: /ink night/i }))
+
+    expect(document.documentElement.dataset.theme).toBe('ink-night')
+    expect(document.documentElement.dataset.font).toBe('classic')
+  })
+
+  it('shows a typography sample for the active font on Theme Playground', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    await user.click(screen.getByRole('button', { name: /^classic$/i }))
+
+    expect(
+      screen.getByRole('region', {
+        name: /typography sample for classic/i,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/display heading in classic/i),
+    ).toBeInTheDocument()
   })
 })

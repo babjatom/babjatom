@@ -49,7 +49,7 @@ describe('Privacy page', () => {
     const { container } = renderApp('/babjatom/')
 
     expect(
-      screen.getByText(/messages go to a cloudflare worker/i),
+      screen.getByText(/don’t send secrets/i),
     ).toBeInTheDocument()
 
     const main = container.querySelector('main')

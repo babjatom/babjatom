@@ -142,7 +142,7 @@ export function AskTomiPage() {
     .find((message) => message.role === 'assistant')?.id
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-3.25rem)] w-full max-w-6xl flex-col gap-3 sm:h-[calc(100vh-4rem)] sm:gap-4 lg:h-[calc(100vh-4rem)]">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-1 flex-col gap-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:gap-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
       <header className="animate-rise shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -176,6 +176,7 @@ export function AskTomiPage() {
         <section
           ref={listRef}
           className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
+          aria-label="Conversation"
           aria-live="polite"
           aria-relevant="additions"
         >
@@ -391,8 +392,7 @@ function LabelledComposer({
             Prototype — don’t take the results seriously.
           </p>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Messages go to a Cloudflare Worker to generate a reply. Don’t send
-            secrets.{' '}
+            Don’t send secrets.{' '}
             <Link
               to="/privacy"
               className="underline underline-offset-2 hover:text-foreground"
@@ -400,7 +400,7 @@ function LabelledComposer({
               Privacy
             </Link>
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="hidden text-[11px] leading-snug text-muted-foreground lg:block">
             Enter to send · Shift+Enter for a new line
           </p>
         </div>

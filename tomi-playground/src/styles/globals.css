@@ -24,8 +24,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: var(--font-sans-stack);
+  --font-display: var(--font-display-stack);
 }
 
 :root {
@@ -47,6 +47,8 @@
   --input: 150 12% 20%;
   --ring: 98 38% 46%;
   --radius: 0.85rem;
+  --font-sans-stack: "Exo 2", ui-sans-serif, system-ui, sans-serif;
+  --font-display-stack: "Exo 2", ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
@@ -61,7 +63,7 @@ body,
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans-stack);
   background:
     radial-gradient(
       1200px 600px at 10% -10%,
@@ -85,7 +87,7 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-display);
+  font-family: var(--font-display-stack);
 }
 
 @keyframes fade-in-up {

@@ -4,7 +4,7 @@ import { AnalyticsCharts } from './analytics-charts'
 
 export function AnalyticsPage() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-8">
       <header className="animate-rise">
         <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Analytics
@@ -26,7 +26,7 @@ export function AnalyticsPage() {
         <VisitsDataTable />
       </Reveal>
 
-      <Reveal as="section" className="flex flex-col gap-3" delayMs={60}>
+      <Reveal as="section" className="flex min-w-0 flex-col gap-3" delayMs={60}>
         <div>
           <h2 className="font-display text-2xl font-semibold">Charts</h2>
           <p className="mt-1 text-sm text-muted-foreground">

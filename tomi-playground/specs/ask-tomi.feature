@@ -27,9 +27,15 @@ Feature: Ask Tomi
     Then I should see my uploaded files in the chat
     And I should see the assistant answer
 
+  Scenario: Chat stays in one screen with an inner scroll area
+    Given I am on the Ask Tomi page
+    Then I should see the Ask Tomi heading
+    And I should see the question composer
+    And the conversation should scroll inside the chat area
+
   Scenario: Visitor sends a starter prompt
     Given I am on the Ask Tomi page
-    When I choose the "Who are you?" starter prompt
+    When I choose the "What’s your tech stack?" starter prompt
     Then I should see my question in the chat
     And I should see the assistant answer
 
