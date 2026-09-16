@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { useFont } from '@/presentation/font/font-provider'
+import { PathLightBackground } from '@/presentation/shared/path-light-background'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 const pages = [
@@ -192,12 +193,13 @@ export function AppShell() {
   return (
     <div
       className={cn(
-        'lg:grid lg:grid-cols-[auto_1fr]',
+        'relative lg:grid lg:grid-cols-[auto_1fr]',
         isAskTomi
           ? 'flex h-dvh max-h-dvh flex-col overflow-hidden'
           : 'min-h-screen',
       )}
     >
+      <PathLightBackground />
       <aside
         className={cn(
           'relative z-30 shrink-0 border-b border-border/80 bg-card/70 pt-[env(safe-area-inset-top)] backdrop-blur-md transition-[width,padding] duration-300 lg:min-h-screen lg:border-b-0 lg:border-r lg:pt-0',
@@ -304,6 +306,7 @@ export function AppShell() {
 
       <main
         className={cn(
+          'relative z-10',
           isAskTomi
             ? 'flex min-h-0 flex-1 flex-col px-3 pt-3 sm:px-6 sm:pt-6 lg:min-h-0 lg:px-10 lg:py-8'
             : 'px-3 py-3 sm:px-6 sm:py-6 lg:px-10 lg:py-8',

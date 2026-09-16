@@ -30,6 +30,16 @@ describe('babjatom shell navigation', () => {
       within(pagesNav).getByRole('link', { name: 'Ask Tomi' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
+    expect(screen.getByTestId('path-light-background')).toBeInTheDocument()
+  })
+
+  it('keeps the ambient path light behind content and non-interactive', () => {
+    renderApp('/babjatom/')
+    const canvas = screen.getByTestId('path-light-background')
+    expect(canvas.tagName).toBe('CANVAS')
+    expect(canvas).toHaveAttribute('aria-hidden')
+    expect(canvas).toHaveClass('pointer-events-none')
+    expect(canvas).toHaveClass('z-0')
   })
 
   it('keeps the pages menu collapsed on mobile viewports', async () => {
