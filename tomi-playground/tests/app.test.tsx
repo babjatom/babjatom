@@ -10,6 +10,14 @@ function renderApp(path = '/babjatom/') {
   return render(<App />)
 }
 
+async function openThemePlayground(user: ReturnType<typeof userEvent.setup>) {
+  renderApp('/babjatom/')
+  const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+  await user.click(
+    within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+  )
+}
+
 describe('babjatom shell navigation', () => {
   beforeEach(() => {
     window.localStorage.clear()
@@ -28,19 +36,35 @@ describe('babjatom shell navigation', () => {
     expect(
       within(pagesNav).getByRole('link', { name: 'Ask Tomi' }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /random theme/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /ink night/i }),
+    ).not.toBeInTheDocument()
   })
 
-  it('keeps the pages menu collapsed on mobile viewports', async () => {
+  it('keeps a compact mobile header with the title between menu and home', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
     renderApp('/babjatom/')
 
-    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /show menu/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('navigation', { name: /pages/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /show menu/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /open menu/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getAllByText('babjatom').length).toBeGreaterThan(0)
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /open menu/i }))
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /random theme/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('collapses the menu on mobile when a nav link is clicked', async () => {
@@ -48,14 +72,16 @@ describe('babjatom shell navigation', () => {
     setMatchMediaMatches(true)
     renderApp('/babjatom/')
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /open menu/i }))
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     expect(pagesNav).toBeInTheDocument()
 
     await user.click(
       within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
     )
-    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('navigation', { name: /pages/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('navigates to the theme playground route', async () => {
@@ -68,6 +94,7 @@ describe('babjatom shell navigation', () => {
     )
     expect(screen.getByRole('button', { name: 'Primary' })).toBeInTheDocument()
     expect(screen.getByText(/recent visits/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
   })
 
   it('navigates to the Ask Tomi chat route', async () => {
@@ -91,9 +118,9 @@ describe('babjatom shell navigation', () => {
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
   })
 
-  it('switches themes from the sidebar', async () => {
+  it('switches themes from the playground', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    await openThemePlayground(user)
 
     await user.click(screen.getByRole('button', { name: /ink night/i }))
     expect(document.documentElement.dataset.theme).toBe('ink-night')
@@ -108,7 +135,7 @@ describe('babjatom shell navigation', () => {
 
   it('generates a random theme and persists it', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    await openThemePlayground(user)
 
     await user.click(screen.getByRole('button', { name: /random theme/i }))
     const themeId = document.documentElement.dataset.theme
