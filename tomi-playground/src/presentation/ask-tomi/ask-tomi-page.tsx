@@ -141,14 +141,14 @@ export function AskTomiPage() {
     .find((message) => message.role === 'assistant')?.id
 
   return (
-    <div className="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-1 flex-col gap-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:gap-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-1 flex-col gap-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:gap-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
       <header className="animate-rise shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
               Ask Tomi
             </h1>
-            <p className="mt-1 hidden max-w-2xl text-sm text-muted-foreground sm:mt-2 sm:block sm:text-base">
+            <p className="mt-1 hidden max-w-3xl text-sm text-muted-foreground sm:mt-2 sm:block sm:text-base">
               Ask about Tomi’s experience, stack, or approach. Follow-ups in this
               chat can refer to earlier answers for about 30 minutes.
             </p>
@@ -174,7 +174,7 @@ export function AskTomiPage() {
       <div className="flex min-h-0 flex-1 flex-col gap-3 sm:gap-4">
         <section
           ref={listRef}
-          className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/50 px-3 py-4 sm:px-4"
+          className="animate-rise-delay min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/70 bg-background/65 px-3 py-4 backdrop-blur-[2px] sm:px-4"
           aria-label="Conversation"
           aria-live="polite"
           aria-relevant="additions"
@@ -316,7 +316,7 @@ export function AskTomiPage() {
         </section>
 
         <form
-          className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/80 p-3 backdrop-blur-sm"
+          className="animate-rise-delay shrink-0 rounded-xl border border-border/70 bg-card/70 p-3 backdrop-blur-sm"
           onSubmit={handleSubmit}
         >
           <LabelledComposer

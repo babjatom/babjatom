@@ -7,11 +7,11 @@ Feature: Shell navigation
     Then I should see the Ask Tomi chat
     And the pages menu should list Theme Playground, Analytics, and Ask Tomi
     And I should see a control to generate a random theme
-    And an ambient path light should sit behind the page content
+    And an ambient maze light should sit behind the page content
 
-  Scenario: Ambient path light stays decorative
+  Scenario: Ambient maze light stays decorative
     Given I am on the home page
-    Then the ambient path light should not capture pointer events
+    Then the ambient maze light should not capture pointer events
 
   Scenario: Mobile pages menu starts collapsed
     Given I am on a mobile viewport

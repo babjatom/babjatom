@@ -24,7 +24,7 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 
 | Spec | Executable tests |
 | --- | --- |
-| `shell.feature` | `tests/app.test.tsx`, `tests/path-light.test.ts` |
+| `shell.feature` | `tests/app.test.tsx`, `tests/maze.test.ts` |
 | `themes.feature` | `tests/app.test.tsx`, `tests/theme-service.test.ts`, `tests/theme-domain.test.ts` |
 | `fonts.feature` | `tests/app.test.tsx`, `tests/font-service.test.ts`, `tests/font-domain.test.ts`, `tests/apply-font.test.ts` |
 | `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx` |
