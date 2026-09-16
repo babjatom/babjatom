@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
@@ -7,6 +7,7 @@ import {
   TOMI_CHAT_SESSION_KEY,
   TOMI_CHAT_URL,
 } from '@/infrastructure/tomi-chat-api'
+import { TOMI_JD_URL } from '@/infrastructure/tomi-jd-api'
 
 function renderApp(path = '/babjatom/') {
   window.history.pushState({}, '', path)
@@ -30,6 +31,36 @@ function getChatRequestBody(callIndex = 0) {
     question: string
     session_id: string
   }
+}
+
+function makeJdFile(
+  name: string,
+  options?: { type?: string; size?: number },
+) {
+  const size = options?.size ?? 24
+  return new File([new Uint8Array(size)], name, {
+    type: options?.type ?? 'application/pdf',
+  })
+}
+
+async function attachJdFile(
+  user: ReturnType<typeof userEvent.setup>,
+  file: File,
+) {
+  const input = document.querySelector(
+    'input[type="file"]',
+  ) as HTMLInputElement | null
+  expect(input).toBeTruthy()
+  await user.upload(input!, file)
+}
+
+function dropJdFile(file: File) {
+  const dropzone = screen.getByLabelText('Job description drop zone')
+  fireEvent.drop(dropzone, {
+    dataTransfer: {
+      files: [file],
+    },
+  })
 }
 
 describe('Ask Tomi chat', () => {
@@ -89,11 +120,82 @@ describe('Ask Tomi chat', () => {
         name: 'What have you shipped end-to-end recently?',
       }),
     ).toBeInTheDocument()
+    expect(screen.getByText('OR')).toBeInTheDocument()
+    expect(
+      screen.getByLabelText('Job description drop zone'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Upload' })).toBeInTheDocument()
+    expect(
+      screen.getByText((_, element) => element?.textContent === 'Job Descriptions'),
+    ).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
     expect(
       screen.getByText(/follow-ups in this chat can refer to earlier answers/i),
+    ).toBeInTheDocument()
+  })
+
+  it('rejects unsupported job description files', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    dropJdFile(makeJdFile('notes.png', { type: 'image/png' }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      /not supported\. use pdf, docx, or txt/i,
+    )
+    expect(
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('uploads job descriptions and analyzes them immediately', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url === TOMI_JD_URL) {
+          return Response.json({
+            answer: 'You are a strong match for this role.',
+          })
+        }
+        return Response.json({
+          answer: 'Tomi is a full-stack engineer based in Prague.',
+        })
+      }),
+    )
+
+    await openAskTomi(user)
+    await attachJdFile(user, makeJdFile('frontend-role.pdf'))
+
+    expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
+      source: 'jd',
+      file_count: 1,
+    })
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        TOMI_JD_URL,
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        }),
+      )
+    })
+
+    const init = vi.mocked(fetch).mock.calls[0]?.[1] as RequestInit
+    const body = init.body as FormData
+    expect(body.get('session_id')).toEqual(expect.any(String))
+    expect(body.get('files')).toEqual(expect.any(File))
+
+    expect(
+      await screen.findByText('Uploaded JD: frontend-role.pdf'),
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText('You are a strong match for this role.'),
     ).toBeInTheDocument()
   })
 

@@ -20,6 +20,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
+import { JdDropzone } from './jd-dropzone'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
@@ -90,7 +91,7 @@ function AssistantBody({
 }
 
 export function AskTomiPage() {
-  const { messages, pending, send, stop, regenerate, clear, copy } =
+  const { messages, pending, send, analyzeJd, stop, regenerate, clear, copy } =
     useTomiChat()
   const [draft, setDraft] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -180,11 +181,12 @@ export function AskTomiPage() {
           aria-relevant="additions"
         >
             {messages.length === 0 ? (
-              <div className="flex h-full flex-col justify-center gap-4">
-                <Reveal as="p" className="text-sm text-muted-foreground">
-                  Start with a suggested question, or type your own below.
+              <div className="flex flex-col gap-4 sm:h-full sm:min-h-0">
+                <Reveal as="p" className="shrink-0 text-sm text-muted-foreground">
+                  Start with a suggested question, drop a job description, or
+                  type your own below.
                 </Reveal>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
                   {STARTER_PROMPTS.map((prompt, index) => (
                     <Reveal
                       key={prompt}
@@ -208,6 +210,24 @@ export function AskTomiPage() {
                     </Reveal>
                   ))}
                 </div>
+                <Reveal
+                  as="p"
+                  rootRef={listRef}
+                  delayMs={480}
+                  className="shrink-0 text-center text-xs font-semibold tracking-[0.2em] text-muted-foreground"
+                >
+                  OR
+                </Reveal>
+                <Reveal
+                  rootRef={listRef}
+                  delayMs={540}
+                  className="flex min-h-0 flex-col sm:flex-1"
+                >
+                  <JdDropzone
+                    disabled={pending}
+                    onAnalyze={(files) => void analyzeJd(files)}
+                  />
+                </Reveal>
               </div>
             ) : (
               <ul className="flex flex-col gap-4">

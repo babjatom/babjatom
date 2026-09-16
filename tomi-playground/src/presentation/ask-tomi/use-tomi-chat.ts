@@ -5,6 +5,8 @@ import {
   getOrCreateChatSessionId,
   rotateChatSessionId,
 } from '@/infrastructure/tomi-chat-api'
+import { analyzeTomiJd } from '@/infrastructure/tomi-jd-api'
+import { describeJdUpload } from './jd-file-validation'
 
 export type ChatRole = 'user' | 'assistant'
 
@@ -30,7 +32,7 @@ export const STARTER_PROMPTS = [
 ] as const
 
 export type SendOptions = {
-  source?: 'starter' | 'typed'
+  source?: 'starter' | 'typed' | 'jd'
   starter_id?: string
 }
 
@@ -46,24 +48,24 @@ export function useTomiChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [pending, setPending] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
+  const jdFilesByUserIdRef = useRef(new Map<string, File[]>())
 
   function abortInFlight() {
     abortRef.current?.abort()
     abortRef.current = null
   }
 
-  async function runQuestion(question: string, assistantId: string) {
+  async function runRequest(
+    assistantId: string,
+    request: (signal: AbortSignal, sessionId: string) => Promise<string>,
+  ) {
     const controller = new AbortController()
     abortRef.current = controller
     setPending(true)
 
     try {
       const sessionId = getOrCreateChatSessionId()
-      const answer = await askTomiChat(
-        question,
-        controller.signal,
-        sessionId,
-      )
+      const answer = await request(controller.signal, sessionId)
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantId
@@ -107,6 +109,18 @@ export function useTomiChat() {
     }
   }
 
+  async function runQuestion(question: string, assistantId: string) {
+    await runRequest(assistantId, (signal, sessionId) =>
+      askTomiChat(question, signal, sessionId),
+    )
+  }
+
+  async function runJdAnalysis(files: readonly File[], assistantId: string) {
+    await runRequest(assistantId, (signal, sessionId) =>
+      analyzeTomiJd(files, signal, sessionId),
+    )
+  }
+
   async function send(question: string, options?: SendOptions) {
     const trimmed = question.trim()
     if (!trimmed || pending) return
@@ -137,6 +151,37 @@ export function useTomiChat() {
     ])
 
     await runQuestion(trimmed, assistantId)
+  }
+
+  async function analyzeJd(files: File[]) {
+    if (pending || files.length === 0) return
+
+    track('Ask Tomi Message Sent', {
+      source: 'jd',
+      file_count: files.length,
+    })
+
+    const userId = createId()
+    const assistantId = createId()
+    jdFilesByUserIdRef.current.set(userId, files)
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: userId,
+        role: 'user',
+        content: describeJdUpload(files),
+        status: 'complete',
+      },
+      {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        status: 'pending',
+      },
+    ])
+
+    await runJdAnalysis(files, assistantId)
   }
 
   function stop() {
@@ -171,6 +216,12 @@ export function useTomiChat() {
       ),
     )
 
+    const jdFiles = jdFilesByUserIdRef.current.get(previous.id)
+    if (jdFiles && jdFiles.length > 0) {
+      await runJdAnalysis(jdFiles, assistantId)
+      return
+    }
+
     await runQuestion(previous.content, assistantId)
   }
 
@@ -179,6 +230,7 @@ export function useTomiChat() {
     abortInFlight()
     setPending(false)
     setMessages([])
+    jdFilesByUserIdRef.current.clear()
     rotateChatSessionId()
   }
 
@@ -199,6 +251,7 @@ export function useTomiChat() {
     messages,
     pending,
     send,
+    analyzeJd,
     stop,
     regenerate,
     clear,
