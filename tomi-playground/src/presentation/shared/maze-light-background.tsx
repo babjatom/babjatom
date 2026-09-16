@@ -44,7 +44,7 @@ function drawFrame(
 
   ctx.lineCap = 'square'
   ctx.lineJoin = 'miter'
-  ctx.strokeStyle = hsl(muted, 0.22)
+  ctx.strokeStyle = hsl(muted, 0.2)
   ctx.lineWidth = 1.25
   for (const wall of scene.walls) {
     ctx.beginPath()
@@ -89,16 +89,16 @@ function drawFrame(
   }
 
   const head = pointAlongPath(path, headT, metrics)
-  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 42)
-  glow.addColorStop(0, hsl(primary, 0.55))
-  glow.addColorStop(0.4, hsl(accent, 0.2))
+  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 48)
+  glow.addColorStop(0, hsl(primary, 0.5))
+  glow.addColorStop(0.4, hsl(accent, 0.18))
   glow.addColorStop(1, hsl(primary, 0))
   ctx.fillStyle = glow
   ctx.beginPath()
-  ctx.arc(head.x, head.y, 42, 0, Math.PI * 2)
+  ctx.arc(head.x, head.y, 48, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = hsl(primary, 0.95)
+  ctx.fillStyle = hsl(primary, 0.9)
   ctx.beginPath()
   ctx.arc(head.x, head.y, 2.5, 0, Math.PI * 2)
   ctx.fill()
@@ -175,14 +175,20 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      data-testid="maze-light-background"
-      className={cn(
-        'pointer-events-none fixed inset-0 z-0 h-dvh w-screen',
-        className,
-      )}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        aria-hidden
+        data-testid="maze-light-background"
+        className={cn(
+          'pointer-events-none fixed inset-0 z-0 h-dvh w-screen opacity-95 brightness-[0.96]',
+          className,
+        )}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-background/5"
+      />
+    </>
   )
 }
