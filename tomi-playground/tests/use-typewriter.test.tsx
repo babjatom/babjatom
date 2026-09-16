@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useTypewriter } from '@/presentation/use-typewriter'
+import { useTypewriter } from '@/presentation/ask-tomi/use-typewriter'
 
 describe('useTypewriter', () => {
   beforeEach(() => {

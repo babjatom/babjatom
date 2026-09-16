@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
-import { useTheme } from './theme-provider'
+import { useTheme } from '@/presentation/theme/theme-provider'
 
 const pages = [
   { to: '/theme-playground', label: 'Theme Playground', end: false },

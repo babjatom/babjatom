@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { AnalyticsPage } from '@/presentation/analytics-page'
-import { AppShell } from '@/presentation/app-shell'
-import { AskTomiPage } from '@/presentation/ask-tomi-page'
-import { ComponentShowcase } from '@/presentation/component-showcase'
-import { PageViewTracker } from '@/presentation/page-view-tracker'
-import { PrivacyPage } from '@/presentation/privacy-page'
-import { ThemeProvider } from '@/presentation/theme-provider'
+import { AnalyticsPage } from '@/presentation/analytics/analytics-page'
+import { AskTomiPage } from '@/presentation/ask-tomi/ask-tomi-page'
+import { PrivacyPage } from '@/presentation/privacy/privacy-page'
+import { AppShell } from '@/presentation/shell/app-shell'
+import { PageViewTracker } from '@/presentation/shell/page-view-tracker'
+import { ThemeProvider } from '@/presentation/theme/theme-provider'
+import { ComponentShowcase } from '@/presentation/theme-playground/component-showcase'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 

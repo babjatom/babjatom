@@ -5,7 +5,7 @@ import {
   PENDING_STATUS_INTERVAL_MS,
   PENDING_STATUS_PRIMARY,
   usePendingStatus,
-} from '@/presentation/use-pending-status'
+} from '@/presentation/ask-tomi/use-pending-status'
 
 describe('usePendingStatus', () => {
   beforeEach(() => {

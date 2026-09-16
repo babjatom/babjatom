@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { Reveal } from '@/presentation/reveal'
+import { Reveal } from '@/presentation/shared/reveal'
 
 describe('Reveal', () => {
   it('fades content in once it intersects the viewport', async () => {

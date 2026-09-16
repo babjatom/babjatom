@@ -102,7 +102,7 @@ Random themes are produced in `src/domain/random-theme.ts` using the same token 
 ## Adding Components
 
 1. Add a shadcn-style primitive under `src/components/ui/` (or generate with the shadcn CLI using `components.json`)
-2. Import it in `src/presentation/component-showcase.tsx`
+2. Import it in `src/presentation/theme-playground/component-showcase.tsx`
 3. Prefer semantic utility classes (`bg-primary`, `text-muted-foreground`, `border-border`) so the control follows every theme
 
 ## Architecture

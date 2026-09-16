@@ -19,7 +19,7 @@ import {
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Reveal } from './reveal'
+import { Reveal } from '@/presentation/shared/reveal'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {

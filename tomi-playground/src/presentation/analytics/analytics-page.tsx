@@ -1,6 +1,6 @@
+import { Reveal } from '@/presentation/shared/reveal'
+import { VisitsDataTable } from '@/presentation/shared/visits-data-table'
 import { AnalyticsCharts } from './analytics-charts'
-import { Reveal } from './reveal'
-import { VisitsDataTable } from './visits-data-table'
 
 export function AnalyticsPage() {
   return (
