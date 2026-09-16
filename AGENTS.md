@@ -20,6 +20,7 @@ Everything committed here is public forever, including history.
 - Reuse the existing CSS-variable theme system.
 - Ship incomplete features as intentional placeholders, not broken nav entries.
 - When adding routes, add or update routing/navigation tests.
+- Treat [`tomi-playground/specs/`](tomi-playground/specs/) Gherkin files as the acceptance contract. Write or update scenarios before implementing. Implement the feature and Vitest tests so those scenarios pass. Do not invent user-facing behavior outside the spec. Tag unfinished scenarios `@wip`.
 - Use Conventional Commits for every commit (see below).
 - Verify changes with install, test, and build (commands below).
 
@@ -69,7 +70,7 @@ pnpm lint
 pnpm build
 ```
 
-Local development: `pnpm dev`. Full runbook: [`tomi-playground/README.md`](tomi-playground/README.md).
+Local development: `pnpm dev`. Full runbook: [`tomi-playground/README.md`](tomi-playground/README.md). Spec convention: [`tomi-playground/specs/README.md`](tomi-playground/specs/README.md).
 
 ## Cursor Cloud
 
