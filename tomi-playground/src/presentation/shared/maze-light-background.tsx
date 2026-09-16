@@ -8,8 +8,8 @@ import {
 } from '@/domain/maze'
 import { cn } from '@/lib/utils'
 
-const LOOP_MS = 16000
-const TRAIL_FRACTION = 0.14
+const SPEED_PX_PER_SEC = 280
+const TRAIL_PX = 160
 
 function prefersReducedMotion() {
   return (
@@ -34,7 +34,7 @@ function drawFrame(
   scene: MazeScene,
   width: number,
   height: number,
-  headT: number,
+  headDist: number,
 ) {
   const primary = readChannel('--primary')
   const accent = readChannel('--accent')
@@ -44,7 +44,7 @@ function drawFrame(
 
   ctx.lineCap = 'square'
   ctx.lineJoin = 'miter'
-  ctx.strokeStyle = hsl(muted, 0.22)
+  ctx.strokeStyle = hsl(muted, 0.2)
   ctx.lineWidth = 1.25
   for (const wall of scene.walls) {
     ctx.beginPath()
@@ -57,6 +57,10 @@ function drawFrame(
   if (path.length < 2) return
 
   const metrics = pathMetrics(path)
+  const total = Math.max(metrics.total, 1)
+  const clampedHead = ((headDist % total) + total) % total
+  const headT = clampedHead / total
+  const trailStartT = Math.max(0, clampedHead - TRAIL_PX) / total
 
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
@@ -71,12 +75,7 @@ function drawFrame(
   ctx.lineWidth = 1.5
   ctx.stroke()
 
-  const trail = trailAlongPath(
-    path,
-    Math.max(0, headT - TRAIL_FRACTION),
-    headT,
-    metrics,
-  )
+  const trail = trailAlongPath(path, trailStartT, headT, metrics)
   if (trail.length >= 2) {
     ctx.beginPath()
     ctx.moveTo(trail[0].x, trail[0].y)
@@ -89,16 +88,16 @@ function drawFrame(
   }
 
   const head = pointAlongPath(path, headT, metrics)
-  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 42)
-  glow.addColorStop(0, hsl(primary, 0.55))
-  glow.addColorStop(0.4, hsl(accent, 0.2))
+  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 48)
+  glow.addColorStop(0, hsl(primary, 0.5))
+  glow.addColorStop(0.4, hsl(accent, 0.18))
   glow.addColorStop(1, hsl(primary, 0))
   ctx.fillStyle = glow
   ctx.beginPath()
-  ctx.arc(head.x, head.y, 42, 0, Math.PI * 2)
+  ctx.arc(head.x, head.y, 48, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = hsl(primary, 0.95)
+  ctx.fillStyle = hsl(primary, 0.9)
   ctx.beginPath()
   ctx.arc(head.x, head.y, 2.5, 0, Math.PI * 2)
   ctx.fill()
@@ -109,7 +108,8 @@ type MazeLightBackgroundProps = {
 }
 
 /**
- * Fixed ambient canvas: random maze walls + light traveling the solution path.
+ * Fixed ambient canvas: random maze walls + light traveling the solution path
+ * at a constant pixels-per-second speed.
  */
 export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -138,11 +138,24 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       scene = buildMazeScene({ width, height })
     }
 
+    const headDistanceAt = (timeMs: number) => {
+      if (prefersReducedMotion()) {
+        const total = pathMetrics(scene.path).total
+        return total * 0.4
+      }
+      return (timeMs / 1000) * SPEED_PX_PER_SEC
+    }
+
     const paint = (time: number) => {
       if (disposed) return
       const reduced = prefersReducedMotion()
-      const headT = reduced ? 0.4 : (time % LOOP_MS) / LOOP_MS
-      drawFrame(ctx, scene, window.innerWidth, window.innerHeight, headT)
+      drawFrame(
+        ctx,
+        scene,
+        window.innerWidth,
+        window.innerHeight,
+        headDistanceAt(time),
+      )
       if (!reduced) {
         frameId = requestAnimationFrame(paint)
       }
@@ -153,14 +166,26 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       resizeTimer = window.setTimeout(() => {
         sizeCanvas()
         if (prefersReducedMotion()) {
-          drawFrame(ctx, scene, window.innerWidth, window.innerHeight, 0.4)
+          drawFrame(
+            ctx,
+            scene,
+            window.innerWidth,
+            window.innerHeight,
+            headDistanceAt(0),
+          )
         }
       }, 120)
     }
 
     sizeCanvas()
     if (prefersReducedMotion()) {
-      drawFrame(ctx, scene, window.innerWidth, window.innerHeight, 0.4)
+      drawFrame(
+        ctx,
+        scene,
+        window.innerWidth,
+        window.innerHeight,
+        headDistanceAt(0),
+      )
     } else {
       frameId = requestAnimationFrame(paint)
     }
@@ -175,14 +200,20 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      data-testid="maze-light-background"
-      className={cn(
-        'pointer-events-none fixed inset-0 z-0 h-dvh w-screen',
-        className,
-      )}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        aria-hidden
+        data-testid="maze-light-background"
+        className={cn(
+          'pointer-events-none fixed inset-0 z-0 h-dvh w-screen opacity-95 brightness-[0.96]',
+          className,
+        )}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-background/5"
+      />
+    </>
   )
 }
