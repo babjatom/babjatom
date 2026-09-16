@@ -38,9 +38,9 @@ describe('babjatom shell navigation', () => {
     renderApp('/babjatom/')
 
     expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /show menu/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /toggle sidebar/i })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
   })
 
@@ -49,7 +49,7 @@ describe('babjatom shell navigation', () => {
     setMatchMediaMatches(true)
     renderApp('/babjatom/')
 
-    await user.click(screen.getByRole('button', { name: /show menu/i }))
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     expect(pagesNav).toBeInTheDocument()
 
@@ -88,7 +88,7 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
     expect(
-      screen.getByRole('button', { name: 'Who are you?' }),
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument()
   })

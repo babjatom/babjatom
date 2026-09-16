@@ -371,8 +371,7 @@ function LabelledComposer({
             Prototype — don’t take the results seriously.
           </p>
           <p className="text-[11px] leading-snug text-muted-foreground">
-            Messages go to a Cloudflare Worker to generate a reply. Don’t send
-            secrets.{' '}
+            Don’t send secrets.{' '}
             <Link
               to="/privacy"
               className="underline underline-offset-2 hover:text-foreground"
@@ -380,7 +379,7 @@ function LabelledComposer({
               Privacy
             </Link>
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="hidden text-[11px] leading-snug text-muted-foreground lg:block">
             Enter to send · Shift+Enter for a new line
           </p>
         </div>
