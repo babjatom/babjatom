@@ -1,5 +1,6 @@
 Feature: Ask Tomi
   Visitors can ask questions about Tomi and read generated answers in this browser tab.
+  Ask Tomi is the site home page.
 
   Scenario: Empty chat shows starter prompts
     Given I am on the Ask Tomi page

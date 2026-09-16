@@ -15,7 +15,7 @@ import { useTheme } from './theme-provider'
 const pages = [
   { to: '/theme-playground', label: 'Theme Playground', end: false },
   { to: '/analytics', label: 'Analytics', end: false },
-  { to: '/ask-tomi', label: 'Ask Tomi', end: false },
+  { to: '/', label: 'Ask Tomi', end: true },
 ] as const
 
 const MOBILE_BREAKPOINT = '(max-width: 1023px)'
