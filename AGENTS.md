@@ -49,7 +49,17 @@ Rules:
 - Imperative, concise description (for example `add AGENTS.md`, not `added` / `Adds`).
 - Scope optional; use when it clarifies the area (`tomi-playground`, `deploy`, `agents`).
 - Breaking changes: append `!` after type/scope or add a `BREAKING CHANGE:` footer.
-- One logical change per commit when practical.
+- One logical change per PR when practical (squash lands as a single commit on `main`).
+
+### Landing on `main`
+
+`main` is linear and squash-only. Do not introduce merge commits.
+
+- Land changes only via PR squash: `gh pr merge --squash`. Never `--merge` or `--rebase`.
+- Never `git merge` into `main`, and never a plain `git pull` (merge) on `main`.
+- Update local `main` with `git pull --rebase` (or `git fetch origin` then `git rebase origin/main`).
+- The PR **title** becomes the `main` commit subject. It must be a Conventional Commit (for example `feat(tomi-playground): add analytics charts page`). The PR body can be a normal summary.
+- If `main` moved, rebase the feature branch onto `origin/main`. Do not merge `main` into the feature branch.
 
 Examples:
 
