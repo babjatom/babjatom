@@ -29,11 +29,11 @@ export function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="font-display text-lg font-semibold">Local storage</h2>
           <p>
-            Theme preferences are stored only in your browser (
+            Theme and font preferences are stored only in your browser (
             <code className="rounded bg-muted px-1 py-0.5 text-xs">
               localStorage
             </code>
-            ). That data does not leave your device for theming.
+            ). That data does not leave your device for theming or typefaces.
           </p>
         </section>
 

@@ -1,0 +1,163 @@
+/* Self-hosted techno presets (SIL OFL). Classic Outfit/Fraunces stay on @fontsource. */
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/orbitron/Orbitron-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../assets/fonts/orbitron/Orbitron-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../assets/fonts/orbitron/Orbitron-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../assets/fonts/orbitron/Orbitron-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Audiowide';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/audiowide/Audiowide-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/exo-2/Exo2-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../assets/fonts/exo-2/Exo2-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../assets/fonts/exo-2/Exo2-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../assets/fonts/exo-2/Exo2-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/rajdhani/Rajdhani-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../assets/fonts/rajdhani/Rajdhani-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../assets/fonts/rajdhani/Rajdhani-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../assets/fonts/rajdhani/Rajdhani-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/share-tech-mono/ShareTechMono-Regular.ttf')
+    format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/oxanium/Oxanium-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../assets/fonts/oxanium/Oxanium-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../assets/fonts/oxanium/Oxanium-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../assets/fonts/oxanium/Oxanium-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Electrolize';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/electrolize/Electrolize-Regular.ttf')
+    format('truetype');
+}
+
+@font-face {
+  font-family: 'Michroma';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../assets/fonts/michroma/Michroma-Regular.ttf') format('truetype');
+}
