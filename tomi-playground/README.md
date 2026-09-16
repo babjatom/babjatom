@@ -24,7 +24,7 @@ The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with
 - CSS-based visual effects
 - localStorage theme persistence
 - Mixpanel product analytics (optional locally; off on GitHub Pages)
-- Self-hosted Outfit / Fraunces fonts (no Google Fonts CDN)
+- Self-hosted Outfit / Fraunces (Classic) plus techno typeface presets (no Google Fonts CDN)
 - Vitest + React Testing Library
 - Gherkin acceptance specs in `specs/`
 - GitHub Pages deployment

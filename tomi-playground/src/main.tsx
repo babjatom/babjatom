@@ -8,6 +8,7 @@ import '@fontsource/outfit/600.css'
 import '@fontsource/outfit/700.css'
 import '@fontsource/fraunces/500.css'
 import '@fontsource/fraunces/700.css'
+import './styles/font-faces.css'
 import './styles/globals.css'
 
 initMixpanel()

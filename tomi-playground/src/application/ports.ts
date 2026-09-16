@@ -5,3 +5,8 @@ export type ThemePersistence = {
   saveCustomTheme: (serialized: string) => void
   clearCustomTheme: () => void
 }
+
+export type FontPersistence = {
+  loadFontId: () => string | null
+  saveFontId: (id: string) => void
+}
