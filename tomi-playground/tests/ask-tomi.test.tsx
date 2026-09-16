@@ -97,6 +97,18 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
   })
 
+  it('keeps the heading and composer on screen with an inner chat scroll area', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Question')).toBeInTheDocument()
+
+    const conversation = screen.getByRole('region', { name: /conversation/i })
+    expect(conversation).toBeInTheDocument()
+    expect(conversation.className).toMatch(/overflow-y-auto/)
+  })
+
   it('sends a starter prompt and renders the answer', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
