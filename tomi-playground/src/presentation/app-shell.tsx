@@ -18,6 +18,8 @@ const pages = [
   { to: '/ask-tomi', label: 'Ask Tomi', end: false },
 ] as const
 
+const MOBILE_BREAKPOINT = '(max-width: 1023px)'
+
 export function AppShell() {
   const {
     theme,
@@ -27,6 +29,12 @@ export function AppShell() {
     selectTheme,
     randomizeTheme,
   } = useTheme()
+
+  const closeMobileMenu = () => {
+    if (window.matchMedia(MOBILE_BREAKPOINT).matches) {
+      setSidebarCollapsed(true)
+    }
+  }
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[auto_1fr]">
@@ -39,7 +47,10 @@ export function AppShell() {
         <div className="flex items-center justify-between gap-3 px-4 py-4">
           <NavLink
             to="/"
-            onClick={() => track('Nav Clicked', { to: '/', source: 'brand' })}
+            onClick={() => {
+              track('Nav Clicked', { to: '/', source: 'brand' })
+              closeMobileMenu()
+            }}
             className={cn(
               'flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
               sidebarCollapsed && 'lg:justify-center lg:w-full',
@@ -99,9 +110,10 @@ export function AppShell() {
                     key={page.to}
                     to={page.to}
                     end={page.end}
-                    onClick={() =>
+                    onClick={() => {
                       track('Nav Clicked', { to: page.to, source: 'sidebar' })
-                    }
+                      closeMobileMenu()
+                    }}
                     className={({ isActive }) =>
                       cn(
                         'rounded-lg border px-3 py-2 text-sm transition-colors',
@@ -172,9 +184,10 @@ export function AppShell() {
               </Button>
               <NavLink
                 to="/privacy"
-                onClick={() =>
+                onClick={() => {
                   track('Nav Clicked', { to: '/privacy', source: 'sidebar' })
-                }
+                  closeMobileMenu()
+                }}
                 className={({ isActive }) =>
                   cn(
                     'mt-2 text-[10px] text-muted-foreground underline-offset-2 hover:underline',
@@ -191,9 +204,10 @@ export function AppShell() {
             <div className="mt-6 border-t border-border/60 pt-4">
               <NavLink
                 to="/privacy"
-                onClick={() =>
+                onClick={() => {
                   track('Nav Clicked', { to: '/privacy', source: 'sidebar' })
-                }
+                  closeMobileMenu()
+                }}
                 className={({ isActive }) =>
                   cn(
                     'text-xs text-muted-foreground underline-offset-4 hover:underline',
