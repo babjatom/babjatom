@@ -26,6 +26,7 @@ The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with
 - Mixpanel product analytics (optional locally; off on GitHub Pages)
 - Self-hosted Outfit / Fraunces fonts (no Google Fonts CDN)
 - Vitest + React Testing Library
+- Gherkin acceptance specs in `specs/`
 - GitHub Pages deployment
 
 ## Tech Stack
@@ -64,6 +65,12 @@ pnpm preview
 ```
 
 Vite is configured with `base: '/babjatom/'` so assets resolve correctly on GitHub Pages. Local `pnpm dev` still works with that base path.
+
+## Specs
+
+User-facing behavior is specified as Gherkin in [`specs/`](specs/). Write or update those scenarios before implementing a feature. Vitest tests under `tests/` make the scenarios executable; there is no Cucumber runner.
+
+See [`specs/README.md`](specs/README.md) for the workflow and file mapping.
 
 ## Adding a Theme
 
