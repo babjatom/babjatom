@@ -42,7 +42,7 @@ export function ComponentShowcase() {
       <header className="animate-rise relative overflow-hidden rounded-2xl border border-border/70">
         <div className="theme-mesh absolute inset-0 opacity-80" />
         <div className="relative px-6 py-10 sm:px-10">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary-foreground/90 mix-blend-difference">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-foreground/70">
             Active · {theme.name} · {font.name}
           </p>
           <h1 className="font-display mt-3 max-w-2xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
