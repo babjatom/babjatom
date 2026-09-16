@@ -11,8 +11,9 @@ export type AnalyticsEventMap = {
     source: 'preset' | 'random'
   }
   'Ask Tomi Message Sent': {
-    source: 'starter' | 'typed'
+    source: 'starter' | 'typed' | 'jd'
     starter_id?: string
+    file_count?: number
   }
   'Ask Tomi Action': {
     action: 'stop' | 'regenerate' | 'clear' | 'copy'

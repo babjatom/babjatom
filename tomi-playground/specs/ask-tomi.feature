@@ -8,9 +8,24 @@ Feature: Ask Tomi
     And I should see a prototype disclaimer
     And I should see a Privacy link
     And I should see starter prompts
+    And I should see an OR separator
+    And I should see a job description drop zone
+    And I should see an Upload button
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder
     And I should not see the 3D scene
+
+  Scenario: Visitor cannot attach an unsupported file
+    Given I am on the Ask Tomi page
+    When I choose an unsupported job description file
+    Then I should see a file validation error
+    And the chat should stay empty
+
+  Scenario: Visitor uploads job descriptions
+    Given I am on the Ask Tomi page
+    When I choose a valid PDF job description
+    Then I should see my uploaded files in the chat
+    And I should see the assistant answer
 
   Scenario: Visitor sends a starter prompt
     Given I am on the Ask Tomi page
