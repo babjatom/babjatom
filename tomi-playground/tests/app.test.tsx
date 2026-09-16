@@ -44,6 +44,18 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
   })
 
+  it('dismisses the mobile menu when tapping outside', async () => {
+    const user = userEvent.setup()
+    setMatchMediaMatches(true)
+    renderApp('/babjatom/')
+
+    await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
+    expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /dismiss menu/i }))
+    expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
+  })
+
   it('collapses the menu on mobile when a nav link is clicked', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)

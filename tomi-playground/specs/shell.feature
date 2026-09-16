@@ -15,6 +15,13 @@ Feature: Shell navigation
     When I show the menu
     Then the pages menu should be visible
 
+  Scenario: Visitor dismisses the mobile menu by tapping outside
+    Given I am on a mobile viewport
+    And I am on the home page
+    When I show the menu
+    And I tap outside the menu
+    Then the pages menu should be hidden
+
   Scenario: Visitor opens Theme Playground from the pages menu
     Given I am on the home page
     When I open Theme Playground from the pages menu
