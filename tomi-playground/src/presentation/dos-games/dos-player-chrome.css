@@ -12,9 +12,14 @@
 }
 
 /*
-  On touch devices, canvas taps become mouse-button events in js-dos, and Wolf3D
-  treats mouse click as fire. Route input through on-screen keys only.
+  On touch devices, bare canvas taps become mouse-button events (Wolf fires on
+  click). Disable the overlay for empty space, but keep the on-screen buttons
+  clickable — they are children of .emulator-mouse-overlay.
 */
 .dos-player-host--touch .jsdos-rso .emulator-mouse-overlay {
   pointer-events: none !important;
+}
+
+.dos-player-host--touch .jsdos-rso .emulator-button-touch-zone {
+  pointer-events: auto !important;
 }

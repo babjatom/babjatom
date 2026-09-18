@@ -138,7 +138,7 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           <p className="text-sm text-muted-foreground">
             Progress auto-saves in this browser. On desktop, click the game to
             capture the mouse (Esc to release). On phones, use the on-screen
-            pad: arrows move, Fire / Open / Strafe on the right.
+            pad (tap Enter or Open on the “Press a key” screen).
           </p>
         </div>
         <button
