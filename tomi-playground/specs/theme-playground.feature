@@ -1,5 +1,11 @@
 Feature: Theme Playground
-  Visitors can inspect themed components and a sample visits table.
+  Visitors can switch themes and fonts, inspect themed components, and browse a sample visits table.
+
+  Scenario: Theme and font controls sit above typography
+    Given I am on the Theme Playground page
+    Then I should see theme and font controls
+    And I should see a control to generate a random theme
+    And those controls should appear above the typography sample
 
   Scenario: Showcase and visits table are on the page
     Given I am on the Theme Playground page

@@ -13,16 +13,16 @@ describe('Analytics page', () => {
     window.localStorage.clear()
   })
 
-  it('is listed after Theme Playground and shows table plus charts', async () => {
+  it('is listed after Ask Tomi and Theme Playground and shows table plus charts', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     const links = within(pagesNav).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
+      'Ask Tomi',
       'Theme Playground',
       'Analytics',
-      'Ask Tomi',
     ])
 
     await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))

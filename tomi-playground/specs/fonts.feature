@@ -1,8 +1,8 @@
 Feature: Fonts
-  Visitors can switch typeface presets from the shell. The choice is remembered in this browser and stays when they change color themes.
+  Visitors can switch typeface presets from Theme Playground. The choice is remembered in this browser and stays when they change color themes.
 
   Scenario: Visitor selects a font preset
-    Given I am on the home page
+    Given I am on the Theme Playground page
     When I select the Classic font
     Then the playground should use the Classic font
     And that font choice should be remembered in this browser
@@ -14,7 +14,7 @@ Feature: Fonts
     And several techno font presets should be available
 
   Scenario: Font choice survives a theme change
-    Given I am on the home page
+    Given I am on the Theme Playground page
     And I have selected the Classic font
     When I select the Ink Night theme
     Then the playground should still use the Classic font
