@@ -16,6 +16,7 @@ const pages = [
   { to: '/', label: 'Ask Tomi', end: true },
   { to: '/theme-playground', label: 'Theme Playground', end: false },
   { to: '/analytics', label: 'Analytics', end: false },
+  { to: '/dos-games', label: 'Dos games', end: false },
 ] as const
 
 const MOBILE_BREAKPOINT = '(max-width: 1023px)'
