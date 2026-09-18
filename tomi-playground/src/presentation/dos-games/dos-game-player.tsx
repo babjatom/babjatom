@@ -130,15 +130,64 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
     }
   }
 
+  useEffect(() => {
+    const surface = surfaceRef.current
+    if (!surface) {
+      return
+    }
+
+    let lastTapAt = 0
+
+    function isOnScreenControl(target: EventTarget | null) {
+      return (
+        target instanceof Element &&
+        Boolean(target.closest('.emulator-button-touch-zone'))
+      )
+    }
+
+    function onDoubleClick(event: MouseEvent) {
+      if (isOnScreenControl(event.target)) {
+        return
+      }
+      event.preventDefault()
+      void toggleFullScreen()
+    }
+
+    function onTouchEnd(event: TouchEvent) {
+      if (isOnScreenControl(event.target)) {
+        lastTapAt = 0
+        return
+      }
+      const now = Date.now()
+      if (now - lastTapAt < 300) {
+        lastTapAt = 0
+        event.preventDefault()
+        void toggleFullScreen()
+        return
+      }
+      lastTapAt = now
+    }
+
+    surface.addEventListener('dblclick', onDoubleClick)
+    surface.addEventListener('touchend', onTouchEnd, { passive: false })
+    return () => {
+      surface.removeEventListener('dblclick', onDoubleClick)
+      surface.removeEventListener('touchend', onTouchEnd)
+    }
+    // Listeners only need the mount node; toggleFullScreen reads refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div className="flex flex-col gap-3" data-testid="dos-game-player">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
           <p className="text-sm text-muted-foreground">
-            Progress auto-saves in this browser. On desktop, click the game to
-            capture the mouse (Esc to release). On phones, use the on-screen
-            pad (tap Enter or Open on the “Press a key” screen).
+            Progress auto-saves in this browser. Double-click or double-tap the
+            player for fullscreen. On desktop, click once to capture the mouse
+            (Esc to release). On phones, use the on-screen pad (Enter or Open on
+            the “Press a key” screen).
           </p>
         </div>
         <button

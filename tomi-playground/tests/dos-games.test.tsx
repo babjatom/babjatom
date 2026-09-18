@@ -121,6 +121,27 @@ describe('Dos games page', () => {
     expect(setFullScreen).toHaveBeenCalledWith(true)
   })
 
+  it('enters fullscreen when the player is double-clicked', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+    await openDosGames(user)
+    await user.click(
+      screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
+    )
+
+    await vi.waitFor(() => {
+      expect(dosMock).toHaveBeenCalled()
+    })
+
+    const setFullScreen = dosMock.mock.results[0]?.value.setFullScreen as ReturnType<
+      typeof vi.fn
+    >
+    setFullScreen.mockClear()
+
+    await user.dblClick(screen.getByTestId('dos-player-surface'))
+    expect(setFullScreen).toHaveBeenCalledWith(true)
+  })
+
   it('disables pointer lock on a mobile viewport', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
