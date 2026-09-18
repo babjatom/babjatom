@@ -42,8 +42,9 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           pathPrefix: dosEmulatorsPathPrefix(),
           autoStart: true,
           autoSave: true,
-          mouseCapture: true,
-          softFullscreen: isMobile,
+          // Pointer lock is desktop-oriented; on phones it can leave a blank UI.
+          mouseCapture: !isMobile,
+          softFullscreen: false,
           scaleControls: isMobile ? 0.4 : 0.2,
           theme: 'dark',
           lang: 'en',
@@ -55,7 +56,6 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
         })
 
         playerRef.current = player
-        setStatus('ready')
       } catch (error) {
         if (cancelled) {
           return
@@ -83,7 +83,7 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
   }, [game.bundlePath])
 
   return (
-    <div className="flex min-h-[70vh] flex-col gap-3" data-testid="dos-game-player">
+    <div className="flex flex-col gap-3" data-testid="dos-game-player">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
@@ -112,9 +112,13 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
         </p>
       ) : null}
 
+      {/*
+        js-dos roots use height:100%, which needs a definite parent height.
+        min-height alone collapses the canvas (sound plays, screen stays blank).
+      */}
       <div
         ref={containerRef}
-        className="relative min-h-[60vh] w-full overflow-hidden rounded-md border border-border bg-black"
+        className="relative h-[70dvh] w-full overflow-hidden rounded-md border border-border bg-black"
         data-testid="dos-player-surface"
         data-mobile-controls="available"
       />

@@ -29,8 +29,9 @@ describe('Dos games page', () => {
     setMatchMediaMatches(false)
     vi.mocked(track).mockClear()
     dosMock.mockReset()
-    dosMock.mockImplementation((element: HTMLDivElement) => {
+    dosMock.mockImplementation((element: HTMLDivElement, options?: { onEvent?: (event: string) => void }) => {
       element.setAttribute('data-dos-started', 'true')
+      queueMicrotask(() => options?.onEvent?.('ci-ready'))
       return {
         stop: vi.fn().mockResolvedValue(undefined),
         save: vi.fn().mockResolvedValue(true),
@@ -71,7 +72,9 @@ describe('Dos games page', () => {
     )
 
     expect(screen.getByTestId('dos-game-player')).toBeInTheDocument()
-    expect(screen.getByTestId('dos-player-surface')).toBeInTheDocument()
+    const surface = screen.getByTestId('dos-player-surface')
+    expect(surface).toBeInTheDocument()
+    expect(surface.className).toMatch(/h-\[70dvh\]/)
     expect(screen.getByText(/progress auto-saves/i)).toBeInTheDocument()
 
     await vi.waitFor(() => {
@@ -81,8 +84,10 @@ describe('Dos games page', () => {
     const options = dosMock.mock.calls[0]?.[1] as {
       autoSave?: boolean
       url?: string
+      mouseCapture?: boolean
     }
     expect(options.autoSave).toBe(true)
+    expect(options.mouseCapture).toBe(true)
     expect(options.url).toContain('games/wolf3d/wolf3d.jsdos')
 
     await user.click(screen.getByRole('button', { name: 'Back to catalog' }))
@@ -113,8 +118,10 @@ describe('Dos games page', () => {
     const options = dosMock.mock.calls[0]?.[1] as {
       softFullscreen?: boolean
       scaleControls?: number
+      mouseCapture?: boolean
     }
-    expect(options.softFullscreen).toBe(true)
+    expect(options.softFullscreen).toBe(false)
+    expect(options.mouseCapture).toBe(false)
     expect(options.scaleControls).toBe(0.4)
   })
 })
