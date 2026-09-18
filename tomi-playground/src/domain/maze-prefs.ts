@@ -13,7 +13,7 @@ export const AMBIENT_BACKGROUNDS: AmbientBackgroundOption[] = [
 
 export const DEFAULT_AMBIENT_BACKGROUND: AmbientBackgroundId = 'maze'
 
-/** Scale 1 = today's default maze (15×9 passage cells). */
+/** Scale 1 = today's default maze (15×9 passage cells on a ~1440×900 window). */
 export const DEFAULT_MAZE_DENSITY = 1
 export const MIN_MAZE_DENSITY = 0.5
 export const MAX_MAZE_DENSITY = 4
@@ -23,8 +23,15 @@ export const DEFAULT_MAZE_VISIBILITY = 1
 export const MIN_MAZE_VISIBILITY = 0.25
 export const MAX_MAZE_VISIBILITY = 2.5
 
+/** Historical desktop reference grid at density 1 on a wide window. */
 export const BASE_MAZE_COLS = 15
 export const BASE_MAZE_ROWS = 9
+
+/** Passage-cell target size (px) at density 1 — ~1440 / 15. */
+export const REF_MAZE_CELL_PX = 96
+
+/** Soft cap so dense large viewports stay ambient-cheap (~60×36). */
+export const MAX_MAZE_CELLS = BASE_MAZE_COLS * BASE_MAZE_ROWS * MAX_MAZE_DENSITY ** 2
 
 export type MazePrefs = {
   background: AmbientBackgroundId
@@ -49,11 +56,29 @@ export function clampMazeVisibility(value: number): number {
   return Math.min(MAX_MAZE_VISIBILITY, Math.max(MIN_MAZE_VISIBILITY, value))
 }
 
-/** Map density scale to passage-cell grid, keeping the ~15:9 aspect. */
-export function densityToGrid(density: number): { cols: number; rows: number } {
+/**
+ * Map density + viewport to a passage-cell grid with roughly square cells.
+ * Higher density → smaller target cell size → more cells for the same viewport.
+ */
+export function densityToGrid(
+  density: number,
+  width: number,
+  height: number,
+): { cols: number; rows: number } {
   const scale = clampMazeDensity(density)
-  return {
-    cols: Math.max(3, Math.round(BASE_MAZE_COLS * scale)),
-    rows: Math.max(3, Math.round(BASE_MAZE_ROWS * scale)),
+  const w = Math.max(1, width)
+  const h = Math.max(1, height)
+  const cellSize = REF_MAZE_CELL_PX / scale
+
+  let cols = Math.max(3, Math.round(w / cellSize))
+  let rows = Math.max(3, Math.round(h / cellSize))
+
+  const total = cols * rows
+  if (total > MAX_MAZE_CELLS) {
+    const factor = Math.sqrt(MAX_MAZE_CELLS / total)
+    cols = Math.max(3, Math.round(cols * factor))
+    rows = Math.max(3, Math.round(rows * factor))
   }
+
+  return { cols, rows }
 }

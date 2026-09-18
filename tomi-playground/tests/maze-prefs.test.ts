@@ -8,22 +8,45 @@ import {
   DEFAULT_MAZE_DENSITY,
   DEFAULT_MAZE_VISIBILITY,
   densityToGrid,
+  MAX_MAZE_CELLS,
   MAX_MAZE_DENSITY,
   MIN_MAZE_DENSITY,
   MIN_MAZE_VISIBILITY,
   parseAmbientBackground,
+  REF_MAZE_CELL_PX,
 } from '@/domain/maze-prefs'
 
 describe('densityToGrid', () => {
-  it('maps default density to 15×9', () => {
-    expect(densityToGrid(1)).toEqual({ cols: 15, rows: 9 })
+  it('maps density 1 on a 1440×900 window to ~15×9', () => {
+    expect(densityToGrid(1, 1440, 900)).toEqual({ cols: 15, rows: 9 })
   })
 
-  it('scales both axes and clamps to at least 3 cells', () => {
-    expect(densityToGrid(2)).toEqual({ cols: 30, rows: 18 })
-    expect(densityToGrid(4)).toEqual({ cols: 60, rows: 36 })
-    expect(densityToGrid(0.5)).toEqual({ cols: 8, rows: 5 })
-    expect(densityToGrid(0)).toEqual(densityToGrid(MIN_MAZE_DENSITY))
+  it('uses more rows than cols on a tall phone viewport', () => {
+    const grid = densityToGrid(1, 390, 844)
+    expect(grid.rows).toBeGreaterThan(grid.cols)
+    expect(grid.cols).toBeGreaterThanOrEqual(3)
+    expect(grid.rows).toBeGreaterThanOrEqual(3)
+  })
+
+  it('raises cell count when density increases for the same viewport', () => {
+    const base = densityToGrid(1, 1440, 900)
+    const denser = densityToGrid(2, 1440, 900)
+    expect(denser.cols * denser.rows).toBeGreaterThan(base.cols * base.rows)
+    expect(denser.cols).toBeGreaterThan(base.cols)
+    expect(denser.rows).toBeGreaterThan(base.rows)
+  })
+
+  it('clamps invalid density and keeps at least 3 cells per axis', () => {
+    expect(densityToGrid(0, 1440, 900)).toEqual(
+      densityToGrid(MIN_MAZE_DENSITY, 1440, 900),
+    )
+    expect(densityToGrid(1, 10, 10)).toEqual({ cols: 3, rows: 3 })
+  })
+
+  it('caps total cells on huge dense viewports', () => {
+    const grid = densityToGrid(MAX_MAZE_DENSITY, 8000, 8000)
+    expect(grid.cols * grid.rows).toBeLessThanOrEqual(MAX_MAZE_CELLS + 50)
+    expect(REF_MAZE_CELL_PX).toBe(96)
   })
 })
 

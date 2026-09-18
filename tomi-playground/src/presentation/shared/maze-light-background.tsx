@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   buildMazeScene,
   pathMetrics,
@@ -12,6 +12,7 @@ import { useMaze } from '@/presentation/maze/maze-provider'
 
 const SPEED_PX_PER_SEC = 280
 const TRAIL_PX = 160
+const RESIZE_DEBOUNCE_MS = 120
 
 function prefersReducedMotion() {
   return (
@@ -98,23 +99,29 @@ function drawFrame(
   }
 
   const head = pointAlongPath(path, headT, metrics)
-  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 48)
-  glow.addColorStop(0, hsl(primary, alpha(0.5, v)))
-  glow.addColorStop(0.4, hsl(accent, alpha(0.18, v)))
-  glow.addColorStop(1, hsl(primary, 0))
+  const glow = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 28)
+  glow.addColorStop(0, hsl(accent, alpha(0.55, v)))
+  glow.addColorStop(1, hsl(accent, 0))
   ctx.fillStyle = glow
   ctx.beginPath()
-  ctx.arc(head.x, head.y, 48, 0, Math.PI * 2)
+  ctx.arc(head.x, head.y, 28, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = hsl(primary, alpha(0.9, v))
+  ctx.fillStyle = hsl(accent, alpha(0.95, v))
   ctx.beginPath()
-  ctx.arc(head.x, head.y, 2.5, 0, Math.PI * 2)
+  ctx.arc(head.x, head.y, 3.5, 0, Math.PI * 2)
   ctx.fill()
 }
 
 type MazeLightBackgroundProps = {
   className?: string
+}
+
+function readViewport() {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }
 }
 
 /**
@@ -125,12 +132,29 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { background, density, visibility, generation } = useMaze()
   const visibilityRef = useRef(visibility)
+  const [viewport, setViewport] = useState(readViewport)
 
   useEffect(() => {
     visibilityRef.current = visibility
   }, [visibility])
 
-  const { cols, rows } = densityToGrid(density)
+  useEffect(() => {
+    let resizeTimer = 0
+    const onResize = () => {
+      window.clearTimeout(resizeTimer)
+      resizeTimer = window.setTimeout(() => {
+        setViewport(readViewport())
+      }, RESIZE_DEBOUNCE_MS)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.clearTimeout(resizeTimer)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
+
+  const { cols, rows } = densityToGrid(density, viewport.width, viewport.height)
+  const rebuildKey = `${viewport.width}x${viewport.height}:${cols}x${rows}:${generation}`
 
   useEffect(() => {
     if (background !== 'maze') return
@@ -141,22 +165,24 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let scene: MazeScene = { walls: [], path: [], cols: 0, rows: 0 }
+    const { width, height } = viewport
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = Math.floor(width * dpr)
+    canvas.height = Math.floor(height * dpr)
+    canvas.style.width = `${width}px`
+    canvas.style.height = `${height}px`
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+    const grid = densityToGrid(density, width, height)
+    const scene: MazeScene = buildMazeScene({
+      width,
+      height,
+      cols: grid.cols,
+      rows: grid.rows,
+    })
+
     let frameId = 0
     let disposed = false
-    let resizeTimer = 0
-
-    const sizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const width = window.innerWidth
-      const height = window.innerHeight
-      canvas.width = Math.floor(width * dpr)
-      canvas.height = Math.floor(height * dpr)
-      canvas.style.width = `${width}px`
-      canvas.style.height = `${height}px`
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      scene = buildMazeScene({ width, height, cols, rows })
-    }
 
     const headDistanceAt = (timeMs: number) => {
       if (prefersReducedMotion()) {
@@ -172,8 +198,8 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       drawFrame(
         ctx,
         scene,
-        window.innerWidth,
-        window.innerHeight,
+        width,
+        height,
         headDistanceAt(time),
         visibilityRef.current,
       )
@@ -182,30 +208,12 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       }
     }
 
-    const onResize = () => {
-      window.clearTimeout(resizeTimer)
-      resizeTimer = window.setTimeout(() => {
-        sizeCanvas()
-        if (prefersReducedMotion()) {
-          drawFrame(
-            ctx,
-            scene,
-            window.innerWidth,
-            window.innerHeight,
-            headDistanceAt(0),
-            visibilityRef.current,
-          )
-        }
-      }, 120)
-    }
-
-    sizeCanvas()
     if (prefersReducedMotion()) {
       drawFrame(
         ctx,
         scene,
-        window.innerWidth,
-        window.innerHeight,
+        width,
+        height,
         headDistanceAt(0),
         visibilityRef.current,
       )
@@ -213,14 +221,11 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       frameId = requestAnimationFrame(paint)
     }
 
-    window.addEventListener('resize', onResize)
     return () => {
       disposed = true
       cancelAnimationFrame(frameId)
-      window.clearTimeout(resizeTimer)
-      window.removeEventListener('resize', onResize)
     }
-  }, [background, cols, rows, generation])
+  }, [background, density, generation, viewport])
 
   if (background !== 'maze') return null
 
@@ -234,6 +239,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
         data-maze-rows={rows}
         data-maze-visibility={visibility}
         data-maze-generation={generation}
+        data-maze-rebuild={rebuildKey}
         className={cn(
           'pointer-events-none fixed inset-0 z-0 h-dvh w-screen opacity-95 brightness-[0.96]',
           className,

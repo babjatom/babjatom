@@ -12,6 +12,17 @@ Feature: Shell navigation
     Given I am on the home page
     Then the ambient maze light should not capture pointer events
 
+  Scenario: Ambient maze uses a taller grid on a tall phone
+    Given I am on a tall phone viewport
+    And I am on the home page
+    Then the ambient maze should have more rows than columns
+
+  Scenario: Ambient maze regenerates when the viewport is resized
+    Given I am on the home page
+    When I resize the viewport to a tall phone shape
+    Then the ambient maze should have more rows than columns
+    And the ambient maze layout should change
+
   Scenario: Mobile pages menu starts collapsed
     Given I am on a mobile viewport
     And I am on the home page
