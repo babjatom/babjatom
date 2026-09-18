@@ -150,7 +150,7 @@ export function AskTomiPage() {
               <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
                 Ask Tomi
               </h1>
-              <p className="mt-1 hidden max-w-3xl text-sm text-foreground/80 sm:mt-2 sm:block sm:text-base">
+              <p className="mt-1 max-w-3xl text-xs text-foreground/80 sm:mt-2 sm:text-base">
                 Ask about Tomi’s experience, stack, or approach. Follow-ups in
                 this chat can refer to earlier answers for about 30 minutes.
               </p>
