@@ -7,6 +7,7 @@ Feature: Privacy
     Then I should see the Privacy heading
     And I should see that the public site does not use advertising cookies or product analytics
     And I should see that the playground is hosted on GitHub Pages
+    And I should see that theme, font, and background preferences stay in the browser
     And I should see the Ask Tomi worker host
     And I should see the profile pixel host
 

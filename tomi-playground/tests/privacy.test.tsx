@@ -33,6 +33,9 @@ describe('Privacy page', () => {
       screen.getByText(/the playground is hosted on GitHub Pages/i),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(/theme, font, and background preferences/i),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(/tomi-interview-bot\.tomibabjak\.workers\.dev/i),
     ).toBeInTheDocument()
     expect(

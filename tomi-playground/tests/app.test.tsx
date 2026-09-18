@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
@@ -238,5 +238,123 @@ describe('babjatom shell navigation', () => {
     expect(
       screen.getByText(/display heading in classic/i),
     ).toBeInTheDocument()
+  })
+
+  it('shows background controls before themes and maze settings when Maze is on', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    const backgroundControls = screen.getByRole('group', {
+      name: /background controls/i,
+    })
+    const themeControls = screen.getByRole('region', {
+      name: /theme and font controls/i,
+    })
+    expect(backgroundControls.compareDocumentPosition(themeControls)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+
+    expect(
+      screen.getByRole('group', { name: /background options/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('group', { name: /maze controls/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /regenerate maze/i }),
+    ).toBeInTheDocument()
+
+    const canvas = screen.getByTestId('maze-light-background')
+    expect(canvas).toHaveAttribute('data-maze-cols', '15')
+    expect(canvas).toHaveAttribute('data-maze-rows', '9')
+    expect(canvas).toHaveAttribute('data-maze-visibility', '1')
+    expect(canvas).toHaveAttribute('data-maze-generation', '0')
+
+    const density = screen.getByRole('slider', { name: /maze density/i })
+    fireEvent.change(density, { target: { value: '2' } })
+    fireEvent.pointerUp(density)
+    expect(canvas).toHaveAttribute('data-maze-cols', '30')
+    expect(canvas).toHaveAttribute('data-maze-rows', '18')
+
+    const visibility = screen.getByRole('slider', { name: /maze visibility/i })
+    fireEvent.change(visibility, { target: { value: '2.5' } })
+    expect(canvas).toHaveAttribute('data-maze-visibility', '2.5')
+
+    await user.click(screen.getByRole('button', { name: /regenerate maze/i }))
+    expect(canvas).toHaveAttribute('data-maze-generation', '1')
+  })
+
+  it('hides the maze when None background is selected', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    expect(screen.getByTestId('maze-light-background')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^none$/i }))
+
+    expect(
+      screen.queryByTestId('maze-light-background'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('group', { name: /maze controls/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/no settings for this background/i),
+    ).toBeInTheDocument()
+  })
+
+  it('persists background and maze prefs across remount', async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    const density = screen.getByRole('slider', { name: /maze density/i })
+    fireEvent.change(density, { target: { value: '1.5' } })
+    fireEvent.pointerUp(density)
+    fireEvent.change(screen.getByRole('slider', { name: /maze visibility/i }), {
+      target: { value: '2' },
+    })
+    await user.click(screen.getByRole('button', { name: /^none$/i }))
+
+    unmount()
+    renderApp('/babjatom/')
+
+    expect(
+      screen.queryByTestId('maze-light-background'),
+    ).not.toBeInTheDocument()
+
+    const remountNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(remountNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    expect(screen.getByRole('button', { name: /^none$/i })).toHaveClass(
+      /border-primary/,
+    )
+    await user.click(screen.getByRole('button', { name: /^maze$/i }))
+
+    const canvas = screen.getByTestId('maze-light-background')
+    expect(canvas).toHaveAttribute('data-maze-cols', '23')
+    expect(canvas).toHaveAttribute('data-maze-rows', '14')
+    expect(canvas).toHaveAttribute('data-maze-visibility', '2')
+    expect(screen.getByRole('slider', { name: /maze density/i })).toHaveValue(
+      '1.5',
+    )
+    expect(
+      screen.getByRole('slider', { name: /maze visibility/i }),
+    ).toHaveValue('2')
   })
 })
