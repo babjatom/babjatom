@@ -5,6 +5,7 @@ Feature: Ask Tomi
   Scenario: Empty chat shows starter prompts
     Given I am on the Ask Tomi page
     Then I should see the Ask Tomi heading
+    And the heading should sit on the same title background as Theme Playground
     And I should see a prototype disclaimer
     And I should see a Privacy link
     And I should see starter prompts

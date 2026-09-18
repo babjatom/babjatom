@@ -95,6 +95,23 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByText(/follow-ups in this chat can refer to earlier answers/i),
     ).toBeInTheDocument()
+
+    const askHeading = screen.getByRole('heading', { name: 'Ask Tomi' })
+    const askTitleMesh = askHeading
+      .closest('header')
+      ?.querySelector('.theme-mesh')
+    expect(askTitleMesh).toBeTruthy()
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    const playgroundTitleMesh = screen
+      .getByRole('heading', { name: 'Theme Playground' })
+      .closest('header')
+      ?.querySelector('.theme-mesh')
+    expect(playgroundTitleMesh).toBeTruthy()
+    expect(askTitleMesh?.className).toBe(playgroundTitleMesh?.className)
   })
 
   it('keeps the heading and composer on screen with an inner chat scroll area', async () => {

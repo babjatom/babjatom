@@ -142,32 +142,35 @@ export function AskTomiPage() {
 
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-1 flex-col gap-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:gap-4 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
-      <header className="animate-rise shrink-0">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
-              Ask Tomi
-            </h1>
-            <p className="mt-1 hidden max-w-3xl text-sm text-muted-foreground sm:mt-2 sm:block sm:text-base">
-              Ask about Tomi’s experience, stack, or approach. Follow-ups in this
-              chat can refer to earlier answers for about 30 minutes.
-            </p>
+      <header className="animate-rise relative shrink-0 overflow-hidden rounded-2xl border border-border/70">
+        <div className="theme-mesh absolute inset-0 opacity-80" />
+        <div className="relative px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Ask Tomi
+              </h1>
+              <p className="mt-1 hidden max-w-3xl text-sm text-foreground/80 sm:mt-2 sm:block sm:text-base">
+                Ask about Tomi’s experience, stack, or approach. Follow-ups in
+                this chat can refer to earlier answers for about 30 minutes.
+              </p>
+            </div>
+            {messages.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clear()
+                  setTypingDoneIds({})
+                }}
+                aria-label="Clear chat"
+              >
+                <Eraser className="h-4 w-4" />
+                Clear
+              </Button>
+            )}
           </div>
-          {messages.length > 0 && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                clear()
-                setTypingDoneIds({})
-              }}
-              aria-label="Clear chat"
-            >
-              <Eraser className="h-4 w-4" />
-              Clear
-            </Button>
-          )}
         </div>
       </header>
 
