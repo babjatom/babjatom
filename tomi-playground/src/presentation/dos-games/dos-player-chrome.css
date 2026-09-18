@@ -13,13 +13,13 @@
 
 /*
   On touch devices, bare canvas taps become mouse-button events (Wolf fires on
-  click). Disable the overlay for empty space, but keep the on-screen buttons
-  clickable — they are children of .emulator-mouse-overlay.
+  click). Disable the overlay for empty space, but keep interactive children
+  (on-screen buttons and the nipple joystick zone) receiving touches.
 */
 .dos-player-host--touch .jsdos-rso .emulator-mouse-overlay {
   pointer-events: none !important;
 }
 
-.dos-player-host--touch .jsdos-rso .emulator-button-touch-zone {
+.dos-player-host--touch .jsdos-rso .emulator-mouse-overlay > * {
   pointer-events: auto !important;
 }

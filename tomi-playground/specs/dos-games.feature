@@ -23,3 +23,8 @@ Feature: Dos games
     Given I am playing Wolfenstein 3D with auto-save enabled
     When I leave Dos games and open it again
     Then saved progress for Wolfenstein 3D should still be available
+
+  Scenario: Phone play uses a slide stick for movement
+    Given I am on a mobile viewport
+    And I am playing Wolfenstein 3D
+    Then I should see guidance about sliding the left stick to move
