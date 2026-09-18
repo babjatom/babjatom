@@ -52,7 +52,7 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           mouseCapture: !isTouchUi,
           softFullscreen: false,
           // Larger hit targets for landscape phones.
-          scaleControls: isTouchUi ? 0.55 : 0.2,
+          scaleControls: isTouchUi ? 0.7 : 0.2,
           theme: 'dark',
           lang: 'en',
           onEvent: (event) => {
