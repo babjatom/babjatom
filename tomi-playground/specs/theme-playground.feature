@@ -7,6 +7,49 @@ Feature: Theme Playground
     And I should see a control to generate a random theme
     And those controls should appear above the typography sample
 
+  Scenario: Background controls sit above theme and font controls
+    Given I am on the Theme Playground page
+    Then I should see background controls to choose Maze or None
+    And the background controls should appear above the theme and font controls
+
+  Scenario: Maze settings show when Maze is selected
+    Given I am on the Theme Playground page
+    And the Maze background is selected
+    Then I should see maze density and visibility controls
+    And I should see a control to regenerate the maze
+
+  Scenario: Visitor turns the background off
+    Given I am on the Theme Playground page
+    When I choose the None background
+    Then the ambient maze should not be shown
+    And maze density and visibility controls should be hidden
+
+  Scenario: Visitor changes maze density and visibility
+    Given I am on the Theme Playground page
+    And the Maze background is selected
+    When I set maze density higher
+    And I set maze visibility higher
+    Then the ambient maze should use the denser layout
+    And the ambient maze should use the higher visibility
+
+  Scenario: Visitor regenerates the maze
+    Given I am on the Theme Playground page
+    And the Maze background is selected
+    When I regenerate the maze
+    Then the ambient maze layout should change
+
+  Scenario: Background and maze preferences stick after reload
+    Given I am on the Theme Playground page
+    When I set maze density higher
+    And I set maze visibility higher
+    And I choose the None background
+    And I reload the page
+    Then the None background should stay selected
+    And the ambient maze should not be shown
+    When I choose the Maze background
+    Then the ambient maze should keep the denser layout
+    And the ambient maze should keep the higher visibility
+
   Scenario: Showcase and visits table are on the page
     Given I am on the Theme Playground page
     Then I should see themed component samples
