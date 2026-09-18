@@ -37,9 +37,10 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           return
         }
 
-        const isMobile =
+        const isTouchUi =
           typeof window.matchMedia === 'function' &&
-          window.matchMedia('(max-width: 1023px)').matches
+          (window.matchMedia('(max-width: 1023px)').matches ||
+            window.matchMedia('(hover: none) and (pointer: coarse)').matches)
 
         const player = Dos(containerRef.current, {
           url: dosAssetUrl(game.bundlePath),
@@ -48,9 +49,10 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           autoSave: true,
           kiosk: true,
           // Pointer lock is desktop-oriented; on phones it can leave a blank UI.
-          mouseCapture: !isMobile,
+          mouseCapture: !isTouchUi,
           softFullscreen: false,
-          scaleControls: isMobile ? 0.4 : 0.2,
+          // Larger hit targets for landscape phones.
+          scaleControls: isTouchUi ? 0.55 : 0.2,
           theme: 'dark',
           lang: 'en',
           onEvent: (event) => {
@@ -62,6 +64,10 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
             }
           },
         })
+
+        if (isTouchUi && surfaceRef.current) {
+          surfaceRef.current.classList.add('dos-player-host--touch')
+        }
 
         playerRef.current = player
       } catch (error) {
@@ -130,8 +136,9 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
         <div>
           <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
           <p className="text-sm text-muted-foreground">
-            Progress auto-saves in this browser. Click the game to capture the
-            mouse; press Esc to release it.
+            Progress auto-saves in this browser. On desktop, click the game to
+            capture the mouse (Esc to release). On phones, use the on-screen
+            pad: arrows move, Fire / Open / Strafe on the right.
           </p>
         </div>
         <button

@@ -148,6 +148,6 @@ describe('Dos games page', () => {
     expect(options.kiosk).toBe(true)
     expect(options.softFullscreen).toBe(false)
     expect(options.mouseCapture).toBe(false)
-    expect(options.scaleControls).toBe(0.4)
+    expect(options.scaleControls).toBe(0.55)
   })
 })

@@ -10,3 +10,11 @@
 .dos-player-host .jsdos-rso .absolute.pointer-events-none {
   display: none !important;
 }
+
+/*
+  On touch devices, canvas taps become mouse-button events in js-dos, and Wolf3D
+  treats mouse click as fire. Route input through on-screen keys only.
+*/
+.dos-player-host--touch .jsdos-rso .emulator-mouse-overlay {
+  pointer-events: none !important;
+}
