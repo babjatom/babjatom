@@ -113,15 +113,22 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
       ) : null}
 
       {/*
-        js-dos roots use height:100%, which needs a definite parent height.
-        min-height alone collapses the canvas (sound plays, screen stays blank).
+        js-dos adds .jsdos-rso { height: 100% } to the mount node, which overrides
+        Tailwind height utilities. Keep the definite size on an outer wrapper so
+        height:100% resolves and the canvas is not 0×0 (sound-only blank screen).
       */}
       <div
-        ref={containerRef}
-        className="relative h-[70dvh] w-full overflow-hidden rounded-md border border-border bg-black"
+        className="relative w-full overflow-hidden rounded-md border border-border bg-black"
+        style={{ height: '70dvh' }}
         data-testid="dos-player-surface"
         data-mobile-controls="available"
-      />
+      >
+        <div
+          ref={containerRef}
+          className="h-full w-full bg-black"
+          style={{ height: '100%', width: '100%', background: '#000' }}
+        />
+      </div>
     </div>
   )
 }

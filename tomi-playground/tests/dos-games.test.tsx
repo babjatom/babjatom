@@ -74,7 +74,7 @@ describe('Dos games page', () => {
     expect(screen.getByTestId('dos-game-player')).toBeInTheDocument()
     const surface = screen.getByTestId('dos-player-surface')
     expect(surface).toBeInTheDocument()
-    expect(surface.className).toMatch(/h-\[70dvh\]/)
+    expect(surface).toHaveStyle({ height: '70dvh' })
     expect(screen.getByText(/progress auto-saves/i)).toBeInTheDocument()
 
     await vi.waitFor(() => {
