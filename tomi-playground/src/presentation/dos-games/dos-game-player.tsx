@@ -141,7 +141,11 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
     function isOnScreenControl(target: EventTarget | null) {
       return (
         target instanceof Element &&
-        Boolean(target.closest('.emulator-button-touch-zone'))
+        Boolean(
+          target.closest(
+            '.emulator-button-touch-zone, .nipple, .nipple-zone, .front, .back',
+          ),
+        )
       )
     }
 
@@ -186,8 +190,8 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           <p className="text-sm text-muted-foreground">
             Progress auto-saves in this browser. Double-click or double-tap the
             player for fullscreen. On desktop, click once to capture the mouse
-            (Esc to release). On phones, use the on-screen pad (Enter or Open on
-            the “Press a key” screen).
+            (Esc to release). On phones, slide the left stick to move without
+            lifting your thumb; Fire / Open / Strafe / Enter are on the right.
           </p>
         </div>
         <button

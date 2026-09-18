@@ -156,6 +156,7 @@ describe('Dos games page', () => {
 
     expect(screen.getByTestId('dos-player-surface')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeInTheDocument()
+    expect(screen.getByText(/slide the left stick/i)).toBeInTheDocument()
 
     await vi.waitFor(() => {
       expect(dosMock).toHaveBeenCalled()
