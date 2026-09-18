@@ -184,7 +184,10 @@ export function AskTomiPage() {
         >
             {messages.length === 0 ? (
               <div className="flex h-full flex-col justify-center gap-4">
-                <Reveal as="p" className="text-sm text-muted-foreground">
+                <Reveal
+                  as="p"
+                  className="hidden text-sm text-muted-foreground sm:block"
+                >
                   Start with a suggested question, or type your own below.
                 </Reveal>
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">

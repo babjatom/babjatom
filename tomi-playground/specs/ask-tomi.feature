@@ -8,10 +8,17 @@ Feature: Ask Tomi
     And the heading should sit on the same title background as Theme Playground
     And I should see a prototype disclaimer
     And I should see a Privacy link
+    And I should see a hint to start with a suggested question
     And I should see starter prompts
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder
     And I should not see the 3D scene
+
+  Scenario: Empty chat hides the suggested-question hint on a phone
+    Given I am on a mobile viewport
+    And I am on the Ask Tomi page
+    Then I should see starter prompts
+    And I should not see the suggested-question hint
 
   Scenario: Chat stays in one screen with an inner scroll area
     Given I am on the Ask Tomi page
