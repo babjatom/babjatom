@@ -29,7 +29,7 @@ Feature: Theme Playground
     And the Maze background is selected
     When I set maze density higher
     And I set maze visibility higher
-    Then the ambient maze should use the denser layout
+    Then the ambient maze should use more passage cells for this viewport
     And the ambient maze should use the higher visibility
 
   Scenario: Visitor regenerates the maze

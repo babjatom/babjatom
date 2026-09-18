@@ -1,7 +1,8 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
+import { densityToGrid } from '@/domain/maze-prefs'
 import { track } from '@/infrastructure/analytics'
 import { setMatchMediaMatches } from './setup'
 
@@ -10,11 +11,29 @@ function renderApp(path = '/babjatom/') {
   return render(<App />)
 }
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width,
+  })
+  Object.defineProperty(window, 'innerHeight', {
+    configurable: true,
+    writable: true,
+    value: height,
+  })
+}
+
 describe('babjatom shell navigation', () => {
   beforeEach(() => {
     window.localStorage.clear()
     setMatchMediaMatches(false)
+    setViewport(1440, 900)
     vi.mocked(track).mockClear()
+  })
+
+  afterEach(() => {
+    setViewport(1440, 900)
   })
 
   it('renders Ask Tomi as the home page with pages nav', () => {
@@ -42,6 +61,32 @@ describe('babjatom shell navigation', () => {
     expect(canvas).toHaveAttribute('aria-hidden')
     expect(canvas).toHaveClass('pointer-events-none')
     expect(canvas).toHaveClass('z-0')
+  })
+
+  it('uses a taller maze grid on a tall phone viewport', () => {
+    setViewport(390, 844)
+    renderApp('/babjatom/')
+    const canvas = screen.getByTestId('maze-light-background')
+    const cols = Number(canvas.getAttribute('data-maze-cols'))
+    const rows = Number(canvas.getAttribute('data-maze-rows'))
+    expect(rows).toBeGreaterThan(cols)
+    expect(densityToGrid(1, 390, 844)).toEqual({ cols, rows })
+  })
+
+  it('regenerates the maze grid when resized to a tall phone shape', async () => {
+    renderApp('/babjatom/')
+    const canvas = screen.getByTestId('maze-light-background')
+    const rebuildBefore = canvas.getAttribute('data-maze-rebuild')
+
+    setViewport(390, 844)
+    window.dispatchEvent(new Event('resize'))
+
+    await waitFor(() => {
+      const cols = Number(canvas.getAttribute('data-maze-cols'))
+      const rows = Number(canvas.getAttribute('data-maze-rows'))
+      expect(rows).toBeGreaterThan(cols)
+      expect(canvas.getAttribute('data-maze-rebuild')).not.toBe(rebuildBefore)
+    })
   })
 
   it('keeps the pages menu collapsed on mobile viewports', async () => {
@@ -270,16 +315,20 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
 
     const canvas = screen.getByTestId('maze-light-background')
-    expect(canvas).toHaveAttribute('data-maze-cols', '15')
-    expect(canvas).toHaveAttribute('data-maze-rows', '9')
+    const baseGrid = densityToGrid(1, 1440, 900)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(baseGrid.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(baseGrid.rows))
     expect(canvas).toHaveAttribute('data-maze-visibility', '1')
     expect(canvas).toHaveAttribute('data-maze-generation', '0')
 
+    const baseCells = baseGrid.cols * baseGrid.rows
     const density = screen.getByRole('slider', { name: /maze density/i })
     fireEvent.change(density, { target: { value: '2' } })
     fireEvent.pointerUp(density)
-    expect(canvas).toHaveAttribute('data-maze-cols', '30')
-    expect(canvas).toHaveAttribute('data-maze-rows', '18')
+    const denser = densityToGrid(2, 1440, 900)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(denser.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(denser.rows))
+    expect(denser.cols * denser.rows).toBeGreaterThan(baseCells)
 
     const visibility = screen.getByRole('slider', { name: /maze visibility/i })
     fireEvent.change(visibility, { target: { value: '2.5' } })
@@ -347,8 +396,9 @@ describe('babjatom shell navigation', () => {
     await user.click(screen.getByRole('button', { name: /^maze$/i }))
 
     const canvas = screen.getByTestId('maze-light-background')
-    expect(canvas).toHaveAttribute('data-maze-cols', '23')
-    expect(canvas).toHaveAttribute('data-maze-rows', '14')
+    const saved = densityToGrid(1.5, 1440, 900)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(saved.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(saved.rows))
     expect(canvas).toHaveAttribute('data-maze-visibility', '2')
     expect(screen.getByRole('slider', { name: /maze density/i })).toHaveValue(
       '1.5',
