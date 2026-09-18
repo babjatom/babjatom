@@ -66,6 +66,12 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getAllByRole('link', { name: 'Privacy' }).length,
     ).toBeGreaterThanOrEqual(1)
+    const starterHint = screen.getByText(
+      /start with a suggested question, or type your own below/i,
+    )
+    expect(starterHint).toBeInTheDocument()
+    expect(starterHint.className).toMatch(/\bhidden\b/)
+    expect(starterHint.className).toMatch(/\bsm:block\b/)
     expect(
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
@@ -112,6 +118,21 @@ describe('Ask Tomi chat', () => {
       ?.querySelector('.theme-mesh')
     expect(playgroundTitleMesh).toBeTruthy()
     expect(askTitleMesh?.className).toBe(playgroundTitleMesh?.className)
+  })
+
+  it('hides the suggested-question hint on a mobile viewport', () => {
+    renderApp('/babjatom/')
+
+    expect(
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+
+    const starterHint = screen.getByText(
+      /start with a suggested question, or type your own below/i,
+    )
+    // Phone layouts rely on Tailwind `hidden sm:block` (see ask-tomi.feature).
+    expect(starterHint.className).toMatch(/\bhidden\b/)
+    expect(starterHint.className).toMatch(/\bsm:block\b/)
   })
 
   it('keeps the heading and composer on screen with an inner chat scroll area', async () => {
