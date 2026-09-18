@@ -3,7 +3,7 @@ Feature: Analytics
 
   Scenario: Analytics sits after Ask Tomi and Theme Playground
     Given I am on the home page
-    Then the pages menu should list Ask Tomi, Theme Playground, and Analytics in that order
+    Then the pages menu should list Ask Tomi, Theme Playground, Analytics, and Dos games in that order
 
   Scenario: Visitor opens Analytics
     Given I am on the home page

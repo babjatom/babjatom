@@ -30,4 +30,5 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 | `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx` |
 | `analytics.feature` | `tests/analytics.test.tsx` |
 | `ask-tomi.feature` | `tests/ask-tomi.test.tsx` |
+| `dos-games.feature` | `tests/dos-games.test.tsx`, `tests/app.test.tsx` |
 | `privacy.feature` | `tests/privacy.test.tsx` |

@@ -4,6 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "sync:js-dos": "node scripts/sync-js-dos.mjs",
+    "predev": "pnpm sync:js-dos",
+    "prebuild": "pnpm sync:js-dos",
+    "pretest": "pnpm sync:js-dos",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -32,6 +36,7 @@
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "js-dos": "^8.4.1",
     "lucide-react": "^1.42.0",
     "mixpanel-browser": "^2.83.0",
     "react": "^19.2.8",

@@ -23,6 +23,7 @@ describe('Analytics page', () => {
       'Ask Tomi',
       'Theme Playground',
       'Analytics',
+      'Dos games',
     ])
 
     await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))

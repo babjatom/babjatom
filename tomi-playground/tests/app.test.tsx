@@ -47,6 +47,7 @@ describe('babjatom shell navigation', () => {
       'Ask Tomi',
       'Theme Playground',
       'Analytics',
+      'Dos games',
     ])
     expect(
       screen.queryByRole('button', { name: /random theme/i }),

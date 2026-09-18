@@ -1,0 +1,25 @@
+/** Hide js-dos player chrome so we can use our own controls. */
+.dos-player-host .jsdos-rso .sidebar,
+.dos-player-host .jsdos-rso .sidebar-thin,
+.dos-player-host .jsdos-rso .sidebar-badge,
+.dos-player-host .jsdos-rso .sidebar-slider {
+  display: none !important;
+}
+
+/* "Click to capture mouse" overlays (full-bleed and compact). */
+.dos-player-host .jsdos-rso .absolute.pointer-events-none {
+  display: none !important;
+}
+
+/*
+  On touch devices, bare canvas taps become mouse-button events (Wolf fires on
+  click). Disable the overlay for empty space, but keep the on-screen buttons
+  clickable — they are children of .emulator-mouse-overlay.
+*/
+.dos-player-host--touch .jsdos-rso .emulator-mouse-overlay {
+  pointer-events: none !important;
+}
+
+.dos-player-host--touch .jsdos-rso .emulator-button-touch-zone {
+  pointer-events: auto !important;
+}
