@@ -3,6 +3,8 @@ export type DosProps = {
   save: () => Promise<boolean>
   setAutoSave: (value: boolean) => void
   setSoftFullscreen: (value: boolean) => void
+  setFullScreen: (value: boolean) => void
+  setKiosk: (value: boolean) => void
   setScaleControls: (value: number) => void
 }
 
@@ -12,6 +14,8 @@ export type DosOptions = {
   autoStart?: boolean
   autoSave?: boolean
   softFullscreen?: boolean
+  fullScreen?: boolean
+  kiosk?: boolean
   scaleControls?: number
   theme?: string
   lang?: 'en' | 'ru'

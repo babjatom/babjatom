@@ -37,6 +37,8 @@ describe('Dos games page', () => {
         save: vi.fn().mockResolvedValue(true),
         setAutoSave: vi.fn(),
         setSoftFullscreen: vi.fn(),
+        setFullScreen: vi.fn(),
+        setKiosk: vi.fn(),
         setScaleControls: vi.fn(),
       }
     })
@@ -75,7 +77,9 @@ describe('Dos games page', () => {
     const surface = screen.getByTestId('dos-player-surface')
     expect(surface).toBeInTheDocument()
     expect(surface).toHaveStyle({ height: '70dvh' })
+    expect(surface).toHaveClass('dos-player-host')
     expect(screen.getByText(/progress auto-saves/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeInTheDocument()
 
     await vi.waitFor(() => {
       expect(dosMock).toHaveBeenCalled()
@@ -85,8 +89,10 @@ describe('Dos games page', () => {
       autoSave?: boolean
       url?: string
       mouseCapture?: boolean
+      kiosk?: boolean
     }
     expect(options.autoSave).toBe(true)
+    expect(options.kiosk).toBe(true)
     expect(options.mouseCapture).toBe(true)
     expect(options.url).toContain('games/wolf3d/wolf3d.jsdos')
 
@@ -96,7 +102,26 @@ describe('Dos games page', () => {
     ).toBeInTheDocument()
   })
 
-  it('exposes on-screen controls affordance on a mobile viewport', async () => {
+  it('offers a custom fullscreen control under the player', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+    await openDosGames(user)
+    await user.click(
+      screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
+    )
+
+    await vi.waitFor(() => {
+      expect(dosMock).toHaveBeenCalled()
+    })
+
+    const setFullScreen = dosMock.mock.results[0]?.value.setFullScreen as ReturnType<
+      typeof vi.fn
+    >
+    await user.click(screen.getByRole('button', { name: 'Fullscreen' }))
+    expect(setFullScreen).toHaveBeenCalledWith(true)
+  })
+
+  it('disables pointer lock on a mobile viewport', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
     renderApp('/babjatom/')
@@ -108,9 +133,8 @@ describe('Dos games page', () => {
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
     )
 
-    const surface = screen.getByTestId('dos-player-surface')
-    expect(surface).toHaveAttribute('data-mobile-controls', 'available')
-    expect(screen.getByText(/mobile controls/i)).toBeInTheDocument()
+    expect(screen.getByTestId('dos-player-surface')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeInTheDocument()
 
     await vi.waitFor(() => {
       expect(dosMock).toHaveBeenCalled()
@@ -119,7 +143,9 @@ describe('Dos games page', () => {
       softFullscreen?: boolean
       scaleControls?: number
       mouseCapture?: boolean
+      kiosk?: boolean
     }
+    expect(options.kiosk).toBe(true)
     expect(options.softFullscreen).toBe(false)
     expect(options.mouseCapture).toBe(false)
     expect(options.scaleControls).toBe(0.4)
