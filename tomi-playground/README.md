@@ -10,7 +10,7 @@ The app in this folder is served from GitHub Pages with routes:
 - `/ask-tomi` and `/tomi-ai` — redirect to `/`
 - `/privacy` — short privacy note (hosting, Ask Tomi, profile pixel)
 
-The sidebar **Pages** menu lists Theme Playground, Analytics, and Ask Tomi, with **Themes** below. A **Privacy** link sits under the sidebar footer.
+The sidebar **Pages** menu lists Ask Tomi, Theme Playground, and Analytics. Theme and font controls (including random theme) live on Theme Playground. A **Privacy** link sits under the sidebar footer.
 
 ## Features
 
@@ -95,7 +95,7 @@ To add a preset theme:
 
 1. Open `src/domain/presets.ts`
 2. Call `createTheme(id, name, tokens)` with HSL channel values (for example `"199 89% 38%"`)
-3. The sidebar lists presets automatically — **do not duplicate components** for the new look
+3. Theme Playground lists presets automatically — **do not duplicate components** for the new look
 
 Random themes are produced in `src/domain/random-theme.ts` using the same token shape.
 

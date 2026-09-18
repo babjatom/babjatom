@@ -30,6 +30,7 @@ import { track } from '@/infrastructure/analytics'
 import { useFont } from '@/presentation/font/font-provider'
 import { Reveal } from '@/presentation/shared/reveal'
 import { VisitsDataTable } from '@/presentation/shared/visits-data-table'
+import { ThemeFontControls } from '@/presentation/theme-playground/theme-font-controls'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 export function ComponentShowcase() {
@@ -50,11 +51,13 @@ export function ComponentShowcase() {
           </h1>
           <p className="mt-3 max-w-xl text-base text-foreground/80 sm:text-lg">
             The same shadcn/ui component system, reshaped by semantic CSS
-            variables for color and type — switch themes and fonts without
+            variables for color and type — switch themes and fonts here without
             duplicating components.
           </p>
         </div>
       </header>
+
+      <ThemeFontControls />
 
       <section
         className="animate-rise-delay"
@@ -74,7 +77,7 @@ export function ComponentShowcase() {
             </p>
             <p className="text-base text-foreground/85">
               Body copy uses the same preset so you can compare readability
-              while you switch fonts from the sidebar.
+              while you switch fonts above.
             </p>
           </CardContent>
         </Card>

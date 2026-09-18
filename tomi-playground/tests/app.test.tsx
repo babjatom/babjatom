@@ -23,13 +23,15 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    const links = within(pagesNav).getAllByRole('link')
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Ask Tomi',
+      'Theme Playground',
+      'Analytics',
+    ])
     expect(
-      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
-    ).toBeInTheDocument()
-    expect(
-      within(pagesNav).getByRole('link', { name: 'Ask Tomi' }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /random theme/i })).toBeInTheDocument()
+      screen.queryByRole('button', { name: /random theme/i }),
+    ).not.toBeInTheDocument()
     expect(screen.getByTestId('maze-light-background')).toBeInTheDocument()
   })
 
@@ -95,9 +97,16 @@ describe('babjatom shell navigation', () => {
 
   it('navigates to Ask Tomi home from the pages menu', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/theme-playground')
+    renderApp('/babjatom/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    expect(
+      screen.getByRole('heading', { name: 'Theme Playground' }),
+    ).toBeInTheDocument()
+
     await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
 
     expect(window.location.pathname).not.toMatch(/ask-tomi/)
@@ -123,9 +132,14 @@ describe('babjatom shell navigation', () => {
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
   })
 
-  it('switches themes from the sidebar', async () => {
+  it('switches themes from Theme Playground', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
 
     await user.click(screen.getByRole('button', { name: /ink night/i }))
     expect(document.documentElement.dataset.theme).toBe('ink-night')
@@ -142,6 +156,11 @@ describe('babjatom shell navigation', () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
     await user.click(screen.getByRole('button', { name: /random theme/i }))
     const themeId = document.documentElement.dataset.theme
     expect(themeId).toMatch(/^random-/)
@@ -153,9 +172,14 @@ describe('babjatom shell navigation', () => {
     ).toContain(themeId)
   })
 
-  it('switches fonts from the sidebar and persists them', async () => {
+  it('switches fonts from Theme Playground and persists them', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
 
     expect(document.documentElement.dataset.font).toBe('exo-2')
     await user.click(screen.getByRole('button', { name: /^classic$/i }))
@@ -170,6 +194,11 @@ describe('babjatom shell navigation', () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
     await user.click(screen.getByRole('button', { name: /^classic$/i }))
     await user.click(screen.getByRole('button', { name: /ink night/i }))
 
@@ -177,7 +206,7 @@ describe('babjatom shell navigation', () => {
     expect(document.documentElement.dataset.font).toBe('classic')
   })
 
-  it('shows a typography sample for the active font on Theme Playground', async () => {
+  it('shows theme and font controls above typography on Theme Playground', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
 
@@ -185,6 +214,20 @@ describe('babjatom shell navigation', () => {
     await user.click(
       within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
     )
+
+    const controls = screen.getByRole('region', {
+      name: /theme and font controls/i,
+    })
+    const typography = screen.getByRole('region', {
+      name: /typography sample for/i,
+    })
+    expect(controls.compareDocumentPosition(typography)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+    expect(
+      screen.getByRole('button', { name: /random theme/i }),
+    ).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: /^classic$/i }))
 
     expect(
