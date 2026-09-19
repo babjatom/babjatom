@@ -52,7 +52,7 @@ describe('Dos games page', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows the catalog with Wolfenstein 3D and shareware credit', async () => {
+  it('shows the catalog with Wolfenstein 3D, Doom, and shareware credits', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
     await openDosGames(user)
@@ -61,7 +61,13 @@ describe('Dos games page', () => {
     expect(
       screen.getByRole('heading', { name: 'Wolfenstein 3D' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/shareware episode 1/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Doom' })).toBeInTheDocument()
+    expect(
+      screen.getByText(/shareware episode 1 © 1992 id Software, published by Apogee/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/shareware episode 1 © 1993 id Software.*DOOM1\.WAD only/i),
+    ).toBeInTheDocument()
   })
 
   it('starts Wolfenstein 3D in the DOS player and can return to the catalog', async () => {
@@ -115,6 +121,32 @@ describe('Dos games page', () => {
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
+  })
+
+  it('starts Doom in the DOS player and can return to the catalog', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+    await openDosGames(user)
+
+    await user.click(screen.getByRole('button', { name: 'Play Doom' }))
+
+    expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Doom' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Play Doom' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByTestId('dos-game-player')).toBeInTheDocument()
+
+    await vi.waitFor(() => {
+      expect(dosMock).toHaveBeenCalled()
+    })
+
+    const options = dosMock.mock.calls[0]?.[1] as { url?: string }
+    expect(options.url).toContain('games/doom/doom.jsdos')
+
+    await user.click(screen.getByRole('button', { name: 'Back to catalog' }))
+    expect(screen.queryByTestId('dos-game-player')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Play Doom' })).toBeInTheDocument()
   })
 
   it('offers a custom fullscreen control above the player', async () => {

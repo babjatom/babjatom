@@ -11,6 +11,8 @@ Feature: Dos games
     Then I should see the Dos games heading
     And I should see Wolfenstein 3D in the catalog
     And I should see a short shareware credit for Wolfenstein 3D
+    And I should see Doom in the catalog
+    And I should see a short shareware credit for Doom
 
   Scenario: Visitor starts Wolfenstein 3D
     Given I am on the Dos games page
@@ -21,6 +23,15 @@ Feature: Dos games
     And I should see the DOS player
     And I should see a fullscreen control above the player
     And the pages menu should still offer a way to collapse the sidebar
+    And I should be able to return to the catalog
+
+  Scenario: Visitor starts Doom
+    Given I am on the Dos games page
+    When I play Doom
+    Then I should still see the Dos games heading
+    And I should still see Doom in the catalog
+    And I should not see the Play Doom button
+    And I should see the DOS player
     And I should be able to return to the catalog
 
   Scenario: Saved progress persists across visits
