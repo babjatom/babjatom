@@ -23,3 +23,35 @@
 .dos-player-host--touch .jsdos-rso .emulator-mouse-overlay > * {
   pointer-events: auto !important;
 }
+
+/* Inline height:70dvh must not win over the fullscreen UA box. */
+.dos-player-host:fullscreen,
+.dos-player-host:-webkit-full-screen {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: #000;
+}
+
+.dos-player-host:fullscreen .jsdos-rso,
+.dos-player-host:-webkit-full-screen .jsdos-rso,
+.dos-player-host:fullscreen .emulator-root,
+.dos-player-host:-webkit-full-screen .emulator-root {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.dos-player-host:fullscreen canvas,
+.dos-player-host:-webkit-full-screen canvas,
+.dos-player-host:fullscreen .emulator-canvas,
+.dos-player-host:-webkit-full-screen .emulator-canvas,
+.dos-player-host:fullscreen .emulator-video,
+.dos-player-host:-webkit-full-screen .emulator-video {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain;
+}
+

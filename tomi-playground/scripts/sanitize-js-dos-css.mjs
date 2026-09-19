@@ -1,10 +1,48 @@
 /**
  * Keep only js-dos player-scoped rules. Drop Tailwind/DaisyUI preflight,
  * theme tokens, and shared utility classes that override the app shell.
+ *
+ * Layout utilities js-dos applies as bare classes (w-full, h-full, absolute, …)
+ * are rewritten under `.jsdos-rso` / `.dos-player-host` so fullscreen scaling
+ * still works without leaking into the shell.
  */
 
 const PLAYER_SCOPE_RE =
   /(?:^|[^\w-])(?:\.?jsdos|emulator-|nipple|notyf|hg-|pre-run-|prerun-|dhry2-|fs-tree|editor-conf|editor-fs|network-frame|network-button|premium-plan-|animate-led|select-window|contentbar|cound-down|play-button|save-buttons|rct-|window-overlay)/i
+
+const LAYOUT_UTILITIES = new Set([
+  'w-full',
+  'h-full',
+  'min-h-full',
+  'min-w-full',
+  'max-h-full',
+  'max-w-full',
+  'absolute',
+  'relative',
+  'fixed',
+  'sticky',
+  'inset-0',
+  'left-0',
+  'right-0',
+  'top-0',
+  'bottom-0',
+  'flex',
+  'flex-col',
+  'flex-row',
+  'flex-grow',
+  'grow',
+  'items-center',
+  'items-stretch',
+  'items-end',
+  'justify-center',
+  'justify-between',
+  'justify-end',
+  'overflow-hidden',
+  'overflow-auto',
+  'object-contain',
+  'object-cover',
+  'object-fill',
+])
 
 const ALLOWED_KEYFRAMES = new Set([
   'spin',
@@ -54,7 +92,6 @@ function filterCss(css) {
           out += `${header}{${inner}}`
         }
       }
-      // Drop @font-face, @layer, and other at-rules.
 
       i = end + 1
       continue
@@ -69,6 +106,8 @@ function filterCss(css) {
 
     if (selector && isPlayerScopedSelector(selector)) {
       out += `${selector}{${body}}`
+    } else if (selector && isBareLayoutUtilitySelector(selector)) {
+      out += `${scopeLayoutUtilities(selector)}{${body}}`
     }
 
     i = end + 1
@@ -102,4 +141,27 @@ function isPlayerScopedSelector(selector) {
     .map((part) => part.trim())
     .filter(Boolean)
     .every((part) => PLAYER_SCOPE_RE.test(part))
+}
+
+function isBareLayoutUtilitySelector(selector) {
+  return selector
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .every((part) => {
+      if (!/^\.[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$/.test(part)) {
+        return false
+      }
+      const classes = part.slice(1).split('.')
+      return classes.length > 0 && classes.every((name) => LAYOUT_UTILITIES.has(name))
+    })
+}
+
+function scopeLayoutUtilities(selector) {
+  return selector
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => `.jsdos-rso ${part},.dos-player-host ${part}`)
+    .join(',')
 }

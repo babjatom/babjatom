@@ -98,7 +98,12 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
 
   useEffect(() => {
     function onFullScreenChange() {
-      setIsFullScreen(Boolean(document.fullscreenElement))
+      const active = Boolean(document.fullscreenElement)
+      setIsFullScreen(active)
+      const surface = surfaceRef.current
+      if (surface) {
+        surface.style.height = active ? '100%' : '70dvh'
+      }
     }
     document.addEventListener('fullscreenchange', onFullScreenChange)
     return () => {
@@ -116,16 +121,25 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
     }
 
     if (entering) {
+      if (surface) {
+        surface.style.height = '100%'
+      }
       try {
         await surface?.requestFullscreen()
       } catch {
         // Dos may already handle fullscreen; ignore gesture/API failures.
+        if (surface && !document.fullscreenElement) {
+          surface.style.height = '70dvh'
+        }
       }
     } else if (document.fullscreenElement) {
       try {
         await document.exitFullscreen()
       } catch {
         // ignore
+      }
+      if (surface) {
+        surface.style.height = '70dvh'
       }
     }
   }

@@ -13,6 +13,9 @@ describe('sanitizeJsDosCss', () => {
       '.hidden{display:none}',
       '.bg-primary{background-color:hsl(var(--p))}',
       '.flex{display:flex}',
+      '.w-full{width:100%}',
+      '.h-full{height:100%}',
+      '.absolute{position:absolute}',
       ':root,[data-theme]{background-color:red;color:blue}',
       'button,[type=button]{background-color:transparent}',
       '*,:before,:after{border-width:0}',
@@ -30,14 +33,21 @@ describe('sanitizeJsDosCss', () => {
     expect(output).toContain('.nipple{position:absolute}')
     expect(output).toContain('@keyframes spin{')
     expect(output).toContain('@media (max-width: 600px){.jsdos-rso{height:100%}}')
+    expect(output).toContain('.jsdos-rso .flex,.dos-player-host .flex{display:flex}')
+    expect(output).toContain('.jsdos-rso .w-full,.dos-player-host .w-full{width:100%}')
+    expect(output).toContain('.jsdos-rso .h-full,.dos-player-host .h-full{height:100%}')
+    expect(output).toContain(
+      '.jsdos-rso .absolute,.dos-player-host .absolute{position:absolute}',
+    )
 
     expect(output).not.toContain('.hidden{display:none}')
     expect(output).not.toContain('.bg-primary{')
-    expect(output).not.toContain('.flex{display:flex}')
     expect(output).not.toContain('[data-theme]')
     expect(output).not.toContain('background-color:transparent')
     expect(output).not.toContain('border-width:0')
     expect(output).not.toContain('button-pop')
     expect(output).not.toContain('prefers-color-scheme')
+    expect(output).not.toMatch(/(?:^|[,}])\.flex\{display:flex\}/)
+    expect(output).not.toMatch(/(?:^|[,}])\.w-full\{width:100%\}/)
   })
 })
