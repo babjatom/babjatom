@@ -17,8 +17,9 @@ Feature: Dos games
     When I play Wolfenstein 3D
     Then I should still see the Dos games heading
     And I should still see Wolfenstein 3D in the catalog
+    And I should not see the Play Wolfenstein 3D button
     And I should see the DOS player
-    And I should see a fullscreen control under the player
+    And I should see a fullscreen control above the player
     And the pages menu should still offer a way to collapse the sidebar
     And I should be able to return to the catalog
 

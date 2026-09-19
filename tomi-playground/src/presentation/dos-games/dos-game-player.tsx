@@ -139,6 +139,20 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
         right.
       </p>
 
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={onBack}>
+          Back to catalog
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            void toggleFullScreen()
+          }}
+        >
+          {isFullScreen ? 'Exit fullscreen' : 'Fullscreen'}
+        </Button>
+      </div>
+
       {status === 'loading' ? (
         <p className="text-sm text-muted-foreground" role="status">
           Loading DOS player…
@@ -167,20 +181,6 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           className="h-full w-full bg-black"
           style={{ height: '100%', width: '100%', background: '#000' }}
         />
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={onBack}>
-          Back to catalog
-        </Button>
-        <Button
-          type="button"
-          onClick={() => {
-            void toggleFullScreen()
-          }}
-        >
-          {isFullScreen ? 'Exit fullscreen' : 'Fullscreen'}
-        </Button>
       </div>
     </div>
   )

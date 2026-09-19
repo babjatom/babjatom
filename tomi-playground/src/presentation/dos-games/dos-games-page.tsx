@@ -28,14 +28,18 @@ export function DosGamesPage() {
             >
               <div>
                 <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
-                <p className="mt-1 text-muted-foreground">{game.summary}</p>
+                {game.summary ? (
+                  <p className="mt-1 text-muted-foreground">{game.summary}</p>
+                ) : null}
                 <p className="mt-2 text-sm text-muted-foreground">{game.credit}</p>
               </div>
-              <div>
-                <Button type="button" onClick={() => setActiveGameId(game.id)}>
-                  Play {game.title}
-                </Button>
-              </div>
+              {activeGameId === game.id ? null : (
+                <div>
+                  <Button type="button" onClick={() => setActiveGameId(game.id)}>
+                    Play {game.title}
+                  </Button>
+                </div>
+              )}
               {activeGameId === game.id ? (
                 <DosGamePlayer
                   game={game}

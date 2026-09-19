@@ -77,6 +77,9 @@ describe('Dos games page', () => {
     expect(
       screen.getByRole('heading', { name: 'Wolfenstein 3D' }),
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Play Wolfenstein 3D' }),
+    ).not.toBeInTheDocument()
     expect(screen.getByTestId('dos-game-player')).toBeInTheDocument()
     const surface = screen.getByTestId('dos-player-surface')
     expect(surface).toBeInTheDocument()
@@ -114,7 +117,7 @@ describe('Dos games page', () => {
     expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
   })
 
-  it('offers a custom fullscreen control under the player', async () => {
+  it('offers a custom fullscreen control above the player', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
     await openDosGames(user)
