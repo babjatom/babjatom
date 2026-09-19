@@ -1,6 +1,15 @@
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
+import {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { sanitizeJsDosCss } from './sanitize-js-dos-css.mjs'
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const playgroundRoot = path.resolve(scriptDir, '..')
@@ -15,12 +24,15 @@ if (!existsSync(sourceDist)) {
 rmSync(targetDir, { recursive: true, force: true })
 mkdirSync(targetDir, { recursive: true })
 
-for (const file of ['js-dos.js', 'js-dos.css', 'js-dos.js.map']) {
+for (const file of ['js-dos.js', 'js-dos.js.map']) {
   copyFileSync(path.join(sourceDist, file), path.join(targetDir, file))
 }
+
+const rawCss = readFileSync(path.join(sourceDist, 'js-dos.css'), 'utf8')
+writeFileSync(path.join(targetDir, 'js-dos.css'), sanitizeJsDosCss(rawCss))
 
 cpSync(path.join(sourceDist, 'emulators'), path.join(targetDir, 'emulators'), {
   recursive: true,
 })
 
-console.log('Synced js-dos assets to public/js-dos/')
+console.log('Synced js-dos assets to public/js-dos/ (CSS sanitized)')

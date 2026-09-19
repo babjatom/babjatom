@@ -98,7 +98,12 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
 
   useEffect(() => {
     function onFullScreenChange() {
-      setIsFullScreen(Boolean(document.fullscreenElement))
+      const active = Boolean(document.fullscreenElement)
+      setIsFullScreen(active)
+      const surface = surfaceRef.current
+      if (surface) {
+        surface.style.height = active ? '100%' : '70dvh'
+      }
     }
     document.addEventListener('fullscreenchange', onFullScreenChange)
     return () => {
@@ -116,10 +121,16 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
     }
 
     if (entering) {
+      if (surface) {
+        surface.style.height = '100%'
+      }
       try {
         await surface?.requestFullscreen()
       } catch {
         // Dos may already handle fullscreen; ignore gesture/API failures.
+        if (surface && !document.fullscreenElement) {
+          surface.style.height = '70dvh'
+        }
       }
     } else if (document.fullscreenElement) {
       try {
@@ -127,80 +138,33 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
       } catch {
         // ignore
       }
+      if (surface) {
+        surface.style.height = '70dvh'
+      }
     }
   }
 
-  useEffect(() => {
-    const surface = surfaceRef.current
-    if (!surface) {
-      return
-    }
-
-    let lastTapAt = 0
-
-    function isOnScreenControl(target: EventTarget | null) {
-      return (
-        target instanceof Element &&
-        Boolean(
-          target.closest(
-            '.emulator-button-touch-zone, .nipple, .nipple-zone, .front, .back',
-          ),
-        )
-      )
-    }
-
-    function onDoubleClick(event: MouseEvent) {
-      if (isOnScreenControl(event.target)) {
-        return
-      }
-      event.preventDefault()
-      void toggleFullScreen()
-    }
-
-    function onTouchEnd(event: TouchEvent) {
-      if (isOnScreenControl(event.target)) {
-        lastTapAt = 0
-        return
-      }
-      const now = Date.now()
-      if (now - lastTapAt < 300) {
-        lastTapAt = 0
-        event.preventDefault()
-        void toggleFullScreen()
-        return
-      }
-      lastTapAt = now
-    }
-
-    surface.addEventListener('dblclick', onDoubleClick)
-    surface.addEventListener('touchend', onTouchEnd, { passive: false })
-    return () => {
-      surface.removeEventListener('dblclick', onDoubleClick)
-      surface.removeEventListener('touchend', onTouchEnd)
-    }
-    // Listeners only need the mount node; toggleFullScreen reads refs.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
     <div className="flex flex-col gap-3" data-testid="dos-game-player">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
-          <p className="text-sm text-muted-foreground">
-            Progress auto-saves in this browser. Double-click or double-tap the
-            player for fullscreen. On desktop, click once to capture the mouse
-            (Esc to release). On phones, slide the left stick to move without
-            lifting your thumb; Fire / Open / Strafe / Enter are on the right.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
-          onClick={onBack}
-        >
+      <p className="text-sm text-muted-foreground">
+        Progress auto-saves in this browser. On desktop, click once to capture
+        the mouse (Esc to release). On phones, slide the left stick to move
+        without lifting your thumb; Fire / Open / Strafe / Enter are on the
+        right.
+      </p>
+
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={onBack}>
           Back to catalog
-        </button>
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            void toggleFullScreen()
+          }}
+        >
+          {isFullScreen ? 'Exit fullscreen' : 'Fullscreen'}
+        </Button>
       </div>
 
       {status === 'loading' ? (
@@ -231,18 +195,6 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           className="h-full w-full bg-black"
           style={{ height: '100%', width: '100%', background: '#000' }}
         />
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => {
-            void toggleFullScreen()
-          }}
-        >
-          {isFullScreen ? 'Exit fullscreen' : 'Fullscreen'}
-        </Button>
       </div>
     </div>
   )

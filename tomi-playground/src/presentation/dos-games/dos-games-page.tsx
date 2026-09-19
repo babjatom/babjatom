@@ -1,25 +1,11 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/presentation/shared/reveal'
-import { dosGames, getDosGame, type DosGame } from './dos-games-catalog'
+import { dosGames } from './dos-games-catalog'
 import { DosGamePlayer } from './dos-game-player'
 
 export function DosGamesPage() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null)
-  const activeGame: DosGame | undefined = activeGameId
-    ? getDosGame(activeGameId)
-    : undefined
-
-  if (activeGame) {
-    return (
-      <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-6">
-        <DosGamePlayer
-          game={activeGame}
-          onBack={() => setActiveGameId(null)}
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-8">
@@ -42,14 +28,24 @@ export function DosGamesPage() {
             >
               <div>
                 <h2 className="font-display text-2xl font-semibold">{game.title}</h2>
-                <p className="mt-1 text-muted-foreground">{game.summary}</p>
+                {game.summary ? (
+                  <p className="mt-1 text-muted-foreground">{game.summary}</p>
+                ) : null}
                 <p className="mt-2 text-sm text-muted-foreground">{game.credit}</p>
               </div>
-              <div>
-                <Button type="button" onClick={() => setActiveGameId(game.id)}>
-                  Play {game.title}
-                </Button>
-              </div>
+              {activeGameId === game.id ? null : (
+                <div>
+                  <Button type="button" onClick={() => setActiveGameId(game.id)}>
+                    Play {game.title}
+                  </Button>
+                </div>
+              )}
+              {activeGameId === game.id ? (
+                <DosGamePlayer
+                  game={game}
+                  onBack={() => setActiveGameId(null)}
+                />
+              ) : null}
             </li>
           ))}
         </ul>

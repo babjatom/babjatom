@@ -73,6 +73,13 @@ describe('Dos games page', () => {
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
     )
 
+    expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Wolfenstein 3D' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Play Wolfenstein 3D' }),
+    ).not.toBeInTheDocument()
     expect(screen.getByTestId('dos-game-player')).toBeInTheDocument()
     const surface = screen.getByTestId('dos-player-surface')
     expect(surface).toBeInTheDocument()
@@ -80,6 +87,12 @@ describe('Dos games page', () => {
     expect(surface).toHaveClass('dos-player-host')
     expect(screen.getByText(/progress auto-saves/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Back to catalog' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Collapse sidebar' }),
+    ).toBeInTheDocument()
 
     await vi.waitFor(() => {
       expect(dosMock).toHaveBeenCalled()
@@ -97,12 +110,14 @@ describe('Dos games page', () => {
     expect(options.url).toContain('games/wolf3d/wolf3d.jsdos')
 
     await user.click(screen.getByRole('button', { name: 'Back to catalog' }))
+    expect(screen.queryByTestId('dos-game-player')).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
   })
 
-  it('offers a custom fullscreen control under the player', async () => {
+  it('offers a custom fullscreen control above the player', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
     await openDosGames(user)
@@ -118,27 +133,6 @@ describe('Dos games page', () => {
       typeof vi.fn
     >
     await user.click(screen.getByRole('button', { name: 'Fullscreen' }))
-    expect(setFullScreen).toHaveBeenCalledWith(true)
-  })
-
-  it('enters fullscreen when the player is double-clicked', async () => {
-    const user = userEvent.setup()
-    renderApp('/babjatom/')
-    await openDosGames(user)
-    await user.click(
-      screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
-    )
-
-    await vi.waitFor(() => {
-      expect(dosMock).toHaveBeenCalled()
-    })
-
-    const setFullScreen = dosMock.mock.results[0]?.value.setFullScreen as ReturnType<
-      typeof vi.fn
-    >
-    setFullScreen.mockClear()
-
-    await user.dblClick(screen.getByTestId('dos-player-surface'))
     expect(setFullScreen).toHaveBeenCalledWith(true)
   })
 

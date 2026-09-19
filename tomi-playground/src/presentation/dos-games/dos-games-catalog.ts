@@ -12,8 +12,7 @@ export const dosGames: DosGame[] = [
   {
     id: 'wolf3d',
     title: 'Wolfenstein 3D',
-    summary:
-      'id Software’s shareware episode — storm Castle Wolfenstein in the browser.',
+    summary: '',
     credit:
       'Shareware episode 1 © 1992 id Software, published by Apogee Software. Free to share under the included VENDOR.DOC terms.',
     bundlePath: 'games/wolf3d/wolf3d.jsdos?v=6',
