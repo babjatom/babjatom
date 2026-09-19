@@ -1,3 +1,7 @@
+import { ThemeService } from '@/application/theme-service'
+import { createLocalStoragePersistence } from '@/infrastructure/local-storage-persistence'
+import { applyTheme } from '@/presentation/theme/apply-theme'
+
 export type DosProps = {
   stop: () => Promise<void>
   save: () => Promise<boolean>
@@ -37,6 +41,37 @@ function publicUrl(relativePath: string): string {
   return `${normalizedBase}${relativePath.replace(/^\//, '')}`
 }
 
+function reapplyStoredTheme() {
+  const service = new ThemeService(createLocalStoragePersistence())
+  applyTheme(service.loadSession().activeTheme)
+}
+
+function ensureJsDosStylesheet(cssHref: string): Promise<void> {
+  const existing = document.querySelector<HTMLLinkElement>(
+    `link[href="${cssHref}"]`,
+  )
+  if (existing) {
+    reapplyStoredTheme()
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = cssHref
+    link.onload = () => {
+      reapplyStoredTheme()
+      resolve()
+    }
+    link.onerror = () => {
+      // Player may still run without chrome styles; do not block Dos().
+      reapplyStoredTheme()
+      resolve()
+    }
+    document.head.appendChild(link)
+  })
+}
+
 let loadPromise: Promise<DosFn> | null = null
 
 export function loadDosPlayer(): Promise<DosFn> {
@@ -47,31 +82,35 @@ export function loadDosPlayer(): Promise<DosFn> {
     return loadPromise
   }
 
-  loadPromise = new Promise((resolve, reject) => {
+  loadPromise = (async () => {
     const cssHref = publicUrl('js-dos/js-dos.css')
-    if (!document.querySelector(`link[href="${cssHref}"]`)) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = cssHref
-      document.head.appendChild(link)
+    await ensureJsDosStylesheet(cssHref)
+
+    if (window.Dos) {
+      return window.Dos
     }
 
-    const script = document.createElement('script')
-    script.src = publicUrl('js-dos/js-dos.js')
-    script.async = true
-    script.onload = () => {
-      if (!window.Dos) {
-        reject(new Error('js-dos loaded but window.Dos is missing'))
-        loadPromise = null
-        return
+    return new Promise<DosFn>((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = publicUrl('js-dos/js-dos.js')
+      script.async = true
+      script.onload = () => {
+        if (!window.Dos) {
+          reject(new Error('js-dos loaded but window.Dos is missing'))
+          loadPromise = null
+          return
+        }
+        resolve(window.Dos)
       }
-      resolve(window.Dos)
-    }
-    script.onerror = () => {
-      loadPromise = null
-      reject(new Error('Failed to load js-dos'))
-    }
-    document.head.appendChild(script)
+      script.onerror = () => {
+        loadPromise = null
+        reject(new Error('Failed to load js-dos'))
+      }
+      document.head.appendChild(script)
+    })
+  })().catch((error) => {
+    loadPromise = null
+    throw error
   })
 
   return loadPromise
