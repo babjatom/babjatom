@@ -20,11 +20,47 @@ Feature: Ask Tomi
     Then I should see starter prompts
     And I should not see the suggested-question hint
 
-  Scenario: Chat stays in one screen with an inner scroll area
+  Scenario: Empty chat centers starter prompts when they fit
+    Given I am on the Ask Tomi page
+    Then I should see starter prompts
+    And the starter prompts should sit in the conversation area
+
+  Scenario: Empty chat does not show an inner scrollbar when content fits
     Given I am on the Ask Tomi page
     Then I should see the Ask Tomi heading
+    And the Ask Tomi heading should not be clipped
     And I should see the question composer
-    And the conversation should scroll inside the chat area
+    And the conversation area should not scroll when starters fit
+    And the conversation area should not look like a bordered panel
+
+  Scenario: Empty chat scrolls starter prompts when they do not fit
+    Given I am on a short mobile viewport
+    And I am on the Ask Tomi page
+    Then I should see starter prompts
+    And the conversation area should scroll so I can reach every starter
+    And the first starter prompt should not be clipped
+
+
+  Scenario: Active chat scrolls inside the conversation area
+    Given I have received an answer in Ask Tomi
+    Then the conversation should scroll inside the chat area
+    And the conversation area should not look like a bordered panel
+
+  Scenario: Active chat quiets the header and composer
+    Given I have received an answer in Ask Tomi
+    Then I should see the Ask Tomi heading
+    And I should not see the Ask Tomi subtitle
+    And I should not see the prototype disclaimer until I focus the composer
+    And I should not see a Privacy link in the composer until I focus it
+    When I focus the question composer
+    Then I should see a prototype disclaimer
+    And I should see a Privacy link
+
+  Scenario: Active chat uses a compact auto-growing composer
+    Given I have received an answer in Ask Tomi
+    Then the question composer should start on one line
+    And the question composer should show a short follow-up placeholder
+    And the question composer should not show a scrollbar until the question is long
 
   Scenario: Visitor sends a starter prompt
     Given I am on the Ask Tomi page

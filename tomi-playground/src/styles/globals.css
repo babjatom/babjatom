@@ -226,6 +226,41 @@ body {
   font-weight: 600;
 }
 
+/* Thin overlay scrollbar for Ask Tomi conversation canvas. */
+.scrollbar-overlay {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+}
+
+.scrollbar-overlay::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-overlay::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: hsl(var(--muted-foreground) / 0.25);
+}
+
+.scrollbar-overlay:hover::-webkit-scrollbar-thumb,
+.scrollbar-overlay:focus-within::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.45);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .scrollbar-overlay {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-overlay::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
 /* Ask Tomi GLB: soft bottom dissolve so the waist cut is not a hard edge.
    Overlay must sit above the WebGL canvas (composited layer). */
 .voxel-scene {

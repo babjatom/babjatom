@@ -135,16 +135,145 @@ describe('Ask Tomi chat', () => {
     expect(starterHint.className).toMatch(/\bsm:block\b/)
   })
 
-  it('keeps the heading and composer on screen with an inner chat scroll area', async () => {
+  it('keeps empty chat without an inner scrollbar when starters fit and does not clip the heading', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
+    const askHeading = screen.getByRole('heading', { name: 'Ask Tomi' })
+    expect(askHeading).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
+
+    const header = askHeading.closest('header')
+    expect(header).toBeTruthy()
+    expect(header?.className).not.toMatch(/overflow-hidden/)
+    expect(askHeading.className).toMatch(/leading-tight/)
+    const headerInner = header?.querySelector(':scope > div.relative')
+    expect(headerInner?.className).toMatch(/pt-5/)
 
     const conversation = screen.getByRole('region', { name: /conversation/i })
     expect(conversation).toBeInTheDocument()
+    // jsdom reports 0×0 sizes, so empty content is treated as fitting.
+    expect(conversation.className).toMatch(/overflow-hidden/)
+    expect(conversation.className).not.toMatch(/overflow-y-auto/)
+    expect(conversation.className).not.toMatch(/scrollbar-overlay/)
+    expect(conversation.className).not.toMatch(/\bborder\b/)
+    expect(conversation.className).not.toMatch(/bg-background/)
+  })
+
+  it('scrolls empty starters when they do not fit the conversation area', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    const conversation = screen.getByRole('region', { name: /conversation/i })
+    const content = conversation.querySelector('.flex.flex-col.gap-5')
+    expect(content).toBeTruthy()
+
+    Object.defineProperty(conversation, 'clientHeight', {
+      configurable: true,
+      value: 120,
+    })
+    Object.defineProperty(content as HTMLElement, 'scrollHeight', {
+      configurable: true,
+      value: 480,
+    })
+
+    window.dispatchEvent(new Event('resize'))
+
+    await waitFor(() => {
+      expect(conversation.className).toMatch(/overflow-y-auto/)
+      expect(conversation.className).toMatch(/scrollbar-overlay/)
+    })
+
+    expect(
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'What have you shipped end-to-end recently?',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('enables inner conversation scroll once chatting', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText(
+        'Tomi is a full-stack engineer based in Prague.',
+      ),
+    ).toBeInTheDocument()
+
+    const conversation = screen.getByRole('region', { name: /conversation/i })
     expect(conversation.className).toMatch(/overflow-y-auto/)
+    expect(conversation.className).toMatch(/scrollbar-overlay/)
+    expect(conversation.className).not.toMatch(/\bborder\b/)
+  })
+
+  it('keeps starter prompts in the conversation area', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    const conversation = screen.getByRole('region', { name: /conversation/i })
+    const starter = within(conversation).getByRole('button', {
+      name: 'What’s your tech stack?',
+    })
+    expect(starter).toBeInTheDocument()
+    expect(starter.closest('.max-w-3xl')).toBeTruthy()
+  })
+
+  it('quiets the header and composer once chatting', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText(
+        'Tomi is a full-stack engineer based in Prague.',
+      ),
+    ).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
+    expect(
+      screen.queryByText(/follow-ups in this chat can refer to earlier answers/i),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/prototype — don’t take the results seriously/i),
+    ).not.toBeInTheDocument()
+
+    const main = document.querySelector('main')
+    expect(main).toBeTruthy()
+    expect(
+      within(main as HTMLElement).queryByRole('link', { name: 'Privacy' }),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('Question'))
+
+    expect(
+      screen.getByText(/prototype — don’t take the results seriously/i),
+    ).toBeInTheDocument()
+    expect(
+      within(main as HTMLElement).getByRole('link', { name: 'Privacy' }),
+    ).toBeInTheDocument()
+  })
+
+  it('uses a compact auto-growing composer once chatting', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText(
+        'Tomi is a full-stack engineer based in Prague.',
+      ),
+    ).toBeInTheDocument()
+
+    const composer = screen.getByLabelText('Question')
+    expect(composer).toHaveAttribute('rows', '1')
+    expect(composer).toHaveAttribute('placeholder', 'Ask a follow-up…')
+    expect(composer.className).toMatch(/overflow-hidden/)
+    expect(composer.style.overflowY).toBe('hidden')
   })
 
   it('sends a starter prompt and renders the answer', async () => {
