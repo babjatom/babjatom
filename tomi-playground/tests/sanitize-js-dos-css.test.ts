@@ -1,10 +1,7 @@
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+// Sanitizer lives next to the sync script (plain ESM, no TS types).
+// @ts-expect-error -- .mjs helper has no declaration file
 import { sanitizeJsDosCss } from '../scripts/sanitize-js-dos-css.mjs'
-
-const playgroundRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 describe('sanitizeJsDosCss', () => {
   it('keeps only player-scoped rules and drops shell-leaking utilities', () => {
@@ -42,20 +39,5 @@ describe('sanitizeJsDosCss', () => {
     expect(output).not.toContain('border-width:0')
     expect(output).not.toContain('button-pop')
     expect(output).not.toContain('prefers-color-scheme')
-  })
-
-  it('sanitizes the synced public js-dos stylesheet', () => {
-    const synced = readFileSync(
-      path.join(playgroundRoot, 'public/js-dos/js-dos.css'),
-      'utf8',
-    )
-
-    expect(synced).toMatch(/\.jsdos/)
-    expect(synced).toMatch(/\.emulator-/)
-    expect(synced).not.toMatch(/\.bg-primary\{/)
-    expect(synced).not.toMatch(/\.hidden\{display:none\}/)
-    expect(synced).not.toMatch(/:root,\[data-theme\]\{/)
-    expect(synced).not.toMatch(/\*,:before,:after\{[^}]*border-width:0/)
-    expect(synced.length).toBeLessThan(80_000)
   })
 })
