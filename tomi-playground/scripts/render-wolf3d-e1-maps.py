@@ -6,6 +6,7 @@ from __future__ import annotations
 import struct
 import zipfile
 from pathlib import Path
+import random
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -20,6 +21,7 @@ AMBUSHTILE = 106
 DOOR_LO, DOOR_HI = 90, 101
 PUSHWALL_OBJ = 98
 PLAYER_LO, PLAYER_HI = 19, 22
+ITEM_LO, ITEM_HI = 23, 74
 
 # Colors
 BG = (18, 18, 22)
@@ -297,6 +299,45 @@ def enemy_color(kind: str) -> tuple[int, int, int]:
     }[kind]
 
 
+def item_style(tile: int) -> tuple[tuple[int, int, int], str]:
+    """Stable pseudo-random color + shape per item type id."""
+    rng = random.Random(tile * 9973 + 42)
+    color = (rng.randint(60, 255), rng.randint(60, 255), rng.randint(60, 255))
+    shape = rng.choice(["diamond", "square", "tri", "cross", "plus", "x"])
+    return color, shape
+
+
+def draw_item(draw: ImageDraw.ImageDraw, cx: int, cy: int, color: tuple[int, int, int], shape: str) -> None:
+    r = 3
+    if shape == "square":
+        draw.rectangle([cx - r, cy - r, cx + r, cy + r], fill=color, outline=(20, 20, 20))
+    elif shape == "diamond":
+        draw.polygon(
+            [(cx, cy - r - 1), (cx + r + 1, cy), (cx, cy + r + 1), (cx - r - 1, cy)],
+            fill=color,
+            outline=(20, 20, 20),
+        )
+    elif shape == "tri":
+        draw.polygon(
+            [(cx, cy - r - 1), (cx + r + 1, cy + r), (cx - r - 1, cy + r)],
+            fill=color,
+            outline=(20, 20, 20),
+        )
+    elif shape == "cross":
+        draw.rectangle([cx - 1, cy - r, cx + 1, cy + r], fill=color)
+        draw.rectangle([cx - r, cy - 1, cx + r, cy + 1], fill=color)
+    elif shape == "plus":
+        draw.line([cx, cy - r, cx, cy + r], fill=color, width=2)
+        draw.line([cx - r, cy, cx + r, cy], fill=color, width=2)
+    else:  # x
+        draw.line([cx - r, cy - r, cx + r, cy + r], fill=color, width=2)
+        draw.line([cx - r, cy + r, cx + r, cy - r], fill=color, width=2)
+
+
+def is_item(tile: int) -> bool:
+    return ITEM_LO <= tile <= ITEM_HI
+
+
 def filename_for(idx: int, name: str) -> str:
     if idx == 9 or "secret" in name.lower():
         return "e1m10-secret.png"
@@ -352,6 +393,16 @@ def render_map(
         # dark rim so it reads on any neighbor
         draw.rectangle([x0, y0, x1, y1], outline=(120, 80, 0))
 
+    # Items (statics 23-74) — random-ish color/shape per type
+    for i, tile in enumerate(objs):
+        if not is_item(tile):
+            continue
+        x, y = i % MAP_W, i // MAP_W
+        cx = x * CELL + CELL // 2
+        cy = y * CELL + CELL // 2
+        color, shape = item_style(tile)
+        draw_item(draw, cx, cy, color, shape)
+
     # Enemies
     for i, tile in enumerate(objs):
         classified = classify_enemy(tile)
@@ -394,10 +445,11 @@ def render_map(
     title = title_for(m["index"], m["name"])
     secrets = len(pushwalls)
     guards = sum(1 for t in objs if classify_enemy(t))
+    items = sum(1 for t in objs if is_item(t))
     draw.text((8, MAP_H * CELL + 6), title, fill=TEXT, font=font)
     draw.text(
         (8, MAP_H * CELL + 24),
-        f"secrets:{secrets}  enemies:{guards}  walls=texture color  gold=pushwall  red=elev  blue=door",
+        f"secrets:{secrets}  enemies:{guards}  items:{items}  gold=pushwall  shapes=items",
         fill=(170, 170, 176),
         font=font,
     )
