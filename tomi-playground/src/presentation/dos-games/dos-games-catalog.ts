@@ -23,7 +23,7 @@ export const dosGames: DosGame[] = [
     summary: '',
     credit:
       'Shareware episode 1 © 1993 id Software. Free to share under the included README.TXT terms (DOOM1.WAD only).',
-    bundlePath: 'games/doom/doom.jsdos?v=1',
+    bundlePath: 'games/doom/doom.jsdos?v=2',
   },
 ]
 

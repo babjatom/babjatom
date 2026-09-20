@@ -34,6 +34,11 @@ Feature: Dos games
     And I should see the DOS player
     And I should be able to return to the catalog
 
+  Scenario: Doom uses the mouse on desktop
+    Given I am on the Dos games page
+    When I play Doom
+    Then I should see guidance about capturing the mouse
+
   Scenario: Saved progress persists across visits
     Given I am playing Wolfenstein 3D with auto-save enabled
     When I leave Dos games and open it again
