@@ -149,6 +149,16 @@ describe('Dos games page', () => {
     expect(screen.getByRole('button', { name: 'Play Doom' })).toBeInTheDocument()
   })
 
+  it('shows mouse capture guidance when playing Doom on desktop', async () => {
+    const user = userEvent.setup()
+    renderApp('/babjatom/')
+    await openDosGames(user)
+
+    await user.click(screen.getByRole('button', { name: 'Play Doom' }))
+
+    expect(screen.getByText(/click once to capture the mouse/i)).toBeInTheDocument()
+  })
+
   it('offers a custom fullscreen control above the player', async () => {
     const user = userEvent.setup()
     renderApp('/babjatom/')
