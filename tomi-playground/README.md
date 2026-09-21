@@ -65,7 +65,7 @@ Preview the production build locally:
 pnpm preview
 ```
 
-Vite is configured with `base: '/babjatom/'` so assets resolve correctly on GitHub Pages. Local `pnpm dev` still works with that base path.
+Vite is configured with `base: '/'` for the custom domain (`tomibabjak.dev`).
 
 ## Specs
 
@@ -137,7 +137,9 @@ The workflow fails if tests or the production build fail.
 Production URL:
 
 ```text
-https://babjatom.github.io/babjatom/
+https://tomibabjak.dev/
 ```
+
+(Legacy project URL: `https://babjatom.github.io/babjatom/` — may break after `base: '/'`.)
 
 In repository Settings → Pages, set the source to **GitHub Actions** after merging.

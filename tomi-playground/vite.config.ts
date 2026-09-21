@@ -19,7 +19,7 @@ function spaFallback(): Plugin {
 }
 
 export default defineConfig({
-  base: '/babjatom/',
+  base: '/',
   plugins: [react(), tailwindcss(), spaFallback()],
   resolve: {
     alias: {

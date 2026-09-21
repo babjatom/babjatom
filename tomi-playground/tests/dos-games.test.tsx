@@ -9,11 +9,11 @@ const dosMock = vi.fn()
 
 vi.mock('@/presentation/dos-games/load-dos-player', () => ({
   loadDosPlayer: () => Promise.resolve(dosMock),
-  dosAssetUrl: (path: string) => `/babjatom/${path}`,
-  dosEmulatorsPathPrefix: () => '/babjatom/js-dos/emulators/',
+  dosAssetUrl: (path: string) => `/${path}`,
+  dosEmulatorsPathPrefix: () => '/js-dos/emulators/',
 }))
 
-function renderApp(path = '/babjatom/') {
+function renderApp(path = '/') {
   window.history.pushState({}, '', path)
   return render(<App />)
 }
@@ -45,7 +45,7 @@ describe('Dos games page', () => {
   })
 
   it('lists Dos games in the pages menu', () => {
-    renderApp('/babjatom/')
+    renderApp('/')
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     expect(
       within(pagesNav).getByRole('link', { name: 'Dos games' }),
@@ -54,7 +54,7 @@ describe('Dos games page', () => {
 
   it('shows the catalog with Wolfenstein 3D, Doom, and shareware credits', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
     await openDosGames(user)
 
     expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
@@ -72,7 +72,7 @@ describe('Dos games page', () => {
 
   it('starts Wolfenstein 3D in the DOS player and can return to the catalog', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
     await openDosGames(user)
 
     await user.click(
@@ -125,7 +125,7 @@ describe('Dos games page', () => {
 
   it('starts Doom in the DOS player and can return to the catalog', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
     await openDosGames(user)
 
     await user.click(screen.getByRole('button', { name: 'Play Doom' }))
@@ -151,7 +151,7 @@ describe('Dos games page', () => {
 
   it('shows mouse capture guidance when playing Doom on desktop', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
     await openDosGames(user)
 
     await user.click(screen.getByRole('button', { name: 'Play Doom' }))
@@ -161,7 +161,7 @@ describe('Dos games page', () => {
 
   it('offers a custom fullscreen control above the player', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
     await openDosGames(user)
     await user.click(
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
@@ -181,7 +181,7 @@ describe('Dos games page', () => {
   it('disables pointer lock on a mobile viewport', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
-    renderApp('/babjatom/')
+    renderApp('/')
 
     await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     await openDosGames(user)

@@ -8,14 +8,14 @@ import {
   TOMI_CHAT_URL,
 } from '@/infrastructure/tomi-chat-api'
 
-function renderApp(path = '/babjatom/') {
+function renderApp(path = '/') {
   window.history.pushState({}, '', path)
   return render(<App />)
 }
 
 async function openAskTomi(
   user: ReturnType<typeof userEvent.setup>,
-  path = '/babjatom/',
+  path = '/',
 ) {
   renderApp(path)
   const pagesNav = screen.getByRole('navigation', { name: /pages/i })
@@ -121,7 +121,7 @@ describe('Ask Tomi chat', () => {
   })
 
   it('hides the suggested-question hint on a mobile viewport', () => {
-    renderApp('/babjatom/')
+    renderApp('/')
 
     expect(
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
