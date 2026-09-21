@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '@/App'
 
-function renderApp(path = '/babjatom/') {
+function renderApp(path = '/') {
   window.history.pushState({}, '', path)
   return render(<App />)
 }
@@ -15,7 +15,7 @@ describe('Analytics page', () => {
 
   it('is listed after Ask Tomi and Theme Playground and shows table plus charts', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     const links = within(pagesNav).getAllByRole('link')

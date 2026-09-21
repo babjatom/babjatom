@@ -5,7 +5,7 @@ import App from '@/App'
 import { track } from '@/infrastructure/analytics'
 import { setMatchMediaMatches } from './setup'
 
-function renderApp(path = '/babjatom/') {
+function renderApp(path = '/') {
   window.history.pushState({}, '', path)
   return render(<App />)
 }
@@ -19,7 +19,7 @@ describe('Privacy page', () => {
 
   it('links Privacy from the shell and discloses hosting, Ask Tomi, and the profile pixel', async () => {
     const user = userEvent.setup()
-    const { container } = renderApp('/babjatom/')
+    const { container } = renderApp('/')
 
     const aside = container.querySelector('aside')
     expect(aside).toBeTruthy()
@@ -49,7 +49,7 @@ describe('Privacy page', () => {
 
   it('is reachable from Ask Tomi composer disclosure', async () => {
     const user = userEvent.setup()
-    const { container } = renderApp('/babjatom/')
+    const { container } = renderApp('/')
 
     expect(
       screen.getByText(/don’t send secrets/i),

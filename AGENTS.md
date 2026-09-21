@@ -17,7 +17,7 @@ Everything committed here is public forever, including history.
 - Route every page through [`app-shell.tsx`](tomi-playground/src/presentation/shell/app-shell.tsx) (`AppShell` + `<Outlet />`).
 - Keep the shell `pages` array aligned with routes in [`App.tsx`](tomi-playground/src/App.tsx).
 - Colocate UI under `presentation/` by surface: `shell/`, `theme/`, `shared/`, and one folder per route feature.
-- Preserve Vite `base: '/babjatom/'` and [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+- Preserve Vite `base: '/'` (custom domain `tomibabjak.dev`) and [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 - Reuse the existing CSS-variable theme system.
 - Ship incomplete features as intentional placeholders, not broken nav entries.
 - When adding routes, add or update routing/navigation tests.

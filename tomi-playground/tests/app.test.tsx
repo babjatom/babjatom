@@ -6,7 +6,7 @@ import { densityToGrid } from '@/domain/maze-prefs'
 import { track } from '@/infrastructure/analytics'
 import { setMatchMediaMatches } from './setup'
 
-function renderApp(path = '/babjatom/') {
+function renderApp(path = '/') {
   window.history.pushState({}, '', path)
   return render(<App />)
 }
@@ -37,7 +37,7 @@ describe('babjatom shell navigation', () => {
   })
 
   it('renders Ask Tomi as the home page with pages nav', () => {
-    renderApp('/babjatom/')
+    renderApp('/')
     expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
 
@@ -56,7 +56,7 @@ describe('babjatom shell navigation', () => {
   })
 
   it('keeps the ambient maze light behind content and non-interactive', () => {
-    renderApp('/babjatom/')
+    renderApp('/')
     const canvas = screen.getByTestId('maze-light-background')
     expect(canvas.tagName).toBe('CANVAS')
     expect(canvas).toHaveAttribute('aria-hidden')
@@ -66,7 +66,7 @@ describe('babjatom shell navigation', () => {
 
   it('uses a taller maze grid on a tall phone viewport', () => {
     setViewport(390, 844)
-    renderApp('/babjatom/')
+    renderApp('/')
     const canvas = screen.getByTestId('maze-light-background')
     const cols = Number(canvas.getAttribute('data-maze-cols'))
     const rows = Number(canvas.getAttribute('data-maze-rows'))
@@ -75,7 +75,7 @@ describe('babjatom shell navigation', () => {
   })
 
   it('regenerates the maze grid when resized to a tall phone shape', async () => {
-    renderApp('/babjatom/')
+    renderApp('/')
     const canvas = screen.getByTestId('maze-light-background')
     const rebuildBefore = canvas.getAttribute('data-maze-rebuild')
 
@@ -93,7 +93,7 @@ describe('babjatom shell navigation', () => {
   it('keeps the pages menu collapsed on mobile viewports', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
-    renderApp('/babjatom/')
+    renderApp('/')
 
     expect(screen.queryByRole('navigation', { name: /pages/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /toggle sidebar/i })).toBeInTheDocument()
@@ -105,7 +105,7 @@ describe('babjatom shell navigation', () => {
   it('dismisses the mobile menu when tapping outside', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
-    renderApp('/babjatom/')
+    renderApp('/')
 
     await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     expect(screen.getByRole('navigation', { name: /pages/i })).toBeInTheDocument()
@@ -117,7 +117,7 @@ describe('babjatom shell navigation', () => {
   it('collapses the menu on mobile when a nav link is clicked', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)
-    renderApp('/babjatom/')
+    renderApp('/')
 
     await user.click(screen.getByRole('button', { name: /toggle sidebar/i }))
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
@@ -131,7 +131,7 @@ describe('babjatom shell navigation', () => {
 
   it('navigates to the theme playground route', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -143,7 +143,7 @@ describe('babjatom shell navigation', () => {
 
   it('navigates to Ask Tomi home from the pages menu', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -171,7 +171,7 @@ describe('babjatom shell navigation', () => {
   })
 
   it('redirects the legacy Ask Tomi URL to home', () => {
-    renderApp('/babjatom/ask-tomi')
+    renderApp('/ask-tomi')
 
     expect(window.location.pathname).not.toMatch(/ask-tomi/)
     expect(screen.getByRole('heading', { name: 'Ask Tomi' })).toBeInTheDocument()
@@ -180,7 +180,7 @@ describe('babjatom shell navigation', () => {
 
   it('switches themes from Theme Playground', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -200,7 +200,7 @@ describe('babjatom shell navigation', () => {
 
   it('generates a random theme and persists it', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -220,7 +220,7 @@ describe('babjatom shell navigation', () => {
 
   it('switches fonts from Theme Playground and persists them', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -238,7 +238,7 @@ describe('babjatom shell navigation', () => {
 
   it('keeps the selected font when switching themes', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -254,7 +254,7 @@ describe('babjatom shell navigation', () => {
 
   it('shows theme and font controls above typography on Theme Playground', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -288,7 +288,7 @@ describe('babjatom shell navigation', () => {
 
   it('shows background controls before themes and maze settings when Maze is on', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -341,7 +341,7 @@ describe('babjatom shell navigation', () => {
 
   it('hides the maze when None background is selected', async () => {
     const user = userEvent.setup()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -364,7 +364,7 @@ describe('babjatom shell navigation', () => {
 
   it('persists background and maze prefs across remount', async () => {
     const user = userEvent.setup()
-    const { unmount } = renderApp('/babjatom/')
+    const { unmount } = renderApp('/')
 
     const pagesNav = screen.getByRole('navigation', { name: /pages/i })
     await user.click(
@@ -380,7 +380,7 @@ describe('babjatom shell navigation', () => {
     await user.click(screen.getByRole('button', { name: /^none$/i }))
 
     unmount()
-    renderApp('/babjatom/')
+    renderApp('/')
 
     expect(
       screen.queryByTestId('maze-light-background'),
