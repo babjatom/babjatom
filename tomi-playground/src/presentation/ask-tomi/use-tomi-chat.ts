@@ -4,6 +4,7 @@ import {
   askTomiChat,
   getOrCreateChatSessionId,
   rotateChatSessionId,
+  TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
 
 export type ChatRole = 'user' | 'assistant'
@@ -42,6 +43,16 @@ function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError'
 }
 
+function classifyAskTomiError(
+  error: unknown,
+): 'network' | 'http' | 'unknown' {
+  if (error instanceof TomiChatError) {
+    if (typeof error.status === 'number') return 'http'
+    return 'network'
+  }
+  return 'unknown'
+}
+
 export function useTomiChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [pending, setPending] = useState(false)
@@ -52,10 +63,15 @@ export function useTomiChat() {
     abortRef.current = null
   }
 
+  function countUserTurns(current: ChatMessage[]) {
+    return current.filter((message) => message.role === 'user').length
+  }
+
   async function runQuestion(question: string, assistantId: string) {
     const controller = new AbortController()
     abortRef.current = controller
     setPending(true)
+    const startedAt = performance.now()
 
     try {
       const sessionId = getOrCreateChatSessionId()
@@ -71,8 +87,13 @@ export function useTomiChat() {
             : message,
         ),
       )
-      track('Ask Tomi Result', { status: 'complete' })
+      track('Ask Tomi Result', {
+        status: 'complete',
+        latency_ms: Math.round(performance.now() - startedAt),
+      })
     } catch (error) {
+      const latency_ms = Math.round(performance.now() - startedAt)
+
       if (isAbortError(error)) {
         setMessages((current) =>
           current.map((message) =>
@@ -85,7 +106,7 @@ export function useTomiChat() {
               : message,
           ),
         )
-        track('Ask Tomi Result', { status: 'cancelled' })
+        track('Ask Tomi Result', { status: 'cancelled', latency_ms })
         return
       }
 
@@ -98,7 +119,11 @@ export function useTomiChat() {
             : entry,
         ),
       )
-      track('Ask Tomi Result', { status: 'error' })
+      track('Ask Tomi Result', {
+        status: 'error',
+        latency_ms,
+        error_kind: classifyAskTomiError(error),
+      })
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null
@@ -111,10 +136,13 @@ export function useTomiChat() {
     const trimmed = question.trim()
     if (!trimmed || pending) return
 
+    const priorUserTurns = countUserTurns(messages)
     const source = options?.source ?? 'typed'
     track('Ask Tomi Message Sent', {
       source,
       ...(options?.starter_id ? { starter_id: options.starter_id } : {}),
+      turn_index: priorUserTurns + 1,
+      is_follow_up: priorUserTurns > 0,
     })
 
     const userId = createId()

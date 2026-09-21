@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { track } from '@/infrastructure/analytics'
 import { isWebGLAvailable } from '@/infrastructure/webgl'
 import { VoxelScene } from '@/presentation/ask-tomi/voxel-scene'
 
@@ -42,10 +41,9 @@ describe('isWebGLAvailable', () => {
 describe('VoxelScene', () => {
   afterEach(() => {
     vi.restoreAllMocks()
-    vi.mocked(track).mockClear()
   })
 
-  it('skips Canvas and reports unsupported when WebGL is missing', async () => {
+  it('skips Canvas and reports unsupported when WebGL is missing', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
 
     render(<VoxelScene />)
@@ -54,10 +52,5 @@ describe('VoxelScene', () => {
     expect(
       screen.getByText(/3D preview needs WebGL/i),
     ).toBeInTheDocument()
-    await waitFor(() => {
-      expect(track).toHaveBeenCalledWith('Voxel Scene Loaded', {
-        status: 'unsupported',
-      })
-    })
   })
 })

@@ -2,7 +2,6 @@ import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNo
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, useGLTF } from '@react-three/drei'
 import type { Group } from 'three'
-import { track } from '@/infrastructure/analytics'
 import { isWebGLAvailable } from '@/infrastructure/webgl'
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/tomi.glb`
@@ -27,10 +26,6 @@ function TomiModel() {
   const { scene } = useGLTF(MODEL_URL)
   const cloned = useMemo(() => scene.clone(true), [scene])
 
-  useEffect(() => {
-    track('Voxel Scene Loaded', { status: 'ok' })
-  }, [])
-
   useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
@@ -50,10 +45,6 @@ function TomiModel() {
 }
 
 function VoxelSceneFallback({ reason }: { reason: 'unsupported' | 'error' }) {
-  useEffect(() => {
-    track('Voxel Scene Loaded', { status: reason })
-  }, [reason])
-
   return (
     <div className="flex h-full w-full items-center justify-center px-4 text-center">
       <p className="max-w-[14rem] text-sm text-muted-foreground">

@@ -27,7 +27,10 @@ describe('Privacy page', () => {
 
     expect(screen.getByRole('heading', { name: 'Privacy' })).toBeInTheDocument()
     expect(
-      screen.getByText(/does not use advertising cookies or product analytics/i),
+      screen.getByText(/does not use advertising cookies/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Mixpanel product analytics/i),
     ).toBeInTheDocument()
     expect(
       screen.getByText(/the playground is hosted on GitHub Pages/i),
@@ -59,5 +62,9 @@ describe('Privacy page', () => {
     expect(main).toBeTruthy()
     await user.click(within(main as HTMLElement).getByRole('link', { name: 'Privacy' }))
     expect(screen.getByRole('heading', { name: 'Privacy' })).toBeInTheDocument()
+    expect(track).toHaveBeenCalledWith('Nav Clicked', {
+      to: '/privacy',
+      source: 'ask_tomi_composer',
+    })
   })
 })
