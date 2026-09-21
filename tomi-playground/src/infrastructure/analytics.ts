@@ -26,7 +26,7 @@ export type AnalyticsEventMap = {
     status: 'complete' | 'error' | 'cancelled'
     latency_ms: number
     error_kind?: 'network' | 'http' | 'unknown'
-    kind?: 'chat' | 'schedule'
+    kind?: 'chat' | 'schedule' | 'schedule_preview' | 'schedule_cancel'
   }
   'Visits Table Interacted': {
     action: 'sort' | 'select' | 'reorder' | 'row_action'

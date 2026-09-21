@@ -538,15 +538,39 @@ describe('Ask Tomi chat', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
-  it('routes a Cal.com link to the scheduler instead of chat', async () => {
+  it('previews slots for a Cal.com link without booking', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementation(async (input) => {
       const url = String(input)
+      if (url.includes('/schedule/preview')) {
+        return Response.json({
+          ok: true,
+          answer:
+            'Found open times on acme/intro. Reply with **1–3** to book that slot, or **no** to cancel.',
+          slots: [
+            {
+              start: '2026-09-23T05:00:00Z',
+              end: '2026-09-23T05:30:00Z',
+              label: 'Wed, 23 Sept 2026, 12:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-09-23T06:00:00Z',
+              end: '2026-09-23T06:30:00Z',
+              label: 'Wed, 23 Sept 2026, 13:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-09-23T07:00:00Z',
+              end: '2026-09-23T07:30:00Z',
+              label: 'Wed, 23 Sept 2026, 14:00 (Asia/Bangkok)',
+            },
+          ],
+        })
+      }
       if (url.includes('/schedule')) {
         return Response.json({
           ok: true,
-          answer: 'Booked **Wed, 23 Sep 2026, 12:00** (Asia/Bangkok) on acme/intro.',
+          answer: 'Booked — should not happen yet.',
         })
       }
       return Response.json({
@@ -563,28 +587,147 @@ describe('Ask Tomi chat', () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining('/schedule'),
+        expect.stringContaining('/schedule/preview'),
         expect.objectContaining({ method: 'POST' }),
       )
     })
 
-    const scheduleCall = fetchMock.mock.calls.find((call) =>
-      String(call[0]).includes('/schedule'),
-    )
-    expect(scheduleCall).toBeTruthy()
-    const body = JSON.parse(String((scheduleCall?.[1] as RequestInit).body)) as {
-      url: string
-    }
-    expect(body.url).toBe('https://cal.com/acme/intro')
-
     expect(
-      await screen.findByText(/Booked/i),
+      await screen.findByTestId('schedule-preview-slots'),
     ).toBeInTheDocument()
+    expect(screen.getByText(/Found open times/i)).toBeInTheDocument()
+    expect(screen.getByText(/13:00/)).toBeInTheDocument()
+
+    const bookCalls = fetchMock.mock.calls.filter((call) => {
+      const url = String(call[0])
+      return url.includes('/schedule') && !url.includes('/preview')
+    })
+    expect(bookCalls).toHaveLength(0)
 
     const chatCalls = fetchMock.mock.calls.filter(
       (call) => String(call[0]) === TOMI_CHAT_URL,
     )
     expect(chatCalls).toHaveLength(0)
+  })
+
+  it('books the chosen preview slot when the visitor replies with a number', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.includes('/schedule/preview')) {
+        return Response.json({
+          ok: true,
+          answer:
+            'Found open times on acme/intro. Reply with **1–3** to book that slot, or **no** to cancel.',
+          slots: [
+            {
+              start: '2026-09-23T05:00:00Z',
+              end: '2026-09-23T05:30:00Z',
+              label: 'Wed, 23 Sept 2026, 12:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-09-23T06:00:00Z',
+              end: '2026-09-23T06:30:00Z',
+              label: 'Wed, 23 Sept 2026, 13:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-09-23T07:00:00Z',
+              end: '2026-09-23T07:30:00Z',
+              label: 'Wed, 23 Sept 2026, 14:00 (Asia/Bangkok)',
+            },
+          ],
+        })
+      }
+      if (url.includes('/schedule')) {
+        return Response.json({
+          ok: true,
+          answer:
+            'Booked **Wed, 23 Sep 2026, 13:00** (Asia/Bangkok) on acme/intro.',
+        })
+      }
+      return Response.json({ answer: 'chat should not run' })
+    })
+
+    await openAskTomi(user)
+    await user.type(
+      screen.getByLabelText('Question'),
+      'https://cal.com/acme/intro',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    await screen.findByTestId('schedule-preview-slots')
+
+    await user.type(screen.getByLabelText('Question'), '2')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/Booked/i)).toBeInTheDocument()
+    })
+
+    const bookCall = fetchMock.mock.calls.find((call) => {
+      const url = String(call[0])
+      return url.includes('/schedule') && !url.includes('/preview')
+    })
+    expect(bookCall).toBeTruthy()
+    const body = JSON.parse(String(bookCall![1]?.body)) as {
+      url: string
+      start: string
+    }
+    expect(body.url).toBe('https://cal.com/acme/intro')
+    expect(body.start).toBe('2026-09-23T06:00:00Z')
+  })
+
+  it('cancels scheduling when the visitor replies no', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.includes('/schedule/preview')) {
+        return Response.json({
+          ok: true,
+          answer:
+            'Found open times on acme/intro. Reply with **1–2** to book that slot, or **no** to cancel.',
+          slots: [
+            {
+              start: '2026-09-23T05:00:00Z',
+              end: '2026-09-23T05:30:00Z',
+              label: 'Wed, 23 Sept 2026, 12:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-09-23T06:00:00Z',
+              end: '2026-09-23T06:30:00Z',
+              label: 'Wed, 23 Sept 2026, 13:00 (Asia/Bangkok)',
+            },
+          ],
+        })
+      }
+      if (url.includes('/schedule')) {
+        return Response.json({
+          ok: true,
+          answer: 'Booked — should not happen.',
+        })
+      }
+      return Response.json({ answer: 'chat' })
+    })
+
+    await openAskTomi(user)
+    await user.type(
+      screen.getByLabelText('Question'),
+      'https://cal.com/acme/intro',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    await screen.findByTestId('schedule-preview-slots')
+
+    await user.type(screen.getByLabelText('Question'), 'no')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+
+    expect(await screen.findByText('Cancelled.')).toBeInTheDocument()
+
+    const bookCalls = fetchMock.mock.calls.filter((call) => {
+      const url = String(call[0])
+      return url.includes('/schedule') && !url.includes('/preview')
+    })
+    expect(bookCalls).toHaveLength(0)
   })
 
   it('is reachable from shell navigation', async () => {

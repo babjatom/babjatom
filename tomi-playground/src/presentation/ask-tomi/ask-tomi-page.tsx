@@ -81,14 +81,30 @@ function AssistantBody({
     )
   }
 
+  const slots = message.schedulePreview?.slots
+
   return (
-    <div className="tomi-md text-sm leading-relaxed">
-      <ReactMarkdown>{displayText}</ReactMarkdown>
-      {!done && (
-        <span
-          className="ml-0.5 inline-block h-[1em] w-[0.08em] translate-y-[0.1em] animate-pulse bg-foreground/80"
-          aria-hidden
-        />
+    <div className="space-y-3 text-sm leading-relaxed">
+      <div className="tomi-md">
+        <ReactMarkdown>{displayText}</ReactMarkdown>
+        {!done && (
+          <span
+            className="ml-0.5 inline-block h-[1em] w-[0.08em] translate-y-[0.1em] animate-pulse bg-foreground/80"
+            aria-hidden
+          />
+        )}
+      </div>
+      {slots && slots.length > 0 && message.status === 'complete' && (
+        <ol
+          className="m-0 list-decimal space-y-1.5 pl-5 text-sm text-foreground"
+          data-testid="schedule-preview-slots"
+        >
+          {slots.map((slot) => (
+            <li key={slot.start} className="pl-1">
+              {slot.label}
+            </li>
+          ))}
+        </ol>
       )}
     </div>
   )

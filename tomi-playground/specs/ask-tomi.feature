@@ -111,8 +111,20 @@ Feature: Ask Tomi
     Then the composer should prompt me to paste a Cal.com link
     And I should not see an assistant answer yet
 
-  Scenario: Pasting a Cal.com link uses the scheduler
+  Scenario: Pasting a Cal.com link previews slots
     Given I am on the Ask Tomi page
     When I paste a Cal.com scheduling link and submit
-    Then I should see the schedule result in the chat
+    Then I should see a schedule preview with open times
     And the chat API should not have been called
+    And the scheduler should not have booked yet
+
+  Scenario: Choosing a previewed slot books it
+    Given I have a schedule preview with open times in Ask Tomi
+    When I reply with 2
+    Then I should see the booked schedule result in the chat
+
+  Scenario: Declining a schedule preview cancels
+    Given I have a schedule preview with open times in Ask Tomi
+    When I reply with no
+    Then I should see that scheduling was cancelled
+    And the scheduler should not have booked
