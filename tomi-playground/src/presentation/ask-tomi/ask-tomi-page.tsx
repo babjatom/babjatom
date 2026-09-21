@@ -9,6 +9,7 @@ import {
 } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
+  Calendar,
   Copy,
   Eraser,
   LoaderCircle,
@@ -30,6 +31,7 @@ import {
 } from './use-tomi-chat'
 
 const NEAR_BOTTOM_PX = 80
+const SCHEDULE_PLACEHOLDER = 'Paste their Cal.com link…'
 
 function AssistantBody({
   message,
@@ -102,6 +104,7 @@ export function AskTomiPage() {
   )
   const [composerFocused, setComposerFocused] = useState(false)
   const [emptyNeedsScroll, setEmptyNeedsScroll] = useState(false)
+  const [scheduleNudge, setScheduleNudge] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const emptyContentRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -242,6 +245,7 @@ export function AskTomiPage() {
                 onClick={() => {
                   clear()
                   setTypingDoneIds({})
+                  setScheduleNudge(false)
                   stickToBottomRef.current = true
                 }}
                 aria-label="Clear chat"
@@ -290,6 +294,25 @@ export function AskTomiPage() {
                     Start with a suggested question, or type your own below.
                   </Reveal>
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+                    <Reveal rootRef={listRef} delayMs={40}>
+                      <Button
+                        type="button"
+                        variant="default"
+                        className="w-full justify-start gap-2 text-left sm:w-auto"
+                        disabled={pending}
+                        data-testid="schedule-call-chip"
+                        onClick={() => {
+                          setScheduleNudge(true)
+                          setDraft('')
+                          setComposerFocused(true)
+                          inputRef.current?.focus()
+                          track('Ask Tomi Action', { action: 'schedule_nudge' })
+                        }}
+                      >
+                        <Calendar className="h-4 w-4 shrink-0" aria-hidden />
+                        Schedule call
+                      </Button>
+                    </Reveal>
                     {STARTER_PROMPTS.map((prompt, index) => (
                       <Reveal
                         key={prompt}
@@ -302,6 +325,7 @@ export function AskTomiPage() {
                           className="w-full justify-start text-left sm:w-auto"
                           disabled={pending}
                           onClick={() => {
+                            setScheduleNudge(false)
                             stickToBottomRef.current = true
                             void send(prompt, {
                               source: 'starter',
@@ -444,8 +468,12 @@ export function AskTomiPage() {
             pending={pending}
             hasMessages={hasMessages}
             showMeta={showComposerMeta}
+            scheduleNudge={scheduleNudge}
             inputRef={inputRef}
-            onDraftChange={setDraft}
+            onDraftChange={(value) => {
+              setDraft(value)
+              if (value.trim()) setScheduleNudge(false)
+            }}
             onKeyDown={handleKeyDown}
             onStop={stop}
           />
@@ -460,6 +488,7 @@ function LabelledComposer({
   pending,
   hasMessages,
   showMeta,
+  scheduleNudge,
   inputRef,
   onDraftChange,
   onKeyDown,
@@ -469,6 +498,7 @@ function LabelledComposer({
   pending: boolean
   hasMessages: boolean
   showMeta: boolean
+  scheduleNudge: boolean
   inputRef: RefObject<HTMLTextAreaElement | null>
   onDraftChange: (value: string) => void
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
@@ -485,6 +515,12 @@ function LabelledComposer({
     node.style.overflowY = node.scrollHeight > maxComposerPx ? 'auto' : 'hidden'
   }, [draft, hasMessages, inputRef, maxComposerPx])
 
+  const placeholder = scheduleNudge
+    ? SCHEDULE_PLACEHOLDER
+    : hasMessages
+      ? 'Ask a follow-up…'
+      : 'Ask about Tomi’s experience, stack, or approach…'
+
   return (
     <div className={cn('flex flex-col', hasMessages ? 'gap-1.5' : 'gap-2')}>
       <label htmlFor="ask-tomi-question" className="sr-only">
@@ -499,11 +535,7 @@ function LabelledComposer({
         disabled={pending}
         onChange={(event) => onDraftChange(event.target.value)}
         onKeyDown={onKeyDown}
-        placeholder={
-          hasMessages
-            ? 'Ask a follow-up…'
-            : 'Ask about Tomi’s experience, stack, or approach…'
-        }
+        placeholder={placeholder}
         autoComplete="off"
         className={cn(
           'w-full resize-none overflow-hidden rounded-md border border-input bg-background px-3 py-2.5 text-sm leading-snug ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
