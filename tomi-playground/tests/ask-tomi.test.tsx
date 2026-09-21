@@ -76,6 +76,10 @@ describe('Ask Tomi chat', () => {
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
     expect(
+      screen.getByRole('button', { name: 'Schedule call' }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('schedule-call-chip')).toBeInTheDocument()
+    expect(
       screen.getByRole('button', {
         name: 'How do you structure a React + TypeScript app?',
       }),
@@ -516,6 +520,71 @@ describe('Ask Tomi chat', () => {
       screen.queryByRole('img', { name: /3d tomi scene/i }),
     ).not.toBeInTheDocument()
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
+  })
+
+  it('nudges paste when Schedule call is chosen', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Schedule call' }))
+
+    expect(screen.getByLabelText('Question')).toHaveAttribute(
+      'placeholder',
+      'Paste their Cal.com link…',
+    )
+    expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
+      action: 'schedule_nudge',
+    })
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('routes a Cal.com link to the scheduler instead of chat', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.includes('/schedule')) {
+        return Response.json({
+          ok: true,
+          answer: 'Booked **Wed, 23 Sep 2026, 12:00** (Asia/Bangkok) on acme/intro.',
+        })
+      }
+      return Response.json({
+        answer: 'Tomi is a full-stack engineer based in Prague.',
+      })
+    })
+
+    await openAskTomi(user)
+    await user.type(
+      screen.getByLabelText('Question'),
+      'https://cal.com/acme/intro',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/schedule'),
+        expect.objectContaining({ method: 'POST' }),
+      )
+    })
+
+    const scheduleCall = fetchMock.mock.calls.find((call) =>
+      String(call[0]).includes('/schedule'),
+    )
+    expect(scheduleCall).toBeTruthy()
+    const body = JSON.parse(String((scheduleCall?.[1] as RequestInit).body)) as {
+      url: string
+    }
+    expect(body.url).toBe('https://cal.com/acme/intro')
+
+    expect(
+      await screen.findByText(/Booked/i),
+    ).toBeInTheDocument()
+
+    const chatCalls = fetchMock.mock.calls.filter(
+      (call) => String(call[0]) === TOMI_CHAT_URL,
+    )
+    expect(chatCalls).toHaveLength(0)
   })
 
   it('is reachable from shell navigation', async () => {

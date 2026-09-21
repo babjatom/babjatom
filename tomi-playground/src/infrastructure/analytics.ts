@@ -20,12 +20,13 @@ export type AnalyticsEventMap = {
     is_follow_up: boolean
   }
   'Ask Tomi Action': {
-    action: 'stop' | 'regenerate' | 'clear' | 'copy'
+    action: 'stop' | 'regenerate' | 'clear' | 'copy' | 'schedule_nudge'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'
     latency_ms: number
     error_kind?: 'network' | 'http' | 'unknown'
+    kind?: 'chat' | 'schedule'
   }
   'Visits Table Interacted': {
     action: 'sort' | 'select' | 'reorder' | 'row_action'

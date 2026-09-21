@@ -1,11 +1,16 @@
 import { useRef, useState } from 'react'
 import { track } from '@/infrastructure/analytics'
+import { extractCalScheduleUrl } from '@/infrastructure/cal-url'
 import {
   askTomiChat,
   getOrCreateChatSessionId,
   rotateChatSessionId,
   TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
+import {
+  scheduleCalLink,
+  TomiScheduleError,
+} from '@/infrastructure/tomi-schedule-api'
 
 export type ChatRole = 'user' | 'assistant'
 
@@ -46,7 +51,7 @@ function isAbortError(error: unknown) {
 function classifyAskTomiError(
   error: unknown,
 ): 'network' | 'http' | 'unknown' {
-  if (error instanceof TomiChatError) {
+  if (error instanceof TomiChatError || error instanceof TomiScheduleError) {
     if (typeof error.status === 'number') return 'http'
     return 'network'
   }
@@ -74,12 +79,14 @@ export function useTomiChat() {
     const startedAt = performance.now()
 
     try {
-      const sessionId = getOrCreateChatSessionId()
-      const answer = await askTomiChat(
-        question,
-        controller.signal,
-        sessionId,
-      )
+      const calUrl = extractCalScheduleUrl(question)
+      const answer = calUrl
+        ? await scheduleCalLink(calUrl, controller.signal)
+        : await askTomiChat(
+            question,
+            controller.signal,
+            getOrCreateChatSessionId(),
+          )
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantId
@@ -90,6 +97,7 @@ export function useTomiChat() {
       track('Ask Tomi Result', {
         status: 'complete',
         latency_ms: Math.round(performance.now() - startedAt),
+        ...(calUrl ? { kind: 'schedule' } : { kind: 'chat' }),
       })
     } catch (error) {
       const latency_ms = Math.round(performance.now() - startedAt)
