@@ -8,8 +8,10 @@ import {
   TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
 import {
+  previewCalLink,
   scheduleCalLink,
   TomiScheduleError,
+  type SchedulePreviewSlot,
 } from '@/infrastructure/tomi-schedule-api'
 
 export type ChatRole = 'user' | 'assistant'
@@ -25,6 +27,12 @@ export type ChatMessage = {
   role: ChatRole
   content: string
   status: ChatMessageStatus
+  schedulePreview?: { slots: SchedulePreviewSlot[] }
+}
+
+export type PendingScheduleChoice = {
+  url: string
+  slots: SchedulePreviewSlot[]
 }
 
 export const STARTER_PROMPTS = [
@@ -58,9 +66,48 @@ function classifyAskTomiError(
   return 'unknown'
 }
 
+export type ScheduleChoice =
+  | { kind: 'book'; index: number }
+  | { kind: 'decline' }
+  | { kind: 'unrecognized' }
+
+/** Parse chat replies while a schedule preview is pending. */
+export function parseScheduleChoice(
+  text: string,
+  slotCount: number,
+): ScheduleChoice {
+  const normalized = text.trim().toLowerCase()
+  if (!normalized) return { kind: 'unrecognized' }
+
+  if (
+    normalized === 'no' ||
+    normalized === 'n' ||
+    normalized === 'cancel' ||
+    normalized === 'nope'
+  ) {
+    return { kind: 'decline' }
+  }
+
+  if (normalized === 'yes' || normalized === 'y') {
+    return slotCount > 0 ? { kind: 'book', index: 0 } : { kind: 'unrecognized' }
+  }
+
+  if (/^[123]$/.test(normalized)) {
+    const index = Number(normalized) - 1
+    if (index >= 0 && index < slotCount) {
+      return { kind: 'book', index }
+    }
+    return { kind: 'unrecognized' }
+  }
+
+  return { kind: 'unrecognized' }
+}
+
 export function useTomiChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [pending, setPending] = useState(false)
+  const [pendingSchedule, setPendingSchedule] =
+    useState<PendingScheduleChoice | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
   function abortInFlight() {
@@ -72,61 +119,64 @@ export function useTomiChat() {
     return current.filter((message) => message.role === 'user').length
   }
 
-  async function runQuestion(question: string, assistantId: string) {
+  function completeAssistant(
+    assistantId: string,
+    content: string,
+    status: ChatMessageStatus = 'complete',
+    schedulePreview?: { slots: SchedulePreviewSlot[] },
+  ) {
+    setMessages((current) =>
+      current.map((message) =>
+        message.id === assistantId
+          ? {
+              ...message,
+              content,
+              status,
+              ...(schedulePreview ? { schedulePreview } : { schedulePreview: undefined }),
+            }
+          : message,
+      ),
+    )
+  }
+
+  async function runWithPending(
+    assistantId: string,
+    work: (signal: AbortSignal) => Promise<{
+      content: string
+      kind: 'chat' | 'schedule' | 'schedule_preview' | 'schedule_cancel'
+      schedulePreview?: { slots: SchedulePreviewSlot[] }
+    }>,
+  ) {
     const controller = new AbortController()
     abortRef.current = controller
     setPending(true)
     const startedAt = performance.now()
 
     try {
-      const calUrl = extractCalScheduleUrl(question)
-      const answer = calUrl
-        ? await scheduleCalLink(calUrl, controller.signal)
-        : await askTomiChat(
-            question,
-            controller.signal,
-            getOrCreateChatSessionId(),
-          )
-      setMessages((current) =>
-        current.map((message) =>
-          message.id === assistantId
-            ? { ...message, content: answer, status: 'complete' }
-            : message,
-        ),
+      const result = await work(controller.signal)
+      completeAssistant(
+        assistantId,
+        result.content,
+        'complete',
+        result.schedulePreview,
       )
       track('Ask Tomi Result', {
         status: 'complete',
         latency_ms: Math.round(performance.now() - startedAt),
-        ...(calUrl ? { kind: 'schedule' } : { kind: 'chat' }),
+        kind: result.kind,
       })
     } catch (error) {
       const latency_ms = Math.round(performance.now() - startedAt)
 
       if (isAbortError(error)) {
-        setMessages((current) =>
-          current.map((message) =>
-            message.id === assistantId
-              ? {
-                  ...message,
-                  content: 'Stopped.',
-                  status: 'cancelled',
-                }
-              : message,
-          ),
-        )
+        completeAssistant(assistantId, 'Stopped.', 'cancelled')
         track('Ask Tomi Result', { status: 'cancelled', latency_ms })
         return
       }
 
       const message =
         error instanceof Error ? error.message : 'Something went wrong.'
-      setMessages((current) =>
-        current.map((entry) =>
-          entry.id === assistantId
-            ? { ...entry, content: message, status: 'error' }
-            : entry,
-        ),
-      )
+      completeAssistant(assistantId, message, 'error')
       track('Ask Tomi Result', {
         status: 'error',
         latency_ms,
@@ -138,6 +188,49 @@ export function useTomiChat() {
       }
       setPending(false)
     }
+  }
+
+  async function runPreview(calUrl: string, assistantId: string) {
+    await runWithPending(assistantId, async (signal) => {
+      const preview = await previewCalLink(calUrl, signal)
+      if (preview.ok && preview.slots.length > 0) {
+        setPendingSchedule({ url: calUrl, slots: preview.slots })
+        return {
+          content: preview.answer,
+          kind: 'schedule_preview',
+          schedulePreview: { slots: preview.slots },
+        }
+      }
+      setPendingSchedule(null)
+      return {
+        content: preview.answer,
+        kind: 'schedule_preview',
+      }
+    })
+  }
+
+  async function runBook(
+    calUrl: string,
+    start: string,
+    assistantId: string,
+  ) {
+    setPendingSchedule(null)
+    await runWithPending(assistantId, async (signal) => {
+      const answer = await scheduleCalLink(calUrl, start, signal)
+      return { content: answer, kind: 'schedule' }
+    })
+  }
+
+  async function runChat(question: string, assistantId: string) {
+    setPendingSchedule(null)
+    await runWithPending(assistantId, async (signal) => {
+      const answer = await askTomiChat(
+        question,
+        signal,
+        getOrCreateChatSessionId(),
+      )
+      return { content: answer, kind: 'chat' }
+    })
   }
 
   async function send(question: string, options?: SendOptions) {
@@ -172,7 +265,36 @@ export function useTomiChat() {
       },
     ])
 
-    await runQuestion(trimmed, assistantId)
+    if (pendingSchedule) {
+      const choice = parseScheduleChoice(trimmed, pendingSchedule.slots.length)
+      if (choice.kind === 'decline') {
+        setPendingSchedule(null)
+        completeAssistant(assistantId, 'Cancelled.', 'complete')
+        track('Ask Tomi Result', {
+          status: 'complete',
+          latency_ms: 0,
+          kind: 'schedule_cancel',
+        })
+        return
+      }
+      if (choice.kind === 'book') {
+        const slot = pendingSchedule.slots[choice.index]
+        if (slot) {
+          await runBook(pendingSchedule.url, slot.start, assistantId)
+          return
+        }
+      }
+      // Unrecognized while preview pending: drop pending and continue normally
+      setPendingSchedule(null)
+    }
+
+    const calUrl = extractCalScheduleUrl(trimmed)
+    if (calUrl) {
+      await runPreview(calUrl, assistantId)
+      return
+    }
+
+    await runChat(trimmed, assistantId)
   }
 
   function stop() {
@@ -202,18 +324,33 @@ export function useTomiChat() {
     setMessages((current) =>
       current.map((message) =>
         message.id === assistantId
-          ? { ...message, content: '', status: 'pending' }
+          ? {
+              ...message,
+              content: '',
+              status: 'pending',
+              schedulePreview: undefined,
+            }
           : message,
       ),
     )
 
-    await runQuestion(previous.content, assistantId)
+    // Regenerating a preview/book choice: treat prior user text as a fresh send target
+    const calUrl = extractCalScheduleUrl(previous.content)
+    if (calUrl) {
+      await runPreview(calUrl, assistantId)
+      return
+    }
+
+    // If regenerating a book confirmation reply, prior was "2" etc. — fall through to chat
+    setPendingSchedule(null)
+    await runChat(previous.content, assistantId)
   }
 
   function clear() {
     track('Ask Tomi Action', { action: 'clear' })
     abortInFlight()
     setPending(false)
+    setPendingSchedule(null)
     setMessages([])
     rotateChatSessionId()
   }
@@ -234,6 +371,7 @@ export function useTomiChat() {
   return {
     messages,
     pending,
+    pendingSchedule,
     send,
     stop,
     regenerate,

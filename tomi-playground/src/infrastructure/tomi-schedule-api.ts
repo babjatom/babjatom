@@ -2,9 +2,26 @@ export const TOMI_SCHEDULE_URL =
   import.meta.env.VITE_TOMI_SCHEDULE_URL?.trim() ||
   'https://tomi-scheduler.tomibabjak.workers.dev/schedule'
 
+export const TOMI_SCHEDULE_PREVIEW_URL = TOMI_SCHEDULE_URL.replace(
+  /\/schedule\/?$/,
+  '/schedule/preview',
+)
+
 export type TomiScheduleResponse = {
   ok: boolean
   answer: string
+}
+
+export type SchedulePreviewSlot = {
+  start: string
+  end: string
+  label: string
+}
+
+export type TomiSchedulePreviewResponse = {
+  ok: boolean
+  answer: string
+  slots: SchedulePreviewSlot[]
 }
 
 export class TomiScheduleError extends Error {
@@ -17,21 +34,17 @@ export class TomiScheduleError extends Error {
   }
 }
 
-export async function scheduleCalLink(
-  url: string,
+async function postScheduleJson<T extends { answer: string }>(
+  endpoint: string,
+  body: Record<string, string>,
   signal?: AbortSignal,
-): Promise<string> {
-  const trimmed = url.trim()
-  if (!trimmed) {
-    throw new TomiScheduleError('Cal.com URL cannot be empty.')
-  }
-
+): Promise<{ status: number; payload: T }> {
   let response: Response
   try {
-    response = await fetch(TOMI_SCHEDULE_URL, {
+    response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: trimmed }),
+      body: JSON.stringify(body),
       signal,
     })
   } catch (error) {
@@ -58,15 +71,81 @@ export async function scheduleCalLink(
   if (
     typeof payload !== 'object' ||
     payload === null ||
-    typeof (payload as TomiScheduleResponse).answer !== 'string'
+    typeof (payload as { answer: unknown }).answer !== 'string'
   ) {
     throw new TomiScheduleError('Response missing answer.', response.status)
   }
 
-  const answer = (payload as TomiScheduleResponse).answer
-  if (!response.ok && response.status !== 422) {
-    throw new TomiScheduleError(answer || `Request failed (${response.status}).`, response.status)
+  return { status: response.status, payload: payload as T }
+}
+
+export async function previewCalLink(
+  url: string,
+  signal?: AbortSignal,
+): Promise<TomiSchedulePreviewResponse> {
+  const trimmed = url.trim()
+  if (!trimmed) {
+    throw new TomiScheduleError('Cal.com URL cannot be empty.')
   }
 
-  return answer
+  const { status, payload } =
+    await postScheduleJson<TomiSchedulePreviewResponse>(
+      TOMI_SCHEDULE_PREVIEW_URL,
+      { url: trimmed },
+      signal,
+    )
+
+  const slots = Array.isArray(payload.slots)
+    ? payload.slots.filter(
+        (slot): slot is SchedulePreviewSlot =>
+          typeof slot === 'object' &&
+          slot !== null &&
+          typeof slot.start === 'string' &&
+          typeof slot.end === 'string' &&
+          typeof slot.label === 'string',
+      )
+    : []
+
+  if (!status.toString().startsWith('2') && status !== 422) {
+    throw new TomiScheduleError(
+      payload.answer || `Request failed (${status}).`,
+      status,
+    )
+  }
+
+  return {
+    ok: Boolean(payload.ok),
+    answer: payload.answer,
+    slots,
+  }
+}
+
+export async function scheduleCalLink(
+  url: string,
+  start: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  const trimmed = url.trim()
+  if (!trimmed) {
+    throw new TomiScheduleError('Cal.com URL cannot be empty.')
+  }
+  const startTrimmed = start.trim()
+  if (!startTrimmed) {
+    throw new TomiScheduleError('Start time cannot be empty.')
+  }
+
+  const { status, payload } = await postScheduleJson<TomiScheduleResponse>(
+    TOMI_SCHEDULE_URL,
+    { url: trimmed, start: startTrimmed },
+    signal,
+  )
+
+  if (!status.toString().startsWith('2') && status !== 422) {
+    throw new TomiScheduleError(
+      payload.answer || `Request failed (${status}).`,
+      status,
+    )
+  }
+
+  return payload.answer
 }
