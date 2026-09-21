@@ -1,11 +1,12 @@
 Feature: Privacy
-  Visitors can read how this site is hosted, what Ask Tomi sends, and that the public build has no product analytics.
+  Visitors can read how this site is hosted, what Ask Tomi sends, and how product analytics work.
 
   Scenario: Privacy is reachable from the shell
     Given I am on the home page
     When I open Privacy from the sidebar
     Then I should see the Privacy heading
-    And I should see that the public site does not use advertising cookies or product analytics
+    And I should see that the site does not use advertising cookies
+    And I should see that Mixpanel tracks anonymous product interactions
     And I should see that the playground is hosted on GitHub Pages
     And I should see that theme, font, and background preferences stay in the browser
     And I should see the Ask Tomi worker host
@@ -16,3 +17,4 @@ Feature: Privacy
     Then I should see that messages go to a Cloudflare Worker
     When I open Privacy from the composer disclosure
     Then I should see the Privacy heading
+    And that visit should be recorded as coming from the Ask Tomi composer

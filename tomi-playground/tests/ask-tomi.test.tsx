@@ -285,6 +285,8 @@ describe('Ask Tomi chat', () => {
     expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
       source: 'starter',
       starter_id: 'What’s your tech stack?',
+      turn_index: 1,
+      is_follow_up: false,
     })
 
     await waitFor(() => {
@@ -309,6 +311,14 @@ describe('Ask Tomi chat', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.getByText('What’s your tech stack?')).toBeInTheDocument()
+
+    expect(track).toHaveBeenCalledWith(
+      'Ask Tomi Result',
+      expect.objectContaining({
+        status: 'complete',
+        latency_ms: expect.any(Number),
+      }),
+    )
   })
 
   it('submits a typed question from the composer', async () => {
@@ -323,6 +333,12 @@ describe('Ask Tomi chat', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalled()
+    })
+
+    expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
+      source: 'typed',
+      turn_index: 1,
+      is_follow_up: false,
     })
 
     const body = getChatRequestBody()
@@ -363,6 +379,12 @@ describe('Ask Tomi chat', () => {
     const second = getChatRequestBody(1)
     expect(first.session_id).toBe(second.session_id)
     expect(second.question).toBe('What other projects?')
+
+    expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
+      source: 'typed',
+      turn_index: 2,
+      is_follow_up: true,
+    })
   })
 
   it('clears the conversation', async () => {

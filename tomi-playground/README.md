@@ -24,7 +24,7 @@ The sidebar **Pages** menu lists Ask Tomi, Theme Playground, Analytics, and Dos 
 - responsive mobile layout
 - CSS-based visual effects
 - localStorage theme persistence
-- Mixpanel product analytics (optional locally; off on GitHub Pages)
+- Mixpanel product analytics (Pages deploy + optional local `.env`)
 - Self-hosted Outfit / Fraunces (Classic) plus techno typeface presets (no Google Fonts CDN)
 - Vitest + React Testing Library
 - Gherkin acceptance specs in `specs/`
@@ -121,12 +121,13 @@ The Theme domain can be unit-tested and reused without mounting the UI.
 
 ## Analytics
 
-Mixpanel is optional for local development only. Copy `.env.example` to `.env`
-and set `VITE_MIXPANEL_TOKEN` if you want tracking while developing. Without a
-token, analytics no-ops.
+Mixpanel tracks anonymous product interactions (page views, navigation, theme
+and font choices, Ask Tomi send/result events) when `VITE_MIXPANEL_TOKEN` is
+set. Copy `.env.example` to `.env` for local development. Without a token,
+analytics no-ops.
 
-The GitHub Pages deploy workflow does **not** inject a Mixpanel token, so the
-public site ships without product analytics trackers.
+The GitHub Pages deploy workflow injects `secrets.VITE_MIXPANEL_TOKEN` into the
+production build so the public site sends events to Mixpanel’s EU API host.
 
 ## Deployment
 

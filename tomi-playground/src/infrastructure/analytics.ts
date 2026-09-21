@@ -4,7 +4,7 @@ export type AnalyticsEventMap = {
   'Page Viewed': { path: string }
   'Nav Clicked': {
     to: string
-    source: 'sidebar' | 'home' | 'brand'
+    source: 'sidebar' | 'home' | 'brand' | 'ask_tomi_composer'
   }
   'Theme Selected': {
     theme_id: string
@@ -16,15 +16,16 @@ export type AnalyticsEventMap = {
   'Ask Tomi Message Sent': {
     source: 'starter' | 'typed'
     starter_id?: string
+    turn_index: number
+    is_follow_up: boolean
   }
   'Ask Tomi Action': {
     action: 'stop' | 'regenerate' | 'clear' | 'copy'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'
-  }
-  'Voxel Scene Loaded': {
-    status: 'ok' | 'error' | 'unsupported'
+    latency_ms: number
+    error_kind?: 'network' | 'http' | 'unknown'
   }
   'Visits Table Interacted': {
     action: 'sort' | 'select' | 'reorder' | 'row_action'

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
 import { usePendingStatus } from './use-pending-status'
@@ -520,6 +521,12 @@ function LabelledComposer({
               <Link
                 to="/privacy"
                 className="underline underline-offset-2 hover:text-foreground"
+                onClick={() =>
+                  track('Nav Clicked', {
+                    to: '/privacy',
+                    source: 'ask_tomi_composer',
+                  })
+                }
               >
                 Privacy
               </Link>
