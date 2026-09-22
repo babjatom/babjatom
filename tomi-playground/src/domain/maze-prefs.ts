@@ -26,10 +26,11 @@ export const DEFAULT_MAZE_DENSITY = MAX_MAZE_DENSITY
 export const MOBILE_MAZE_MAX_WIDTH_PX = 1023
 export const MOBILE_MAZE_DENSITY_FACTOR = 0.5
 
-/** Traveling-light speed along the solution path (px/s) on desktop. */
-export const DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC = 280
-/** Mobile light moves at half the desktop speed. */
-export const MOBILE_MAZE_LIGHT_SPEED_FACTOR = 0.5
+/**
+ * Traveling-light speed along the solution path (px/s).
+ * Same on all viewports — matches the former mobile half-speed pace.
+ */
+export const MAZE_LIGHT_SPEED_PX_PER_SEC = 140
 
 /** Scale 1 = today's draw alphas for walls and traveling light. */
 export const DEFAULT_MAZE_VISIBILITY = 1
@@ -80,10 +81,9 @@ export function effectiveMazeDensity(density: number, width: number): number {
   return clampMazeDensity(scale * MOBILE_MAZE_DENSITY_FACTOR)
 }
 
-/** Traveling-light speed for the viewport width. */
-export function mazeLightSpeedPxPerSec(width: number): number {
-  if (!isMobileMazeViewport(width)) return DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC
-  return DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC * MOBILE_MAZE_LIGHT_SPEED_FACTOR
+/** Traveling-light speed (viewport width kept for call-site compatibility). */
+export function mazeLightSpeedPxPerSec(_width?: number): number {
+  return MAZE_LIGHT_SPEED_PX_PER_SEC
 }
 
 /**

@@ -22,10 +22,10 @@ Feature: Shell navigation
     And I am on the home page
     Then the ambient maze should use half the configured density
 
-  Scenario: Mobile maze light travels more slowly
+  Scenario: Ambient maze light uses the same slow speed on mobile and desktop
     Given I am on a tall phone viewport
     And I am on the home page
-    Then the ambient maze light should travel slower than on desktop
+    Then the ambient maze light should travel at the same speed as on desktop
 
   Scenario: Ambient maze uses a taller grid on a tall phone
     Given I am on a tall phone viewport
