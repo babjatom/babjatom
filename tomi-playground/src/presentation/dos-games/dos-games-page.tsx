@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/presentation/shared/reveal'
 import { track } from '@/infrastructure/analytics'
@@ -9,13 +9,13 @@ export function DosGamesPage() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null)
   const sessionStartedAt = useRef<number | null>(null)
 
-  function startGame(gameId: string) {
+  const startGame = useCallback((gameId: string) => {
     sessionStartedAt.current = Date.now()
     track('Dos Game Started', { game_id: gameId })
     setActiveGameId(gameId)
-  }
+  }, [])
 
-  function exitGame() {
+  const exitGame = useCallback(() => {
     if (activeGameId) {
       const started = sessionStartedAt.current ?? Date.now()
       track('Dos Game Exited', {
@@ -25,14 +25,7 @@ export function DosGamesPage() {
     }
     sessionStartedAt.current = null
     setActiveGameId(null)
-  }
-
-  useEffect(() => {
-    if (!activeGameId) {
-      sessionStartedAt.current = null
-    }
   }, [activeGameId])
-
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-8">
       <header className="animate-rise">
