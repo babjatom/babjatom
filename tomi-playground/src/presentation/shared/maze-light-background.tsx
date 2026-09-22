@@ -17,6 +17,10 @@ import { useTheme } from '@/presentation/theme/theme-provider'
 
 const TRAIL_PX = 160
 const RESIZE_DEBOUNCE_MS = 120
+/** Ambient light does not need display refresh — ~20 fps. */
+const MIN_FRAME_MS = 50
+/** Cap backing-store density to cut fill rate. */
+const MAZE_DPR = 1
 /** Compensate for removing CSS brightness-[0.96] (~4% dim). */
 const BRIGHTNESS_COMPENSATION = 0.96
 
@@ -30,7 +34,7 @@ type PathMetrics = ReturnType<typeof pathMetrics>
 
 type MazeRuntime = {
   paintStatic: (visibility: number) => void
-  composite: (timeMs: number) => void
+  paintLight: (timeMs: number) => void
 }
 
 function reducedMotionQuery() {
@@ -56,21 +60,30 @@ function alpha(base: number, visibility: number) {
   return Math.min(1, base * visibility * BRIGHTNESS_COMPENSATION)
 }
 
-function bakeStaticLayer(
-  target: HTMLCanvasElement,
-  scene: MazeScene,
+function sizeCanvas(
+  canvas: HTMLCanvasElement,
   width: number,
   height: number,
   dpr: number,
+) {
+  canvas.width = Math.floor(width * dpr)
+  canvas.height = Math.floor(height * dpr)
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  return ctx
+}
+
+function bakeStaticLayer(
+  ctx: CanvasRenderingContext2D,
+  scene: MazeScene,
+  width: number,
+  height: number,
   visibility: number,
   colors: ThemeColors,
 ) {
-  target.width = Math.floor(width * dpr)
-  target.height = Math.floor(height * dpr)
-  const ctx = target.getContext('2d')
-  if (!ctx) return
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.clearRect(0, 0, width, height)
 
   const v = clampMazeVisibility(visibility)
@@ -163,11 +176,12 @@ function readViewport() {
 }
 
 /**
- * Fixed ambient canvas: random maze walls + light traveling the solution path
- * at a constant pixels-per-second speed.
+ * Fixed ambient maze: static walls canvas (paint once) + light canvas
+ * (~20 fps, DPR 1) for the traveling solution head.
  */
 export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const staticRef = useRef<HTMLCanvasElement>(null)
+  const lightRef = useRef<HTMLCanvasElement>(null)
   const runtimeRef = useRef<MazeRuntime | null>(null)
   const { background, density, visibility, generation } = useMaze()
   const { theme } = useTheme()
@@ -203,25 +217,30 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       return
     }
 
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const staticCanvas = staticRef.current
+    const lightCanvas = lightRef.current
+    if (!staticCanvas || !lightCanvas) return
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const staticCtx = sizeCanvas(
+      staticCanvas,
+      viewport.width,
+      viewport.height,
+      MAZE_DPR,
+    )
+    const lightCtx = sizeCanvas(
+      lightCanvas,
+      viewport.width,
+      viewport.height,
+      MAZE_DPR,
+    )
+    if (!staticCtx || !lightCtx) return
 
     const setAnimatingAttr = (on: boolean) => {
-      canvas.dataset.mazeAnimating = on ? 'true' : 'false'
+      lightCanvas.dataset.mazeAnimating = on ? 'true' : 'false'
     }
     setAnimatingAttr(false)
 
     const { width, height } = viewport
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    canvas.width = Math.floor(width * dpr)
-    canvas.height = Math.floor(height * dpr)
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-
     const grid = densityToGrid(density, width, height)
     const speed = mazeLightSpeedPxPerSec(width)
     const scene = buildMazeScene({
@@ -231,11 +250,10 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       rows: grid.rows,
     })
     const metrics = pathMetrics(scene.path)
-    const staticCanvas = document.createElement('canvas')
     const colors = readThemeColors()
 
     const paintStatic = (vis: number) => {
-      bakeStaticLayer(staticCanvas, scene, width, height, dpr, vis, colors)
+      bakeStaticLayer(staticCtx, scene, width, height, vis, colors)
     }
 
     const headDistanceAt = (timeMs: number, reduced: boolean) => {
@@ -245,11 +263,10 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       return (timeMs / 1000) * speed
     }
 
-    const composite = (timeMs: number, reduced: boolean) => {
-      ctx.clearRect(0, 0, width, height)
-      ctx.drawImage(staticCanvas, 0, 0, width, height)
+    const paintLight = (timeMs: number, reduced: boolean) => {
+      lightCtx.clearRect(0, 0, width, height)
       drawLight(
-        ctx,
+        lightCtx,
         scene.path,
         metrics,
         headDistanceAt(timeMs, reduced),
@@ -262,8 +279,8 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
 
     const runtime: MazeRuntime = {
       paintStatic,
-      composite: (timeMs) =>
-        composite(timeMs, reducedMotionQuery()?.matches ?? false),
+      paintLight: (timeMs) =>
+        paintLight(timeMs, reducedMotionQuery()?.matches ?? false),
     }
     runtimeRef.current = runtime
 
@@ -272,6 +289,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
     let frameId = 0
     let disposed = false
     let running = false
+    let lastPaintMs = 0
 
     const stopLoop = () => {
       cancelAnimationFrame(frameId)
@@ -285,13 +303,17 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
         stopLoop()
         return
       }
-      composite(time, false)
+      if (time - lastPaintMs >= MIN_FRAME_MS) {
+        lastPaintMs = time
+        paintLight(time, false)
+      }
       frameId = requestAnimationFrame(paint)
     }
 
     const startLoop = () => {
       if (disposed || document.hidden || reduced || running) return
       running = true
+      lastPaintMs = 0
       setAnimatingAttr(true)
       frameId = requestAnimationFrame(paint)
     }
@@ -308,19 +330,19 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
       reduced = motionQuery?.matches ?? false
       if (reduced) {
         stopLoop()
-        composite(0, true)
+        paintLight(0, true)
         return
       }
       startLoop()
     }
 
     if (reduced) {
-      composite(0, true)
+      paintLight(0, true)
       setAnimatingAttr(false)
     } else if (!document.hidden) {
       startLoop()
     } else {
-      composite(0, false)
+      paintLight(0, false)
       setAnimatingAttr(false)
     }
 
@@ -340,15 +362,21 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
     const runtime = runtimeRef.current
     if (!runtime || background !== 'maze') return
     runtime.paintStatic(visibility)
-    runtime.composite(performance.now())
+    runtime.paintLight(performance.now())
   }, [background, visibility])
 
   if (background !== 'maze') return null
 
+  const layerClass = cn(
+    'pointer-events-none fixed inset-0 z-0 h-dvh w-screen',
+    className,
+  )
+
   return (
     <>
+      <canvas ref={staticRef} aria-hidden className={layerClass} />
       <canvas
-        ref={canvasRef}
+        ref={lightRef}
         aria-hidden
         data-testid="maze-light-background"
         data-maze-cols={cols}
@@ -357,10 +385,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
         data-maze-generation={generation}
         data-maze-rebuild={rebuildKey}
         data-maze-light-speed={lightSpeed}
-        className={cn(
-          'pointer-events-none fixed inset-0 z-0 h-dvh w-screen opacity-95',
-          className,
-        )}
+        className={layerClass}
       />
       <div
         aria-hidden
