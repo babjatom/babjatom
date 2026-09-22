@@ -134,6 +134,52 @@ describe('babjatom shell navigation', () => {
     })
   })
 
+  it('pauses the ambient maze when the tab is hidden', async () => {
+    const ctx = {
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+      arc: vi.fn(),
+      setLineDash: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({
+        addColorStop: vi.fn(),
+      })),
+    }
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    )
+
+    let hidden = false
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => hidden,
+    })
+
+    renderApp('/')
+    const canvas = screen.getByTestId('maze-light-background')
+
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'true')
+    })
+
+    hidden = true
+    document.dispatchEvent(new Event('visibilitychange'))
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'false')
+    })
+
+    hidden = false
+    document.dispatchEvent(new Event('visibilitychange'))
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'true')
+    })
+  })
+
   it('keeps the pages menu collapsed on mobile viewports', async () => {
     const user = userEvent.setup()
     setMatchMediaMatches(true)

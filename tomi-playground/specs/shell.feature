@@ -38,6 +38,14 @@ Feature: Shell navigation
     Then the ambient maze should have more rows than columns
     And the ambient maze layout should change
 
+  Scenario: Ambient maze pauses when the tab is hidden
+    Given I am on the home page
+    And the ambient maze light is animating
+    When I hide the browser tab
+    Then the ambient maze light should stop animating
+    When I show the browser tab again
+    Then the ambient maze light should resume animating
+
   Scenario: Mobile pages menu starts collapsed
     Given I am on a mobile viewport
     And I am on the home page
