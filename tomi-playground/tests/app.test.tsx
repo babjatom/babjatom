@@ -90,6 +90,19 @@ describe('babjatom shell navigation', () => {
     })
   })
 
+  it('halves maze density on a tall phone viewport', () => {
+    setViewport(390, 844)
+    renderApp('/')
+    const canvas = screen.getByTestId('maze-light-background')
+    const expected = densityToGrid(DEFAULT_MAZE_DENSITY, 390, 844)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(expected.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(expected.rows))
+
+    const fullCols = Math.round(390 / (96 / DEFAULT_MAZE_DENSITY))
+    const fullRows = Math.round(844 / (96 / DEFAULT_MAZE_DENSITY))
+    expect(expected.cols * expected.rows).toBeLessThan(fullCols * fullRows)
+  })
+
   it('regenerates the maze grid when resized to a tall phone shape', async () => {
     renderApp('/')
     const canvas = screen.getByTestId('maze-light-background')

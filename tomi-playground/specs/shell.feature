@@ -17,6 +17,11 @@ Feature: Shell navigation
     And I am on the home page
     Then the ambient maze should use maximum density
 
+  Scenario: Mobile maze is half as dense as the preference
+    Given I am on a tall phone viewport
+    And I am on the home page
+    Then the ambient maze should use half the configured density
+
   Scenario: Ambient maze uses a taller grid on a tall phone
     Given I am on a tall phone viewport
     And I am on the home page
