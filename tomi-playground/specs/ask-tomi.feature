@@ -11,6 +11,7 @@ Feature: Ask Tomi
     And I should see a hint to start with a suggested question
     And I should see starter prompts
     And I should see a distinctive Schedule call chip with a calendar icon
+    And I should see a distinctive Download CV chip with a download icon
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder
     And I should not see the 3D scene
@@ -109,6 +110,12 @@ Feature: Ask Tomi
     Given I am on the Ask Tomi page
     When I choose the Schedule call chip
     Then the composer should prompt me to paste a Cal.com link
+    And I should not see an assistant answer yet
+
+  Scenario: Download CV chip starts a PDF download
+    Given I am on the Ask Tomi page
+    When I choose the Download CV chip
+    Then a CV PDF download should start
     And I should not see an assistant answer yet
 
   Scenario: Pasting a Cal.com link previews slots

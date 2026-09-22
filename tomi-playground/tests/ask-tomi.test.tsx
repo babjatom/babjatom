@@ -7,6 +7,16 @@ import {
   TOMI_CHAT_SESSION_KEY,
   TOMI_CHAT_URL,
 } from '@/infrastructure/tomi-chat-api'
+import { downloadCvPdf } from '@/presentation/ask-tomi/download-cv'
+
+vi.mock('@/presentation/ask-tomi/download-cv', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/presentation/ask-tomi/download-cv')>()
+  return {
+    ...actual,
+    downloadCvPdf: vi.fn(),
+  }
+})
 
 function renderApp(path = '/') {
   window.history.pushState({}, '', path)
@@ -37,6 +47,7 @@ describe('Ask Tomi chat', () => {
     window.localStorage.clear()
     window.sessionStorage.clear()
     vi.mocked(track).mockClear()
+    vi.mocked(downloadCvPdf).mockClear()
     vi.stubGlobal(
       'fetch',
       vi.fn(async () =>
@@ -79,6 +90,10 @@ describe('Ask Tomi chat', () => {
       screen.getByRole('button', { name: 'Schedule call' }),
     ).toBeInTheDocument()
     expect(screen.getByTestId('schedule-call-chip')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Download CV' }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: 'How do you structure a React + TypeScript app?',
@@ -536,6 +551,20 @@ describe('Ask Tomi chat', () => {
       action: 'schedule_nudge',
     })
     expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('downloads the CV PDF when Download CV is chosen', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+
+    expect(downloadCvPdf).toHaveBeenCalledTimes(1)
+    expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
+      action: 'download_cv',
+    })
+    expect(fetch).not.toHaveBeenCalled()
+    expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
   })
 
   it('previews slots for a Cal.com link without booking', async () => {
