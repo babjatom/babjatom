@@ -12,6 +12,7 @@ import {
   Calendar,
   Copy,
   Eraser,
+  FileDown,
   LoaderCircle,
   RefreshCw,
   SendHorizontal,
@@ -22,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
+import { downloadCvPdf } from './download-cv'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
@@ -327,6 +329,22 @@ export function AskTomiPage() {
                       >
                         <Calendar className="h-4 w-4 shrink-0" aria-hidden />
                         Schedule call
+                      </Button>
+                    </Reveal>
+                    <Reveal rootRef={listRef} delayMs={50}>
+                      <Button
+                        type="button"
+                        variant="default"
+                        className="w-full justify-start gap-2 text-left sm:w-auto"
+                        disabled={pending}
+                        data-testid="download-cv-chip"
+                        onClick={() => {
+                          downloadCvPdf()
+                          track('Ask Tomi Action', { action: 'download_cv' })
+                        }}
+                      >
+                        <FileDown className="h-4 w-4 shrink-0" aria-hidden />
+                        Download CV
                       </Button>
                     </Reveal>
                     {STARTER_PROMPTS.map((prompt, index) => (

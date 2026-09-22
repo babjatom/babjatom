@@ -20,7 +20,13 @@ export type AnalyticsEventMap = {
     is_follow_up: boolean
   }
   'Ask Tomi Action': {
-    action: 'stop' | 'regenerate' | 'clear' | 'copy' | 'schedule_nudge'
+    action:
+      | 'stop'
+      | 'regenerate'
+      | 'clear'
+      | 'copy'
+      | 'schedule_nudge'
+      | 'download_cv'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'
