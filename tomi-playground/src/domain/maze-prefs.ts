@@ -13,10 +13,11 @@ export const AMBIENT_BACKGROUNDS: AmbientBackgroundOption[] = [
 
 export const DEFAULT_AMBIENT_BACKGROUND: AmbientBackgroundId = 'maze'
 
-/** Scale 1 = today's default maze (15×9 passage cells on a ~1440×900 window). */
-export const DEFAULT_MAZE_DENSITY = 1
+/** Scale 1 = historical baseline (15×9 passage cells on a ~1440×900 window). */
 export const MIN_MAZE_DENSITY = 0.5
 export const MAX_MAZE_DENSITY = 4
+/** Desktop default: densest ambient maze the slider allows. */
+export const DEFAULT_MAZE_DENSITY = MAX_MAZE_DENSITY
 
 /** Scale 1 = today's draw alphas for walls and traveling light. */
 export const DEFAULT_MAZE_VISIBILITY = 1
