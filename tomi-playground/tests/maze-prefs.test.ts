@@ -7,11 +7,16 @@ import {
   DEFAULT_AMBIENT_BACKGROUND,
   DEFAULT_MAZE_DENSITY,
   DEFAULT_MAZE_VISIBILITY,
+  DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
   densityToGrid,
+  effectiveMazeDensity,
+  mazeLightSpeedPxPerSec,
   MAX_MAZE_CELLS,
   MAX_MAZE_DENSITY,
   MIN_MAZE_DENSITY,
   MIN_MAZE_VISIBILITY,
+  MOBILE_MAZE_DENSITY_FACTOR,
+  MOBILE_MAZE_LIGHT_SPEED_FACTOR,
   parseAmbientBackground,
   REF_MAZE_CELL_PX,
 } from '@/domain/maze-prefs'
@@ -26,6 +31,30 @@ describe('densityToGrid', () => {
     expect(grid.rows).toBeGreaterThan(grid.cols)
     expect(grid.cols).toBeGreaterThanOrEqual(3)
     expect(grid.rows).toBeGreaterThanOrEqual(3)
+  })
+
+  it('halves configured density on mobile widths', () => {
+    expect(effectiveMazeDensity(DEFAULT_MAZE_DENSITY, 390)).toBe(
+      DEFAULT_MAZE_DENSITY * MOBILE_MAZE_DENSITY_FACTOR,
+    )
+    expect(effectiveMazeDensity(DEFAULT_MAZE_DENSITY, 1440)).toBe(
+      DEFAULT_MAZE_DENSITY,
+    )
+    // Preference 4 on a phone → effective 2 → ~8×18 passage cells.
+    expect(densityToGrid(DEFAULT_MAZE_DENSITY, 390, 844)).toEqual({
+      cols: 8,
+      rows: 18,
+    })
+    const fullCols = Math.round(390 / (REF_MAZE_CELL_PX / DEFAULT_MAZE_DENSITY))
+    const fullRows = Math.round(844 / (REF_MAZE_CELL_PX / DEFAULT_MAZE_DENSITY))
+    expect(8 * 18).toBeLessThan(fullCols * fullRows)
+  })
+
+  it('slows the traveling light on mobile widths', () => {
+    expect(mazeLightSpeedPxPerSec(1440)).toBe(DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC)
+    expect(mazeLightSpeedPxPerSec(390)).toBe(
+      DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC * MOBILE_MAZE_LIGHT_SPEED_FACTOR,
+    )
   })
 
   it('raises cell count when density increases for the same viewport', () => {

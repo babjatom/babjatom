@@ -19,6 +19,18 @@ export const MAX_MAZE_DENSITY = 4
 /** Desktop default: densest ambient maze the slider allows. */
 export const DEFAULT_MAZE_DENSITY = MAX_MAZE_DENSITY
 
+/**
+ * Mobile viewports use half the configured density so the maze stays lighter
+ * on small screens. Matches the shell mobile breakpoint (max-width: 1023px).
+ */
+export const MOBILE_MAZE_MAX_WIDTH_PX = 1023
+export const MOBILE_MAZE_DENSITY_FACTOR = 0.5
+
+/** Traveling-light speed along the solution path (px/s) on desktop. */
+export const DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC = 280
+/** Mobile light moves at half the desktop speed. */
+export const MOBILE_MAZE_LIGHT_SPEED_FACTOR = 0.5
+
 /** Scale 1 = today's draw alphas for walls and traveling light. */
 export const DEFAULT_MAZE_VISIBILITY = 1
 export const MIN_MAZE_VISIBILITY = 0.25
@@ -57,16 +69,34 @@ export function clampMazeVisibility(value: number): number {
   return Math.min(MAX_MAZE_VISIBILITY, Math.max(MIN_MAZE_VISIBILITY, value))
 }
 
+export function isMobileMazeViewport(width: number): boolean {
+  return width <= MOBILE_MAZE_MAX_WIDTH_PX
+}
+
+/** Preference density after the mobile half-density adaptation. */
+export function effectiveMazeDensity(density: number, width: number): number {
+  const scale = clampMazeDensity(density)
+  if (!isMobileMazeViewport(width)) return scale
+  return clampMazeDensity(scale * MOBILE_MAZE_DENSITY_FACTOR)
+}
+
+/** Traveling-light speed for the viewport width. */
+export function mazeLightSpeedPxPerSec(width: number): number {
+  if (!isMobileMazeViewport(width)) return DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC
+  return DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC * MOBILE_MAZE_LIGHT_SPEED_FACTOR
+}
+
 /**
  * Map density + viewport to a passage-cell grid with roughly square cells.
  * Higher density → smaller target cell size → more cells for the same viewport.
+ * Mobile widths use half the configured density.
  */
 export function densityToGrid(
   density: number,
   width: number,
   height: number,
 ): { cols: number; rows: number } {
-  const scale = clampMazeDensity(density)
+  const scale = effectiveMazeDensity(density, width)
   const w = Math.max(1, width)
   const h = Math.max(1, height)
   const cellSize = REF_MAZE_CELL_PX / scale
