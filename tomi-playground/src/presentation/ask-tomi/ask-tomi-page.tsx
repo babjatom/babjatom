@@ -312,41 +312,46 @@ export function AskTomiPage() {
                     Start with a suggested question, or type your own below.
                   </Reveal>
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
-                    <Reveal rootRef={listRef} delayMs={40}>
-                      <Button
-                        type="button"
-                        variant="default"
-                        className="w-full justify-start gap-2 text-left sm:w-auto"
-                        disabled={pending}
-                        data-testid="schedule-call-chip"
-                        onClick={() => {
-                          setScheduleNudge(true)
-                          setDraft('')
-                          setComposerFocused(true)
-                          inputRef.current?.focus()
-                          track('Ask Tomi Action', { action: 'schedule_nudge' })
-                        }}
-                      >
-                        <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-                        Schedule call
-                      </Button>
-                    </Reveal>
-                    <Reveal rootRef={listRef} delayMs={50}>
-                      <Button
-                        type="button"
-                        variant="default"
-                        className="w-full justify-start gap-2 text-left sm:w-auto"
-                        disabled={pending}
-                        data-testid="download-cv-chip"
-                        onClick={() => {
-                          downloadCvPdf()
-                          track('Ask Tomi Action', { action: 'download_cv' })
-                        }}
-                      >
-                        <FileDown className="h-4 w-4 shrink-0" aria-hidden />
-                        Download CV
-                      </Button>
-                    </Reveal>
+                    <div
+                      className="flex w-full gap-2 sm:contents"
+                      data-testid="ask-tomi-action-chips"
+                    >
+                      <Reveal rootRef={listRef} delayMs={40} className="min-w-0 flex-1 sm:flex-none">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="w-full justify-start gap-2 text-left sm:w-auto"
+                          disabled={pending}
+                          data-testid="schedule-call-chip"
+                          onClick={() => {
+                            setScheduleNudge(true)
+                            setDraft('')
+                            setComposerFocused(true)
+                            inputRef.current?.focus()
+                            track('Ask Tomi Action', { action: 'schedule_nudge' })
+                          }}
+                        >
+                          <Calendar className="h-4 w-4 shrink-0" aria-hidden />
+                          Schedule call
+                        </Button>
+                      </Reveal>
+                      <Reveal rootRef={listRef} delayMs={50} className="min-w-0 flex-1 sm:flex-none">
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="w-full justify-start gap-2 text-left sm:w-auto"
+                          disabled={pending}
+                          data-testid="download-cv-chip"
+                          onClick={() => {
+                            downloadCvPdf()
+                            track('Ask Tomi Action', { action: 'download_cv' })
+                          }}
+                        >
+                          <FileDown className="h-4 w-4 shrink-0" aria-hidden />
+                          Download CV
+                        </Button>
+                      </Reveal>
+                    </div>
                     {STARTER_PROMPTS.map((prompt, index) => (
                       <Reveal
                         key={prompt}

@@ -37,7 +37,6 @@ export type PendingScheduleChoice = {
 
 export const STARTER_PROMPTS = [
   'What’s your tech stack?',
-  'How do you structure a React + TypeScript app?',
   'What’s your approach to testing and CI?',
   'How do you design APIs and data models?',
   'What have you shipped end-to-end recently?',

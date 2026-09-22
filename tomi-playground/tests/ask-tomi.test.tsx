@@ -95,10 +95,10 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
     expect(
-      screen.getByRole('button', {
+      screen.queryByRole('button', {
         name: 'How do you structure a React + TypeScript app?',
       }),
-    ).toBeInTheDocument()
+    ).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: 'What’s your approach to testing and CI?',
@@ -152,6 +152,18 @@ describe('Ask Tomi chat', () => {
     // Phone layouts rely on Tailwind `hidden sm:block` (see ask-tomi.feature).
     expect(starterHint.className).toMatch(/\bhidden\b/)
     expect(starterHint.className).toMatch(/\bsm:block\b/)
+  })
+
+  it('keeps Schedule call and Download CV on the same row on mobile', () => {
+    renderApp('/')
+
+    const row = screen.getByTestId('ask-tomi-action-chips')
+    expect(row.className).toMatch(/\bflex\b/)
+    expect(row.className).toMatch(/\bw-full\b/)
+    expect(row.className).toMatch(/\bsm:contents\b/)
+    expect(row.className).not.toMatch(/\bflex-col\b/)
+    expect(within(row).getByTestId('schedule-call-chip')).toBeInTheDocument()
+    expect(within(row).getByTestId('download-cv-chip')).toBeInTheDocument()
   })
 
   it('keeps empty chat without an inner scrollbar when starters fit and does not clip the heading', async () => {
