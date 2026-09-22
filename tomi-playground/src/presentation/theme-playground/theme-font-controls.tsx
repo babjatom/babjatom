@@ -34,11 +34,18 @@ export function ThemeFontControls() {
     regenerate,
   } = useMaze()
   const [draftDensity, setDraftDensity] = useState<number | null>(null)
+  const [draftVisibility, setDraftVisibility] = useState<number | null>(null)
   const densityValue = draftDensity ?? density
+  const visibilityValue = draftVisibility ?? visibility
 
   const commitDensity = (value: number) => {
     setDensity(value)
     setDraftDensity(null)
+  }
+
+  const commitVisibility = (value: number) => {
+    setVisibility(value)
+    setDraftVisibility(null)
   }
 
   return (
@@ -123,11 +130,17 @@ export function ThemeFontControls() {
                       min={MIN_MAZE_VISIBILITY}
                       max={MAX_MAZE_VISIBILITY}
                       step={0.05}
-                      value={visibility}
+                      value={visibilityValue}
                       aria-label="Maze visibility"
                       className="h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
                       onChange={(event) => {
-                        setVisibility(Number(event.target.value))
+                        setDraftVisibility(Number(event.target.value))
+                      }}
+                      onPointerUp={(event) => {
+                        commitVisibility(Number(event.currentTarget.value))
+                      }}
+                      onKeyUp={(event) => {
+                        commitVisibility(Number(event.currentTarget.value))
                       }}
                     />
                   </label>

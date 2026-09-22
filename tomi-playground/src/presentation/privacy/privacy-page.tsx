@@ -14,8 +14,10 @@ export function PrivacyPage() {
         <p>
           This site does not use advertising cookies. Anonymous Mixpanel product
           analytics record interactions such as page views, theme and font
-          choices, and Ask Tomi send/result events. Events go to Mixpanel’s EU
-          endpoint. Without a configured token, tracking stays off.
+          choices, background and maze settings, Ask Tomi chips, composer, and
+          send/result events, and Dos games play sessions. Events go to
+          Mixpanel’s EU endpoint. Without a configured token, tracking stays
+          off.
         </p>
 
         <section className="space-y-2">

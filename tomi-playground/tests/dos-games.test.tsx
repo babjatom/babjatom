@@ -79,6 +79,10 @@ describe('Dos games page', () => {
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
     )
 
+    expect(track).toHaveBeenCalledWith('Dos Game Started', {
+      game_id: 'wolf3d',
+    })
+
     expect(screen.getByRole('heading', { name: 'Dos games' })).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: 'Wolfenstein 3D' }),
@@ -104,6 +108,12 @@ describe('Dos games page', () => {
       expect(dosMock).toHaveBeenCalled()
     })
 
+    await vi.waitFor(() => {
+      expect(track).toHaveBeenCalledWith('Dos Game Ready', {
+        game_id: 'wolf3d',
+      })
+    })
+
     const options = dosMock.mock.calls[0]?.[1] as {
       autoSave?: boolean
       url?: string
@@ -116,6 +126,13 @@ describe('Dos games page', () => {
     expect(options.url).toContain('games/wolf3d/wolf3d.jsdos')
 
     await user.click(screen.getByRole('button', { name: 'Back to catalog' }))
+    expect(track).toHaveBeenCalledWith(
+      'Dos Game Exited',
+      expect.objectContaining({
+        game_id: 'wolf3d',
+        session_ms: expect.any(Number),
+      }),
+    )
     expect(screen.queryByTestId('dos-game-player')).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Play Wolfenstein 3D' }),
@@ -176,6 +193,10 @@ describe('Dos games page', () => {
     >
     await user.click(screen.getByRole('button', { name: 'Fullscreen' }))
     expect(setFullScreen).toHaveBeenCalledWith(true)
+    expect(track).toHaveBeenCalledWith('Dos Game Fullscreen', {
+      game_id: 'wolf3d',
+      active: true,
+    })
   })
 
   it('disables pointer lock on a mobile viewport', async () => {

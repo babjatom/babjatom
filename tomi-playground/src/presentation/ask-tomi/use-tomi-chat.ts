@@ -46,6 +46,7 @@ export const STARTER_PROMPTS = [
 export type SendOptions = {
   source?: 'starter' | 'typed'
   starter_id?: string
+  submit_method?: 'button' | 'enter' | 'chip'
 }
 
 function createId() {
@@ -244,6 +245,9 @@ export function useTomiChat() {
       ...(options?.starter_id ? { starter_id: options.starter_id } : {}),
       turn_index: priorUserTurns + 1,
       is_follow_up: priorUserTurns > 0,
+      ...(options?.submit_method
+        ? { submit_method: options.submit_method }
+        : {}),
     })
 
     const userId = createId()

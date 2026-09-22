@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { track } from '@/infrastructure/analytics'
 import type { DosGame } from './dos-games-catalog'
 import {
   dosAssetUrl,
@@ -18,9 +19,16 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<DosProps | null>(null)
+  const trackedReady = useRef(false)
+  const trackedFailed = useRef(false)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isFullScreen, setIsFullScreen] = useState(false)
+
+  useEffect(() => {
+    trackedReady.current = false
+    trackedFailed.current = false
+  }, [game.id])
 
   useEffect(() => {
     const container = containerRef.current
@@ -58,6 +66,10 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           onEvent: (event) => {
             if (event === 'ci-ready' || event === 'bnd-play') {
               setStatus('ready')
+              if (!trackedReady.current) {
+                trackedReady.current = true
+                track('Dos Game Ready', { game_id: game.id })
+              }
             }
             if (event === 'fullscreen-change') {
               setIsFullScreen(Boolean(document.fullscreenElement))
@@ -75,6 +87,10 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
           return
         }
         setStatus('error')
+        if (!trackedFailed.current) {
+          trackedFailed.current = true
+          track('Dos Game Failed', { game_id: game.id })
+        }
         setErrorMessage(
           error instanceof Error ? error.message : 'Unable to start the DOS player',
         )
@@ -94,7 +110,7 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
         container.replaceChildren()
       }
     }
-  }, [game.bundlePath])
+  }, [game.bundlePath, game.id])
 
   useEffect(() => {
     function onFullScreenChange() {
@@ -115,6 +131,8 @@ export function DosGamePlayer({ game, onBack }: DosGamePlayerProps) {
     const player = playerRef.current
     const surface = surfaceRef.current
     const entering = !document.fullscreenElement
+
+    track('Dos Game Fullscreen', { game_id: game.id, active: entering })
 
     if (player) {
       player.setFullScreen(entering)
