@@ -154,6 +154,18 @@ describe('Ask Tomi chat', () => {
     expect(starterHint.className).toMatch(/\bsm:block\b/)
   })
 
+  it('keeps Schedule call and Download CV on the same row on mobile', () => {
+    renderApp('/')
+
+    const row = screen.getByTestId('ask-tomi-action-chips')
+    expect(row.className).toMatch(/\bflex\b/)
+    expect(row.className).toMatch(/\bw-full\b/)
+    expect(row.className).toMatch(/\bsm:contents\b/)
+    expect(row.className).not.toMatch(/\bflex-col\b/)
+    expect(within(row).getByTestId('schedule-call-chip')).toBeInTheDocument()
+    expect(within(row).getByTestId('download-cv-chip')).toBeInTheDocument()
+  })
+
   it('keeps empty chat without an inner scrollbar when starters fit and does not clip the heading', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)

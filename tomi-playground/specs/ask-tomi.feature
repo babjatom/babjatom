@@ -22,6 +22,11 @@ Feature: Ask Tomi
     Then I should see starter prompts
     And I should not see the suggested-question hint
 
+  Scenario: Schedule call and Download CV sit on one row on a phone
+    Given I am on a mobile viewport
+    And I am on the Ask Tomi page
+    Then the Schedule call and Download CV chips should sit on the same row
+
   Scenario: Empty chat centers starter prompts when they fit
     Given I am on the Ask Tomi page
     Then I should see starter prompts
