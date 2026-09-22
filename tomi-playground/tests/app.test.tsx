@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import {
   DEFAULT_MAZE_DENSITY,
+  DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
   densityToGrid,
+  mazeLightSpeedPxPerSec,
   MAX_MAZE_DENSITY,
 } from '@/domain/maze-prefs'
 import { track } from '@/infrastructure/analytics'
@@ -101,6 +103,19 @@ describe('babjatom shell navigation', () => {
     const fullCols = Math.round(390 / (96 / DEFAULT_MAZE_DENSITY))
     const fullRows = Math.round(844 / (96 / DEFAULT_MAZE_DENSITY))
     expect(expected.cols * expected.rows).toBeLessThan(fullCols * fullRows)
+  })
+
+  it('slows the ambient maze light on a tall phone viewport', () => {
+    setViewport(390, 844)
+    renderApp('/')
+    const canvas = screen.getByTestId('maze-light-background')
+    expect(canvas).toHaveAttribute(
+      'data-maze-light-speed',
+      String(mazeLightSpeedPxPerSec(390)),
+    )
+    expect(mazeLightSpeedPxPerSec(390)).toBeLessThan(
+      DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
+    )
   })
 
   it('regenerates the maze grid when resized to a tall phone shape', async () => {

@@ -6,11 +6,10 @@ import {
   trailAlongPath,
   type MazeScene,
 } from '@/domain/maze'
-import { clampMazeVisibility, densityToGrid } from '@/domain/maze-prefs'
+import { clampMazeVisibility, densityToGrid, mazeLightSpeedPxPerSec } from '@/domain/maze-prefs'
 import { cn } from '@/lib/utils'
 import { useMaze } from '@/presentation/maze/maze-provider'
 
-const SPEED_PX_PER_SEC = 280
 const TRAIL_PX = 160
 const RESIZE_DEBOUNCE_MS = 120
 
@@ -154,6 +153,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
   }, [])
 
   const { cols, rows } = densityToGrid(density, viewport.width, viewport.height)
+  const lightSpeed = mazeLightSpeedPxPerSec(viewport.width)
   const rebuildKey = `${viewport.width}x${viewport.height}:${cols}x${rows}:${generation}`
 
   useEffect(() => {
@@ -174,6 +174,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
     const grid = densityToGrid(density, width, height)
+    const speed = mazeLightSpeedPxPerSec(width)
     const scene: MazeScene = buildMazeScene({
       width,
       height,
@@ -189,7 +190,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
         const total = pathMetrics(scene.path).total
         return total * 0.4
       }
-      return (timeMs / 1000) * SPEED_PX_PER_SEC
+      return (timeMs / 1000) * speed
     }
 
     const paint = (time: number) => {
@@ -240,6 +241,7 @@ export function MazeLightBackground({ className }: MazeLightBackgroundProps) {
         data-maze-visibility={visibility}
         data-maze-generation={generation}
         data-maze-rebuild={rebuildKey}
+        data-maze-light-speed={lightSpeed}
         className={cn(
           'pointer-events-none fixed inset-0 z-0 h-dvh w-screen opacity-95 brightness-[0.96]',
           className,

@@ -7,13 +7,16 @@ import {
   DEFAULT_AMBIENT_BACKGROUND,
   DEFAULT_MAZE_DENSITY,
   DEFAULT_MAZE_VISIBILITY,
+  DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
   densityToGrid,
   effectiveMazeDensity,
+  mazeLightSpeedPxPerSec,
   MAX_MAZE_CELLS,
   MAX_MAZE_DENSITY,
   MIN_MAZE_DENSITY,
   MIN_MAZE_VISIBILITY,
   MOBILE_MAZE_DENSITY_FACTOR,
+  MOBILE_MAZE_LIGHT_SPEED_FACTOR,
   parseAmbientBackground,
   REF_MAZE_CELL_PX,
 } from '@/domain/maze-prefs'
@@ -45,6 +48,13 @@ describe('densityToGrid', () => {
     const fullCols = Math.round(390 / (REF_MAZE_CELL_PX / DEFAULT_MAZE_DENSITY))
     const fullRows = Math.round(844 / (REF_MAZE_CELL_PX / DEFAULT_MAZE_DENSITY))
     expect(8 * 18).toBeLessThan(fullCols * fullRows)
+  })
+
+  it('slows the traveling light on mobile widths', () => {
+    expect(mazeLightSpeedPxPerSec(1440)).toBe(DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC)
+    expect(mazeLightSpeedPxPerSec(390)).toBe(
+      DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC * MOBILE_MAZE_LIGHT_SPEED_FACTOR,
+    )
   })
 
   it('raises cell count when density increases for the same viewport', () => {
