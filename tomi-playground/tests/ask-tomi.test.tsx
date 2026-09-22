@@ -306,6 +306,11 @@ describe('Ask Tomi chat', () => {
       starter_id: 'What’s your tech stack?',
       turn_index: 1,
       is_follow_up: false,
+      submit_method: 'chip',
+    })
+    expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
+      chip: 'starter',
+      starter_id: 'What’s your tech stack?',
     })
 
     await waitFor(() => {
@@ -354,10 +359,17 @@ describe('Ask Tomi chat', () => {
       expect(fetch).toHaveBeenCalled()
     })
 
+    expect(track).toHaveBeenCalledWith('Ask Tomi Composer Used', {
+      action: 'focus',
+    })
+    expect(track).toHaveBeenCalledWith('Ask Tomi Composer Used', {
+      action: 'first_input',
+    })
     expect(track).toHaveBeenCalledWith('Ask Tomi Message Sent', {
       source: 'typed',
       turn_index: 1,
       is_follow_up: false,
+      submit_method: 'button',
     })
 
     const body = getChatRequestBody()
@@ -403,6 +415,7 @@ describe('Ask Tomi chat', () => {
       source: 'typed',
       turn_index: 2,
       is_follow_up: true,
+      submit_method: 'button',
     })
   })
 
@@ -547,6 +560,9 @@ describe('Ask Tomi chat', () => {
       'placeholder',
       'Paste their Cal.com link…',
     )
+    expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
+      chip: 'schedule_call',
+    })
     expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
       action: 'schedule_nudge',
     })
@@ -560,6 +576,9 @@ describe('Ask Tomi chat', () => {
     await user.click(screen.getByRole('button', { name: 'Download CV' }))
 
     expect(downloadCvPdf).toHaveBeenCalledTimes(1)
+    expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
+      chip: 'download_cv',
+    })
     expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
       action: 'download_cv',
     })

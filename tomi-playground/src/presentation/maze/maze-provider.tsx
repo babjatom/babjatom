@@ -5,6 +5,7 @@ import {
   AMBIENT_BACKGROUNDS,
   type AmbientBackgroundId,
 } from '@/domain/maze-prefs'
+import { track } from '@/infrastructure/analytics'
 import { createLocalStorageMazePersistence } from '@/infrastructure/local-storage-persistence'
 
 type MazeContextValue = {
@@ -35,19 +36,35 @@ export function MazeProvider({ children }: { children: ReactNode }) {
   const [generation, setGeneration] = useState(0)
 
   const setBackground = (id: AmbientBackgroundId) => {
-    setBackgroundState(service.saveBackground(id))
+    const next = service.saveBackground(id)
+    setBackgroundState(next)
+    track('Background Setting Changed', {
+      setting: 'background',
+      value: next,
+    })
   }
 
   const setDensity = (value: number) => {
-    setDensityState(service.saveDensity(value))
+    const next = service.saveDensity(value)
+    setDensityState(next)
+    track('Background Setting Changed', {
+      setting: 'density',
+      value: next,
+    })
   }
 
   const setVisibility = (value: number) => {
-    setVisibilityState(service.saveVisibility(value))
+    const next = service.saveVisibility(value)
+    setVisibilityState(next)
+    track('Background Setting Changed', {
+      setting: 'visibility',
+      value: next,
+    })
   }
 
   const regenerate = () => {
     setGeneration((current) => current + 1)
+    track('Background Setting Changed', { setting: 'regenerate' })
   }
 
   const value: MazeContextValue = {

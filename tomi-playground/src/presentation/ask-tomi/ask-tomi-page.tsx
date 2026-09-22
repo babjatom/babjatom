@@ -123,6 +123,8 @@ export function AskTomiPage() {
   const [composerFocused, setComposerFocused] = useState(false)
   const [emptyNeedsScroll, setEmptyNeedsScroll] = useState(false)
   const [scheduleNudge, setScheduleNudge] = useState(false)
+  const trackedComposerFocus = useRef(false)
+  const trackedFirstInput = useRef(false)
   const listRef = useRef<HTMLDivElement>(null)
   const emptyContentRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -156,6 +158,28 @@ export function AskTomiPage() {
     if (!viewport || !content) return
     setEmptyNeedsScroll(content.scrollHeight > viewport.clientHeight + 1)
   }, [hasMessages])
+
+  const noteComposerFocus = useCallback(() => {
+    setComposerFocused(true)
+    if (trackedComposerFocus.current) return
+    trackedComposerFocus.current = true
+    track('Ask Tomi Composer Used', { action: 'focus' })
+  }, [])
+
+  const onDraftChange = useCallback((value: string) => {
+    setDraft((previous) => {
+      if (
+        !trackedFirstInput.current &&
+        !previous.trim() &&
+        value.trim()
+      ) {
+        trackedFirstInput.current = true
+        track('Ask Tomi Composer Used', { action: 'first_input' })
+      }
+      return value
+    })
+    if (value.trim()) setScheduleNudge(false)
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
@@ -193,7 +217,7 @@ export function AskTomiPage() {
     const question = draft
     setDraft('')
     stickToBottomRef.current = true
-    await send(question)
+    await send(question, { submit_method: 'button' })
     inputRef.current?.focus()
   }
 
@@ -202,7 +226,7 @@ export function AskTomiPage() {
       event.preventDefault()
       if (!pending && draft.trim()) {
         stickToBottomRef.current = true
-        void send(draft).then(() => {
+        void send(draft, { submit_method: 'enter' }).then(() => {
           setDraft('')
           inputRef.current?.focus()
         })
@@ -322,8 +346,11 @@ export function AskTomiPage() {
                         onClick={() => {
                           setScheduleNudge(true)
                           setDraft('')
-                          setComposerFocused(true)
+                          noteComposerFocus()
                           inputRef.current?.focus()
+                          track('Ask Tomi Chip Clicked', {
+                            chip: 'schedule_call',
+                          })
                           track('Ask Tomi Action', { action: 'schedule_nudge' })
                         }}
                       >
@@ -340,6 +367,9 @@ export function AskTomiPage() {
                         data-testid="download-cv-chip"
                         onClick={() => {
                           downloadCvPdf()
+                          track('Ask Tomi Chip Clicked', {
+                            chip: 'download_cv',
+                          })
                           track('Ask Tomi Action', { action: 'download_cv' })
                         }}
                       >
@@ -361,9 +391,14 @@ export function AskTomiPage() {
                           onClick={() => {
                             setScheduleNudge(false)
                             stickToBottomRef.current = true
+                            track('Ask Tomi Chip Clicked', {
+                              chip: 'starter',
+                              starter_id: prompt,
+                            })
                             void send(prompt, {
                               source: 'starter',
                               starter_id: prompt,
+                              submit_method: 'chip',
                             })
                           }}
                         >
@@ -490,7 +525,7 @@ export function AskTomiPage() {
               : 'rounded-xl border border-border/70 bg-card/70 p-3 backdrop-blur-sm',
           )}
           onSubmit={handleSubmit}
-          onFocus={() => setComposerFocused(true)}
+          onFocus={() => noteComposerFocus()}
           onBlur={(event) => {
             const next = event.relatedTarget as Node | null
             if (next && event.currentTarget.contains(next)) return
@@ -504,10 +539,7 @@ export function AskTomiPage() {
             showMeta={showComposerMeta}
             scheduleNudge={scheduleNudge}
             inputRef={inputRef}
-            onDraftChange={(value) => {
-              setDraft(value)
-              if (value.trim()) setScheduleNudge(false)
-            }}
+            onDraftChange={onDraftChange}
             onKeyDown={handleKeyDown}
             onStop={stop}
           />

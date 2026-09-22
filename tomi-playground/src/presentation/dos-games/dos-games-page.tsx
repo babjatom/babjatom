@@ -1,11 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/presentation/shared/reveal'
+import { track } from '@/infrastructure/analytics'
 import { dosGames } from './dos-games-catalog'
 import { DosGamePlayer } from './dos-game-player'
 
 export function DosGamesPage() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null)
+  const sessionStartedAt = useRef<number | null>(null)
+
+  function startGame(gameId: string) {
+    sessionStartedAt.current = Date.now()
+    track('Dos Game Started', { game_id: gameId })
+    setActiveGameId(gameId)
+  }
+
+  function exitGame() {
+    if (activeGameId) {
+      const started = sessionStartedAt.current ?? Date.now()
+      track('Dos Game Exited', {
+        game_id: activeGameId,
+        session_ms: Math.max(0, Date.now() - started),
+      })
+    }
+    sessionStartedAt.current = null
+    setActiveGameId(null)
+  }
+
+  useEffect(() => {
+    if (!activeGameId) {
+      sessionStartedAt.current = null
+    }
+  }, [activeGameId])
 
   return (
     <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-8">
@@ -35,16 +61,13 @@ export function DosGamesPage() {
               </div>
               {activeGameId === game.id ? null : (
                 <div>
-                  <Button type="button" onClick={() => setActiveGameId(game.id)}>
+                  <Button type="button" onClick={() => startGame(game.id)}>
                     Play {game.title}
                   </Button>
                 </div>
               )}
               {activeGameId === game.id ? (
-                <DosGamePlayer
-                  game={game}
-                  onBack={() => setActiveGameId(null)}
-                />
+                <DosGamePlayer game={game} onBack={exitGame} />
               ) : null}
             </li>
           ))}

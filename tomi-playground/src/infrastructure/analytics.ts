@@ -13,11 +13,23 @@ export type AnalyticsEventMap = {
   'Font Selected': {
     font_id: string
   }
+  'Background Setting Changed': {
+    setting: 'background' | 'density' | 'visibility' | 'regenerate'
+    value?: string | number
+  }
   'Ask Tomi Message Sent': {
     source: 'starter' | 'typed'
     starter_id?: string
     turn_index: number
     is_follow_up: boolean
+    submit_method?: 'button' | 'enter' | 'chip'
+  }
+  'Ask Tomi Chip Clicked': {
+    chip: 'schedule_call' | 'download_cv' | 'starter'
+    starter_id?: string
+  }
+  'Ask Tomi Composer Used': {
+    action: 'focus' | 'first_input'
   }
   'Ask Tomi Action': {
     action:
@@ -34,6 +46,11 @@ export type AnalyticsEventMap = {
     error_kind?: 'network' | 'http' | 'unknown'
     kind?: 'chat' | 'schedule' | 'schedule_preview' | 'schedule_cancel'
   }
+  'Dos Game Started': { game_id: string }
+  'Dos Game Ready': { game_id: string }
+  'Dos Game Failed': { game_id: string }
+  'Dos Game Exited': { game_id: string; session_ms: number }
+  'Dos Game Fullscreen': { game_id: string; active: boolean }
   'Visits Table Interacted': {
     action: 'sort' | 'select' | 'reorder' | 'row_action'
   }

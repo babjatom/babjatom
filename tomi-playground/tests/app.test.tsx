@@ -421,10 +421,22 @@ describe('babjatom shell navigation', () => {
 
     const visibility = screen.getByRole('slider', { name: /maze visibility/i })
     fireEvent.change(visibility, { target: { value: '2.5' } })
+    fireEvent.pointerUp(visibility)
     expect(canvas).toHaveAttribute('data-maze-visibility', '2.5')
 
     await user.click(screen.getByRole('button', { name: /regenerate maze/i }))
     expect(canvas).toHaveAttribute('data-maze-generation', '1')
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'density',
+      value: 2,
+    })
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'visibility',
+      value: 2.5,
+    })
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'regenerate',
+    })
   })
 
   it('hides the maze when None background is selected', async () => {
@@ -438,6 +450,10 @@ describe('babjatom shell navigation', () => {
 
     expect(screen.getByTestId('maze-light-background')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /^none$/i }))
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'background',
+      value: 'none',
+    })
 
     expect(
       screen.queryByTestId('maze-light-background'),
@@ -462,9 +478,9 @@ describe('babjatom shell navigation', () => {
     const density = screen.getByRole('slider', { name: /maze density/i })
     fireEvent.change(density, { target: { value: '1.5' } })
     fireEvent.pointerUp(density)
-    fireEvent.change(screen.getByRole('slider', { name: /maze visibility/i }), {
-      target: { value: '2' },
-    })
+    const visibility = screen.getByRole('slider', { name: /maze visibility/i })
+    fireEvent.change(visibility, { target: { value: '2' } })
+    fireEvent.pointerUp(visibility)
     await user.click(screen.getByRole('button', { name: /^none$/i }))
 
     unmount()
