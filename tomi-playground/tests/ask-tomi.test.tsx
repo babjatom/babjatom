@@ -95,10 +95,10 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
     expect(
-      screen.getByRole('button', {
+      screen.queryByRole('button', {
         name: 'How do you structure a React + TypeScript app?',
       }),
-    ).toBeInTheDocument()
+    ).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: 'What’s your approach to testing and CI?',
