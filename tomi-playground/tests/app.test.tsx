@@ -2,7 +2,11 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
-import { densityToGrid } from '@/domain/maze-prefs'
+import {
+  DEFAULT_MAZE_DENSITY,
+  densityToGrid,
+  MAX_MAZE_DENSITY,
+} from '@/domain/maze-prefs'
 import { track } from '@/infrastructure/analytics'
 import { setMatchMediaMatches } from './setup'
 
@@ -64,6 +68,15 @@ describe('babjatom shell navigation', () => {
     expect(canvas).toHaveClass('z-0')
   })
 
+  it('starts the ambient maze at maximum density on desktop', () => {
+    renderApp('/')
+    const canvas = screen.getByTestId('maze-light-background')
+    const maxGrid = densityToGrid(MAX_MAZE_DENSITY, 1440, 900)
+    expect(DEFAULT_MAZE_DENSITY).toBe(MAX_MAZE_DENSITY)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(maxGrid.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(maxGrid.rows))
+  })
+
   it('uses a taller maze grid on a tall phone viewport', () => {
     setViewport(390, 844)
     renderApp('/')
@@ -71,7 +84,10 @@ describe('babjatom shell navigation', () => {
     const cols = Number(canvas.getAttribute('data-maze-cols'))
     const rows = Number(canvas.getAttribute('data-maze-rows'))
     expect(rows).toBeGreaterThan(cols)
-    expect(densityToGrid(1, 390, 844)).toEqual({ cols, rows })
+    expect(densityToGrid(DEFAULT_MAZE_DENSITY, 390, 844)).toEqual({
+      cols,
+      rows,
+    })
   })
 
   it('regenerates the maze grid when resized to a tall phone shape', async () => {
@@ -316,7 +332,7 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
 
     const canvas = screen.getByTestId('maze-light-background')
-    const baseGrid = densityToGrid(1, 1440, 900)
+    const baseGrid = densityToGrid(DEFAULT_MAZE_DENSITY, 1440, 900)
     expect(canvas).toHaveAttribute('data-maze-cols', String(baseGrid.cols))
     expect(canvas).toHaveAttribute('data-maze-rows', String(baseGrid.rows))
     expect(canvas).toHaveAttribute('data-maze-visibility', '1')
@@ -326,10 +342,10 @@ describe('babjatom shell navigation', () => {
     const density = screen.getByRole('slider', { name: /maze density/i })
     fireEvent.change(density, { target: { value: '2' } })
     fireEvent.pointerUp(density)
-    const denser = densityToGrid(2, 1440, 900)
-    expect(canvas).toHaveAttribute('data-maze-cols', String(denser.cols))
-    expect(canvas).toHaveAttribute('data-maze-rows', String(denser.rows))
-    expect(denser.cols * denser.rows).toBeGreaterThan(baseCells)
+    const sparser = densityToGrid(2, 1440, 900)
+    expect(canvas).toHaveAttribute('data-maze-cols', String(sparser.cols))
+    expect(canvas).toHaveAttribute('data-maze-rows', String(sparser.rows))
+    expect(sparser.cols * sparser.rows).toBeLessThan(baseCells)
 
     const visibility = screen.getByRole('slider', { name: /maze visibility/i })
     fireEvent.change(visibility, { target: { value: '2.5' } })
@@ -398,6 +414,10 @@ describe('babjatom shell navigation', () => {
 
     const canvas = screen.getByTestId('maze-light-background')
     const saved = densityToGrid(1.5, 1440, 900)
+    const defaultGrid = densityToGrid(DEFAULT_MAZE_DENSITY, 1440, 900)
+    expect(saved.cols * saved.rows).toBeLessThan(
+      defaultGrid.cols * defaultGrid.rows,
+    )
     expect(canvas).toHaveAttribute('data-maze-cols', String(saved.cols))
     expect(canvas).toHaveAttribute('data-maze-rows', String(saved.rows))
     expect(canvas).toHaveAttribute('data-maze-visibility', '2')

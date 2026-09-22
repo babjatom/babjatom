@@ -27,9 +27,9 @@ Feature: Theme Playground
   Scenario: Visitor changes maze density and visibility
     Given I am on the Theme Playground page
     And the Maze background is selected
-    When I set maze density higher
+    When I set maze density lower
     And I set maze visibility higher
-    Then the ambient maze should use more passage cells for this viewport
+    Then the ambient maze should use fewer passage cells for this viewport
     And the ambient maze should use the higher visibility
 
   Scenario: Visitor regenerates the maze
@@ -40,14 +40,14 @@ Feature: Theme Playground
 
   Scenario: Background and maze preferences stick after reload
     Given I am on the Theme Playground page
-    When I set maze density higher
+    When I set maze density lower
     And I set maze visibility higher
     And I choose the None background
     And I reload the page
     Then the None background should stay selected
     And the ambient maze should not be shown
     When I choose the Maze background
-    Then the ambient maze should keep the denser layout
+    Then the ambient maze should keep the sparser layout
     And the ambient maze should keep the higher visibility
 
   Scenario: Showcase and visits table are on the page

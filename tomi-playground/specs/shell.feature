@@ -12,6 +12,11 @@ Feature: Shell navigation
     Given I am on the home page
     Then the ambient maze light should not capture pointer events
 
+  Scenario: Desktop starts with maximum maze density
+    Given I am on a desktop viewport
+    And I am on the home page
+    Then the ambient maze should use maximum density
+
   Scenario: Ambient maze uses a taller grid on a tall phone
     Given I am on a tall phone viewport
     And I am on the home page
