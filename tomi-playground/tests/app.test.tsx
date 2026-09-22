@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import {
   DEFAULT_MAZE_DENSITY,
-  DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
   densityToGrid,
   mazeLightSpeedPxPerSec,
+  MAZE_LIGHT_SPEED_PX_PER_SEC,
   MAX_MAZE_DENSITY,
 } from '@/domain/maze-prefs'
 import { track } from '@/infrastructure/analytics'
@@ -105,17 +105,15 @@ describe('babjatom shell navigation', () => {
     expect(expected.cols * expected.rows).toBeLessThan(fullCols * fullRows)
   })
 
-  it('slows the ambient maze light on a tall phone viewport', () => {
+  it('uses the same ambient maze light speed on a tall phone as on desktop', () => {
     setViewport(390, 844)
     renderApp('/')
     const canvas = screen.getByTestId('maze-light-background')
     expect(canvas).toHaveAttribute(
       'data-maze-light-speed',
-      String(mazeLightSpeedPxPerSec(390)),
+      String(MAZE_LIGHT_SPEED_PX_PER_SEC),
     )
-    expect(mazeLightSpeedPxPerSec(390)).toBeLessThan(
-      DESKTOP_MAZE_LIGHT_SPEED_PX_PER_SEC,
-    )
+    expect(mazeLightSpeedPxPerSec(390)).toBe(mazeLightSpeedPxPerSec(1440))
   })
 
   it('regenerates the maze grid when resized to a tall phone shape', async () => {
@@ -131,6 +129,52 @@ describe('babjatom shell navigation', () => {
       const rows = Number(canvas.getAttribute('data-maze-rows'))
       expect(rows).toBeGreaterThan(cols)
       expect(canvas.getAttribute('data-maze-rebuild')).not.toBe(rebuildBefore)
+    })
+  })
+
+  it('pauses the ambient maze when the tab is hidden', async () => {
+    const ctx = {
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+      arc: vi.fn(),
+      setLineDash: vi.fn(),
+      drawImage: vi.fn(),
+      createRadialGradient: vi.fn(() => ({
+        addColorStop: vi.fn(),
+      })),
+    }
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      ctx as unknown as CanvasRenderingContext2D,
+    )
+
+    let hidden = false
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => hidden,
+    })
+
+    renderApp('/')
+    const canvas = screen.getByTestId('maze-light-background')
+
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'true')
+    })
+
+    hidden = true
+    document.dispatchEvent(new Event('visibilitychange'))
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'false')
+    })
+
+    hidden = false
+    document.dispatchEvent(new Event('visibilitychange'))
+    await waitFor(() => {
+      expect(canvas).toHaveAttribute('data-maze-animating', 'true')
     })
   })
 
