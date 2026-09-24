@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
+  ExternalLink,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -17,7 +18,20 @@ const pages = [
   { to: '/theme-playground', label: 'Theme Playground', end: false },
   { to: '/analytics', label: 'Analytics', end: false },
   { to: '/dos-games', label: 'Dos games', end: false },
+  {
+    href: 'https://adsb.tomibabjak.com',
+    label: 'ADS-B',
+    external: true,
+  },
 ] as const
+
+const navItemClassName = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'rounded-lg border px-3 py-2 text-sm transition-colors',
+    isActive
+      ? 'border-primary bg-primary/10 text-foreground'
+      : 'border-transparent bg-secondary/50 hover:bg-secondary',
+  )
 
 const MOBILE_BREAKPOINT = '(max-width: 1023px)'
 
@@ -79,27 +93,43 @@ export function AppShell() {
         </Button>
       </div>
       <nav className="mb-4 flex flex-col gap-2" aria-label="Pages">
-        {pages.map((page) => (
-          <NavLink
-            key={page.to}
-            to={page.to}
-            end={page.end}
-            onClick={() => {
-              track('Nav Clicked', { to: page.to, source: 'sidebar' })
-              closeMobileMenu()
-            }}
-            className={({ isActive }) =>
-              cn(
-                'rounded-lg border px-3 py-2 text-sm transition-colors',
-                isActive
-                  ? 'border-primary bg-primary/10 text-foreground'
-                  : 'border-transparent bg-secondary/50 hover:bg-secondary',
-              )
-            }
-          >
-            {page.label}
-          </NavLink>
-        ))}
+        {pages.map((page) =>
+          'external' in page ? (
+            <a
+              key={page.href}
+              href={page.href}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => {
+                track('Nav Clicked', { to: page.href, source: 'sidebar' })
+                closeMobileMenu()
+              }}
+              className={cn(
+                navItemClassName({ isActive: false }),
+                'inline-flex items-center justify-between gap-2',
+              )}
+            >
+              <span>{page.label}</span>
+              <ExternalLink
+                className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                aria-hidden
+              />
+            </a>
+          ) : (
+            <NavLink
+              key={page.to}
+              to={page.to}
+              end={page.end}
+              onClick={() => {
+                track('Nav Clicked', { to: page.to, source: 'sidebar' })
+                closeMobileMenu()
+              }}
+              className={navItemClassName}
+            >
+              {page.label}
+            </NavLink>
+          ),
+        )}
       </nav>
 
       <div className="mt-6 border-t border-border/60 pt-4">

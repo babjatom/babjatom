@@ -5,7 +5,9 @@ Feature: Shell navigation
   Scenario: Home is Ask Tomi with the pages menu
     Given I am on the home page
     Then I should see the Ask Tomi chat
-    And the pages menu should list Ask Tomi, Theme Playground, Analytics, and Dos games
+    And the pages menu should list Ask Tomi, Theme Playground, Analytics, Dos games, and ADS-B
+    And ADS-B should show a visible link-out icon
+    And ADS-B should open adsb.tomibabjak.com in a new tab
     And an ambient maze light should sit behind the page content
 
   Scenario: Ambient maze light stays decorative

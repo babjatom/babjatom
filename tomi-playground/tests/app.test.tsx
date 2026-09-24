@@ -54,7 +54,12 @@ describe('babjatom shell navigation', () => {
       'Theme Playground',
       'Analytics',
       'Dos games',
+      'ADS-B',
     ])
+    const adsbLink = within(pagesNav).getByRole('link', { name: 'ADS-B' })
+    expect(adsbLink).toHaveAttribute('href', 'https://adsb.tomibabjak.com')
+    expect(adsbLink).toHaveAttribute('target', '_blank')
+    expect(adsbLink.querySelector('svg')).toBeTruthy()
     expect(
       screen.queryByRole('button', { name: /random theme/i }),
     ).not.toBeInTheDocument()
