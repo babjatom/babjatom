@@ -22,7 +22,7 @@ Everything committed here is public forever, including history.
 - Ship incomplete features as intentional placeholders, not broken nav entries.
 - When adding routes, add or update routing/navigation tests.
 - Visitor-facing behavior comes only from [`tomi-playground/specs/*.feature`](tomi-playground/specs/). Update the scenario first, then the feature and its Vitest tests. Tag unfinished scenarios `@wip` and keep them out of public navigation. Procedure: [`.cursor/skills/implement-from-spec/SKILL.md`](.cursor/skills/implement-from-spec/SKILL.md).
-- Use Conventional Commits for every commit (see below).
+- Use Conventional Commits, and branch as `cursor/<type>/<description>` before the first commit (see below).
 - Verify changes with install, test, and build (commands below).
 
 ## Do not
@@ -32,6 +32,7 @@ Everything committed here is public forever, including history.
 - Commit `node_modules/`, `dist/`, model weights, or large binaries.
 - Put server credentials in client code or Pages build env that embeds into the bundle.
 - Expose unfinished experiments in public navigation.
+- Commit or push directly on `main`.
 
 If configuration files are needed later, commit only `.env.example` with empty placeholders. Backend services and training data belong outside this public SPA.
 
@@ -51,6 +52,29 @@ Rules:
 - Scope optional; use when it clarifies the area (`tomi-playground`, `deploy`, `agents`).
 - Breaking changes: append `!` after type/scope or add a `BREAKING CHANGE:` footer.
 - One logical change per PR when practical (squash lands as a single commit on `main`).
+
+### Branches
+
+Create a branch before the first commit. Do not commit or push on `main`.
+
+Cursor agent branches:
+
+```text
+cursor/<type>/<description>
+```
+
+- `<type>` is one of the Conventional Commit types above.
+- `<description>` is short kebab-case.
+- Use the same type in the branch and the PR title.
+- One branch per pull request.
+
+Examples:
+
+```text
+cursor/docs/implement-from-spec-skill
+cursor/feat/analytics-charts-page
+cursor/fix/pages-base-path
+```
 
 ### Landing on `main`
 
