@@ -19,7 +19,7 @@ const pages = [
   { to: '/analytics', label: 'Analytics', end: false },
   { to: '/dos-games', label: 'Dos games', end: false },
   {
-    href: 'https://adsb.tomibabjak.com',
+    href: 'https://adsb.tomibabjak.dev',
     label: 'ADS-B',
     external: true,
   },

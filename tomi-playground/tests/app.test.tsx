@@ -57,7 +57,7 @@ describe('babjatom shell navigation', () => {
       'ADS-B',
     ])
     const adsbLink = within(pagesNav).getByRole('link', { name: 'ADS-B' })
-    expect(adsbLink).toHaveAttribute('href', 'https://adsb.tomibabjak.com')
+    expect(adsbLink).toHaveAttribute('href', 'https://adsb.tomibabjak.dev')
     expect(adsbLink).toHaveAttribute('target', '_blank')
     expect(adsbLink.querySelector('svg')).toBeTruthy()
     expect(
