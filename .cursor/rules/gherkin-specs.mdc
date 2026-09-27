@@ -1,17 +1,12 @@
 ---
-description: Implement playground features from Gherkin specs, not from ad-hoc requirements
-alwaysApply: true
+description: Gherkin scenarios stay in visitor language
+globs: tomi-playground/specs/**/*.feature
+alwaysApply: false
 ---
 
-# Spec-first features
+# Spec style
 
-Acceptance behavior for `tomi-playground` lives in `tomi-playground/specs/*.feature`.
-
-- Before implementing or changing user-facing behavior, write or update the matching `.feature` file.
-- Then implement the feature **and** Vitest tests so those scenarios pass.
-- Tests follow the spec. Do not add user-facing behavior that is not in the spec.
-- Tag unfinished scenarios `@wip`. Keep incomplete work out of public navigation.
-- Specs are the contract; Vitest is the runner. Do not add Cucumber unless asked.
-- Keep Gherkin in visitor language (pages, menus, questions). No selectors, storage keys, or API payloads.
-
-Example: `specs/ask-tomi.feature` → `tests/ask-tomi.test.tsx` plus the Ask Tomi page.
+- One capability per file. Name the scenario by what the visitor gets.
+- Visitor language: pages, menus, questions, answers.
+- No selectors, storage keys, or API payloads.
+- Tag unfinished scenarios `@wip`.

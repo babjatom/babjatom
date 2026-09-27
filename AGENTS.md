@@ -21,7 +21,7 @@ Everything committed here is public forever, including history.
 - Reuse the existing CSS-variable theme system.
 - Ship incomplete features as intentional placeholders, not broken nav entries.
 - When adding routes, add or update routing/navigation tests.
-- Treat [`tomi-playground/specs/`](tomi-playground/specs/) Gherkin files as the acceptance contract. Write or update scenarios before implementing. Implement the feature and Vitest tests so those scenarios pass. Do not invent user-facing behavior outside the spec. Tag unfinished scenarios `@wip`.
+- Visitor-facing behavior comes only from [`tomi-playground/specs/*.feature`](tomi-playground/specs/). Update the scenario first, then the feature and its Vitest tests. Tag unfinished scenarios `@wip` and keep them out of public navigation. Procedure: [`.cursor/skills/implement-from-spec/SKILL.md`](.cursor/skills/implement-from-spec/SKILL.md).
 - Use Conventional Commits for every commit (see below).
 - Verify changes with install, test, and build (commands below).
 
