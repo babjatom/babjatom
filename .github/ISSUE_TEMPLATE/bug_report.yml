@@ -1,0 +1,61 @@
+name: Bug report
+description: Report something that is broken in tomi-playground or the site.
+title: "fix: <short description>"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! For **security** issues, do not file here —
+        follow [SECURITY.md](../blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and its impact.
+      placeholder: When I click X on page Y, Z happens instead of ...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce it?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page / route
+      description: Which route or page? (e.g. /analytics, /dos-games)
+      placeholder: "/"
+    validations:
+      required: false
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where did you see this?
+      options:
+        - Production (tomibabjak.dev)
+        - Local dev (pnpm dev)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Browser / device and extra context
+      description: Browser + version, OS, screenshots, console errors.
+    validations:
+      required: false
