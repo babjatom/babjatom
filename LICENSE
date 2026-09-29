@@ -19,20 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Scope note
-
-The MIT license above covers the ORIGINAL SOURCE CODE of this repository —
-principally the application source under `tomi-playground/src/`, plus the
-build scripts, configuration, tests, and specs authored for this project.
-
-It does NOT cover:
-
-  1. Personal content (see "Personal content" in NOTICE.md) — the CV PDF, the
-     `tomi.glb` likeness model, and profile prose are reserved, not MIT.
-  2. Bundled third-party assets (fonts, UI primitives, and the DOS shareware
-     games) — each retains its own upstream license.
-
-See NOTICE.md for the full breakdown.
