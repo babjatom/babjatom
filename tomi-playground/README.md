@@ -1,5 +1,9 @@
 # Tomi Playground
 
+[![CI](https://github.com/babjatom/babjatom/actions/workflows/ci.yml/badge.svg)](https://github.com/babjatom/babjatom/actions/workflows/ci.yml)
+[![Deploy](https://github.com/babjatom/babjatom/actions/workflows/deploy.yml/badge.svg)](https://github.com/babjatom/babjatom/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
+
 A Vite + React SPA for babjatom: CSS-variable themes, analytics charts, and Ask Tomi.
 
 The app in this folder is served from GitHub Pages with routes:
@@ -72,7 +76,19 @@ Vite is configured with `base: '/'` for the custom domain (`tomibabjak.dev`).
 
 User-facing behavior is specified as Gherkin in [`specs/`](specs/). Write or update those scenarios before implementing a feature. Vitest tests under `tests/` make the scenarios executable; there is no Cucumber runner.
 
-See [`specs/README.md`](specs/README.md) for the workflow and file mapping.
+```mermaid
+flowchart LR
+    S["specs/*.feature<br/>Gherkin scenario"] --> T["tests/*.test.tsx<br/>Vitest + RTL"]
+    T --> I["src/…<br/>implementation"]
+    I --> V{"pnpm test<br/>pnpm lint · build"}
+    V -->|green| M["squash-merge → main → Pages"]
+    V -->|red| T
+```
+
+The spec comes first and stays the contract: tests encode the scenarios, the
+implementation makes them pass, and CI (`pnpm lint`/`test`/`build`) gates the
+merge. See [`specs/README.md`](specs/README.md) for the workflow and the
+spec→test file mapping.
 
 ## Adding a Theme
 
@@ -109,16 +125,46 @@ Random themes are produced in `src/domain/random-theme.ts` using the same token 
 
 ## Architecture
 
-Lightweight DDD layering keeps theming logic independent of React:
+Lightweight hexagonal (ports & adapters) layering keeps domain logic
+independent of React. Dependencies point **inward**: `presentation` and
+`infrastructure` depend on `application`, which depends on `domain`. The
+`domain` depends on nothing.
 
-```text
-domain          Theme entities, presets, random generation (no React)
-application     ThemeService use-cases and persistence ports
-infrastructure  localStorage adapter, Mixpanel analytics
-presentation    React shell, sidebar, showcase, CSS variable application
+```mermaid
+flowchart TD
+    subgraph presentation["presentation/ (React)"]
+        UI["shell · theme · font · feature pages<br/>applies CSS variables"]
+    end
+    subgraph application["application/"]
+        SVC["ThemeService · FontService · MazeService"]
+        PORTS["ports.ts<br/>ThemePersistence · FontPersistence · MazePersistence"]
+    end
+    subgraph domain["domain/ (no React)"]
+        DOM["theme · presets · random-theme · font-presets · maze"]
+    end
+    subgraph infrastructure["infrastructure/ (adapters)"]
+        LS["localStorage persistence"]
+        MP["Mixpanel analytics"]
+        API["chat / schedule APIs"]
+    end
+
+    UI --> SVC
+    SVC --> DOM
+    SVC --> PORTS
+    LS -. implements .-> PORTS
+    UI --> MP
+    UI --> API
 ```
 
-The Theme domain can be unit-tested and reused without mounting the UI.
+| Layer | Responsibility | Depends on |
+| --- | --- | --- |
+| `domain` | Theme/font/maze entities, presets, random generation (no React) | — |
+| `application` | Use-case services + persistence **ports** (interfaces) | `domain` |
+| `infrastructure` | Adapters: localStorage, Mixpanel, chat/schedule APIs | ports in `application` |
+| `presentation` | React shell, sidebar, showcase, CSS variable application | `application` |
+
+The domain and application layers can be unit-tested and reused without
+mounting the UI.
 
 ## Analytics
 
