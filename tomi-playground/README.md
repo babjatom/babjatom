@@ -5,13 +5,14 @@ A Vite + React SPA for babjatom: CSS-variable themes, analytics charts, and Ask 
 The app in this folder is served from GitHub Pages with routes:
 
 - `/` — Ask Tomi chat (site home)
+- `/adsb-radar` — live ADS-B radar with a fullscreen link to adsb.tomibabjak.dev
 - `/theme-playground` — component showcase and visits table
 - `/analytics` — visits table plus area, bar, line, pie, radar, radial, and tooltip charts
 - `/dos-games` — curated shareware/freeware DOS games in-browser
 - `/ask-tomi` and `/tomi-ai` — redirect to `/`
 - `/privacy` — short privacy note (hosting, Ask Tomi, profile pixel)
 
-The sidebar **Pages** menu lists Ask Tomi, Theme Playground, Analytics, and Dos games. Theme and font controls (including random theme) live on Theme Playground. A **Privacy** link sits under the sidebar footer.
+The sidebar **Pages** menu lists Ask Tomi, ADS-B radar, Theme Playground, Analytics, and Dos games. Theme and font controls (including random theme) live on Theme Playground. A **Privacy** link sits under the sidebar footer.
 
 ## Features
 

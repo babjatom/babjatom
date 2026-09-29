@@ -31,4 +31,5 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 | `analytics.feature` | `tests/analytics.test.tsx` |
 | `ask-tomi.feature` | `tests/ask-tomi.test.tsx` |
 | `dos-games.feature` | `tests/dos-games.test.tsx`, `tests/app.test.tsx` |
+| `adsb-radar.feature` | `tests/adsb-radar.test.tsx`, `tests/app.test.tsx` |
 | `privacy.feature` | `tests/privacy.test.tsx` |

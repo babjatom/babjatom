@@ -51,15 +51,14 @@ describe('babjatom shell navigation', () => {
     const links = within(pagesNav).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
       'Ask Tomi',
+      'ADS-B radar',
       'Theme Playground',
       'Analytics',
       'Dos games',
-      'ADS-B',
     ])
-    const adsbLink = within(pagesNav).getByRole('link', { name: 'ADS-B' })
-    expect(adsbLink).toHaveAttribute('href', 'https://adsb.tomibabjak.dev')
-    expect(adsbLink).toHaveAttribute('target', '_blank')
-    expect(adsbLink.querySelector('svg')).toBeTruthy()
+    const adsbLink = within(pagesNav).getByRole('link', { name: 'ADS-B radar' })
+    expect(adsbLink).toHaveAttribute('href', '/adsb-radar')
+    expect(adsbLink).not.toHaveAttribute('target', '_blank')
     expect(
       screen.queryByRole('button', { name: /random theme/i }),
     ).not.toBeInTheDocument()
