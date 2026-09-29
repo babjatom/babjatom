@@ -21,10 +21,10 @@ describe('Analytics page', () => {
     const links = within(pagesNav).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
       'Ask Tomi',
+      'ADS-B radar',
       'Theme Playground',
       'Analytics',
       'Dos games',
-      'ADS-B',
     ])
 
     await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))

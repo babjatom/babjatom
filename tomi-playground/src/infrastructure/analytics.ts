@@ -4,7 +4,7 @@ export type AnalyticsEventMap = {
   'Page Viewed': { path: string }
   'Nav Clicked': {
     to: string
-    source: 'sidebar' | 'home' | 'brand' | 'ask_tomi_composer'
+    source: 'sidebar' | 'home' | 'brand' | 'ask_tomi_composer' | 'adsb_fullscreen'
   }
   'Theme Selected': {
     theme_id: string

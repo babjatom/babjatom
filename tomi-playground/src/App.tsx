@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AdsbRadarPage } from '@/presentation/adsb-radar/adsb-radar-page'
 import { AnalyticsPage } from '@/presentation/analytics/analytics-page'
 import { AskTomiPage } from '@/presentation/ask-tomi/ask-tomi-page'
 import { DosGamesPage } from '@/presentation/dos-games/dos-games-page'
@@ -22,6 +23,7 @@ export default function App() {
             <Routes>
               <Route element={<AppShell />}>
                 <Route index element={<AskTomiPage />} />
+                <Route path="adsb-radar" element={<AdsbRadarPage />} />
                 <Route path="theme-playground" element={<ComponentShowcase />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="dos-games" element={<DosGamesPage />} />
