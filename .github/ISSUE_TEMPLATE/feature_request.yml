@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest a new capability or improvement for tomi-playground.
+title: "feat: <short description>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Visitor-facing behavior is **spec-first**. If accepted, this will be
+        captured as a Gherkin scenario in `tomi-playground/specs/` before
+        implementation. See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do, and why? What is missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: >
+        Describe the outcome in visitor language (pages, menus, actions), not
+        implementation details.
+      placeholder: As a visitor, when I ... then I should see ...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you thought about, if any.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: This is about visitor-facing behavior that could be expressed as a spec.
+          required: false
+        - label: I checked that this isn't already tracked in an existing issue.
+          required: false
