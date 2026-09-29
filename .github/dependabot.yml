@@ -1,0 +1,41 @@
+version: 2
+updates:
+  # tomi-playground npm/pnpm dependencies (Dependabot reads pnpm-lock.yaml
+  # under the "npm" ecosystem).
+  - package-ecosystem: "npm"
+    directory: "/tomi-playground"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions used by the workflows in .github/workflows/.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
