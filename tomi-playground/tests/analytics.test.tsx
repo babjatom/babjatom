@@ -25,6 +25,7 @@ describe('Analytics page', () => {
       'Theme Playground',
       'Analytics',
       'Dos games',
+      'Flood monitor',
     ])
 
     await user.click(within(pagesNav).getByRole('link', { name: 'Analytics' }))

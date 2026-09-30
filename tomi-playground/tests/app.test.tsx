@@ -55,10 +55,15 @@ describe('babjatom shell navigation', () => {
       'Theme Playground',
       'Analytics',
       'Dos games',
+      'Flood monitor',
     ])
     const adsbLink = within(pagesNav).getByRole('link', { name: 'ADS-B radar' })
     expect(adsbLink).toHaveAttribute('href', '/adsb-radar')
     expect(adsbLink).not.toHaveAttribute('target', '_blank')
+    const floodLink = within(pagesNav).getByRole('link', { name: 'Flood monitor' })
+    expect(floodLink).toHaveAttribute('href', 'https://flood.tomibabjak.dev/')
+    expect(floodLink).toHaveAttribute('target', '_blank')
+    expect(floodLink.querySelector('svg')).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /random theme/i }),
     ).not.toBeInTheDocument()

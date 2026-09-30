@@ -5,7 +5,7 @@ Feature: Shell navigation
   Scenario: Home is Ask Tomi with the pages menu
     Given I am on the home page
     Then I should see the Ask Tomi chat
-    And the pages menu should list Ask Tomi, ADS-B radar, Theme Playground, Analytics, and Dos games
+    And the pages menu should list Ask Tomi, ADS-B radar, Theme Playground, Analytics, Dos games, and Flood monitor
     And an ambient maze light should sit behind the page content
 
   Scenario: Ambient maze light stays decorative
@@ -65,6 +65,12 @@ Feature: Shell navigation
     When I open Theme Playground from the pages menu
     Then I should see the component showcase
     And I should see recent visits
+
+  Scenario: Flood monitor leaves this site
+    Given I am on the home page
+    Then the pages menu should list Flood monitor
+    And Flood monitor should open flood.tomibabjak.dev in a new tab
+    And Flood monitor should show an icon that it leaves this site
 
   Scenario: Visitor opens Ask Tomi from the pages menu
     Given I am on the Theme Playground page
