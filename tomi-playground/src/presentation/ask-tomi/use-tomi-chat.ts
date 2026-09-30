@@ -10,6 +10,7 @@ import {
 import {
   previewCalLink,
   scheduleCalLink,
+  TOMI_OWN_CAL_URL,
   TomiScheduleError,
   type SchedulePreviewSlot,
 } from '@/infrastructure/tomi-schedule-api'
@@ -34,6 +35,9 @@ export type PendingScheduleChoice = {
   url: string
   slots: SchedulePreviewSlot[]
 }
+
+/** User turn inserted when the Schedule call chip loads open times. */
+export const SCHEDULE_CALL_PROMPT = 'Schedule call'
 
 export const STARTER_PROMPTS = [
   'What’s your tech stack?',
@@ -234,6 +238,36 @@ export function useTomiChat() {
     })
   }
 
+  function appendTurn(content: string) {
+    const userId = createId()
+    const assistantId = createId()
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: userId,
+        role: 'user',
+        content,
+        status: 'complete',
+      },
+      {
+        id: assistantId,
+        role: 'assistant',
+        content: '',
+        status: 'pending',
+      },
+    ])
+
+    return assistantId
+  }
+
+  async function requestOwnSchedule() {
+    if (pending) return
+
+    const assistantId = appendTurn(SCHEDULE_CALL_PROMPT)
+    await runPreview(TOMI_OWN_CAL_URL, assistantId)
+  }
+
   async function send(question: string, options?: SendOptions) {
     const trimmed = question.trim()
     if (!trimmed || pending) return
@@ -250,24 +284,7 @@ export function useTomiChat() {
         : {}),
     })
 
-    const userId = createId()
-    const assistantId = createId()
-
-    setMessages((current) => [
-      ...current,
-      {
-        id: userId,
-        role: 'user',
-        content: trimmed,
-        status: 'complete',
-      },
-      {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        status: 'pending',
-      },
-    ])
+    const assistantId = appendTurn(trimmed)
 
     if (pendingSchedule) {
       const choice = parseScheduleChoice(trimmed, pendingSchedule.slots.length)
@@ -338,6 +355,11 @@ export function useTomiChat() {
       ),
     )
 
+    if (previous.content === SCHEDULE_CALL_PROMPT) {
+      await runPreview(TOMI_OWN_CAL_URL, assistantId)
+      return
+    }
+
     // Regenerating a preview/book choice: treat prior user text as a fresh send target
     const calUrl = extractCalScheduleUrl(previous.content)
     if (calUrl) {
@@ -377,6 +399,7 @@ export function useTomiChat() {
     pending,
     pendingSchedule,
     send,
+    requestOwnSchedule,
     stop,
     regenerate,
     clear,

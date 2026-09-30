@@ -37,7 +37,6 @@ export type AnalyticsEventMap = {
       | 'regenerate'
       | 'clear'
       | 'copy'
-      | 'schedule_nudge'
       | 'download_cv'
   }
   'Ask Tomi Result': {

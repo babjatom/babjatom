@@ -106,11 +106,14 @@ Feature: Ask Tomi
     Then the answer should be on the clipboard
     And I should see confirmation that it was copied
 
-  Scenario: Schedule call chip nudges paste
+  Scenario: Schedule call chip shows open times
     Given I am on the Ask Tomi page
     When I choose the Schedule call chip
-    Then the composer should prompt me to paste a Cal.com link
-    And I should not see an assistant answer yet
+    Then I should see the Schedule call request in the chat
+    And I should see an assistant answer with open times
+    And the answer should say to reply with a number to book or no to cancel
+    And the chat API should not have been called
+    And the scheduler should not have booked yet
 
   Scenario: Download CV chip starts a PDF download
     Given I am on the Ask Tomi page

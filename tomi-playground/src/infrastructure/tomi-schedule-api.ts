@@ -7,6 +7,11 @@ export const TOMI_SCHEDULE_PREVIEW_URL = TOMI_SCHEDULE_URL.replace(
   '/schedule/preview',
 )
 
+/** Public booking page whose open times the Schedule call chip loads. */
+export const TOMI_OWN_CAL_URL =
+  import.meta.env.VITE_TOMI_CAL_URL?.trim() ||
+  'https://cal.com/tomi-ar8loz/30min'
+
 export type TomiScheduleResponse = {
   ok: boolean
   answer: string
