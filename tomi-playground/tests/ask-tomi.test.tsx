@@ -7,6 +7,7 @@ import {
   TOMI_CHAT_SESSION_KEY,
   TOMI_CHAT_URL,
 } from '@/infrastructure/tomi-chat-api'
+import { TOMI_OWN_CAL_URL } from '@/infrastructure/tomi-schedule-api'
 import { downloadCvPdf } from '@/presentation/ask-tomi/download-cv'
 
 vi.mock('@/presentation/ask-tomi/download-cv', async (importOriginal) => {
@@ -550,23 +551,75 @@ describe('Ask Tomi chat', () => {
     expect(screen.getByLabelText('Question')).toBeInTheDocument()
   })
 
-  it('nudges paste when Schedule call is chosen', async () => {
+  it('shows open times and booking advice when Schedule call is chosen', async () => {
     const user = userEvent.setup()
-    await openAskTomi(user)
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.includes('/schedule/preview')) {
+        return Response.json({
+          ok: true,
+          answer:
+            'Found open times. Reply with **1–2** to book that slot, or **no** to cancel.',
+          slots: [
+            {
+              start: '2026-10-02T05:00:00Z',
+              end: '2026-10-02T05:30:00Z',
+              label: 'Fri, 02 Oct 2026, 12:00 (Asia/Bangkok)',
+            },
+            {
+              start: '2026-10-02T05:30:00Z',
+              end: '2026-10-02T06:00:00Z',
+              label: 'Fri, 02 Oct 2026, 12:30 (Asia/Bangkok)',
+            },
+          ],
+        })
+      }
+      if (url.includes('/schedule')) {
+        return Response.json({
+          ok: true,
+          answer: 'Booked — should not happen yet.',
+        })
+      }
+      return Response.json({
+        answer: 'chat should not run',
+      })
+    })
 
+    await openAskTomi(user)
     await user.click(screen.getByRole('button', { name: 'Schedule call' }))
 
-    expect(screen.getByLabelText('Question')).toHaveAttribute(
-      'placeholder',
-      'Paste their Cal.com link…',
-    )
+    expect(await screen.findByText('Schedule call')).toBeInTheDocument()
+    expect(
+      await screen.findByText(/reply with/i),
+    ).toBeInTheDocument()
+    expect(await screen.findByText(/12:00/)).toBeInTheDocument()
+    expect(await screen.findByText(/12:30/)).toBeInTheDocument()
     expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
       chip: 'schedule_call',
     })
-    expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
-      action: 'schedule_nudge',
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/schedule/preview'),
+        expect.objectContaining({ method: 'POST' }),
+      )
     })
-    expect(fetch).not.toHaveBeenCalled()
+    const previewCall = fetchMock.mock.calls.find((call) =>
+      String(call[0]).includes('/schedule/preview'),
+    )
+    const body = JSON.parse(String(previewCall?.[1]?.body)) as { url: string }
+    expect(body.url).toBe(TOMI_OWN_CAL_URL)
+
+    const bookCalls = fetchMock.mock.calls.filter((call) => {
+      const url = String(call[0])
+      return url.includes('/schedule') && !url.includes('/preview')
+    })
+    expect(bookCalls).toHaveLength(0)
+    const chatCalls = fetchMock.mock.calls.filter(
+      (call) => String(call[0]) === TOMI_CHAT_URL,
+    )
+    expect(chatCalls).toHaveLength(0)
   })
 
   it('downloads the CV PDF when Download CV is chosen', async () => {

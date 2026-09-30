@@ -33,7 +33,6 @@ import {
 } from './use-tomi-chat'
 
 const NEAR_BOTTOM_PX = 80
-const SCHEDULE_PLACEHOLDER = 'Paste their Cal.com link…'
 
 function AssistantBody({
   message,
@@ -113,7 +112,7 @@ function AssistantBody({
 }
 
 export function AskTomiPage() {
-  const { messages, pending, send, stop, regenerate, clear, copy } =
+  const { messages, pending, send, requestOwnSchedule, stop, regenerate, clear, copy } =
     useTomiChat()
   const [draft, setDraft] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -122,7 +121,6 @@ export function AskTomiPage() {
   )
   const [composerFocused, setComposerFocused] = useState(false)
   const [emptyNeedsScroll, setEmptyNeedsScroll] = useState(false)
-  const [scheduleNudge, setScheduleNudge] = useState(false)
   const trackedComposerFocus = useRef(false)
   const trackedFirstInput = useRef(false)
   const listRef = useRef<HTMLDivElement>(null)
@@ -178,7 +176,6 @@ export function AskTomiPage() {
       }
       return value
     })
-    if (value.trim()) setScheduleNudge(false)
   }, [])
 
   useEffect(() => {
@@ -287,7 +284,6 @@ export function AskTomiPage() {
                 onClick={() => {
                   clear()
                   setTypingDoneIds({})
-                  setScheduleNudge(false)
                   stickToBottomRef.current = true
                 }}
                 aria-label="Clear chat"
@@ -344,14 +340,11 @@ export function AskTomiPage() {
                         disabled={pending}
                         data-testid="schedule-call-chip"
                         onClick={() => {
-                          setScheduleNudge(true)
-                          setDraft('')
-                          noteComposerFocus()
-                          inputRef.current?.focus()
+                          stickToBottomRef.current = true
                           track('Ask Tomi Chip Clicked', {
                             chip: 'schedule_call',
                           })
-                          track('Ask Tomi Action', { action: 'schedule_nudge' })
+                          void requestOwnSchedule()
                         }}
                       >
                         <Calendar className="h-4 w-4 shrink-0" aria-hidden />
@@ -389,7 +382,6 @@ export function AskTomiPage() {
                           className="w-full justify-start text-left sm:w-auto"
                           disabled={pending}
                           onClick={() => {
-                            setScheduleNudge(false)
                             stickToBottomRef.current = true
                             track('Ask Tomi Chip Clicked', {
                               chip: 'starter',
@@ -537,7 +529,6 @@ export function AskTomiPage() {
             pending={pending}
             hasMessages={hasMessages}
             showMeta={showComposerMeta}
-            scheduleNudge={scheduleNudge}
             inputRef={inputRef}
             onDraftChange={onDraftChange}
             onKeyDown={handleKeyDown}
@@ -554,7 +545,6 @@ function LabelledComposer({
   pending,
   hasMessages,
   showMeta,
-  scheduleNudge,
   inputRef,
   onDraftChange,
   onKeyDown,
@@ -564,7 +554,6 @@ function LabelledComposer({
   pending: boolean
   hasMessages: boolean
   showMeta: boolean
-  scheduleNudge: boolean
   inputRef: RefObject<HTMLTextAreaElement | null>
   onDraftChange: (value: string) => void
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
@@ -581,11 +570,9 @@ function LabelledComposer({
     node.style.overflowY = node.scrollHeight > maxComposerPx ? 'auto' : 'hidden'
   }, [draft, hasMessages, inputRef, maxComposerPx])
 
-  const placeholder = scheduleNudge
-    ? SCHEDULE_PLACEHOLDER
-    : hasMessages
-      ? 'Ask a follow-up…'
-      : 'Ask about Tomi’s experience, stack, or approach…'
+  const placeholder = hasMessages
+    ? 'Ask a follow-up…'
+    : 'Ask about Tomi’s experience, stack, or approach…'
 
   return (
     <div className={cn('flex flex-col', hasMessages ? 'gap-1.5' : 'gap-2')}>
