@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
+  ExternalLink,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -12,13 +13,22 @@ import { cn } from '@/lib/utils'
 import { MazeLightBackground } from '@/presentation/shared/maze-light-background'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
-const pages = [
-  { to: '/', label: 'Ask Tomi', end: true },
-  { to: '/adsb-radar', label: 'ADS-B radar', end: false },
-  { to: '/theme-playground', label: 'Theme Playground', end: false },
-  { to: '/analytics', label: 'Analytics', end: false },
-  { to: '/dos-games', label: 'Dos games', end: false },
-] as const
+type ShellPage =
+  | { kind: 'route'; to: string; label: string; end: boolean }
+  | { kind: 'external'; href: string; label: string }
+
+const pages: ShellPage[] = [
+  { kind: 'route', to: '/', label: 'Ask Tomi', end: true },
+  { kind: 'route', to: '/adsb-radar', label: 'ADS-B radar', end: false },
+  { kind: 'route', to: '/theme-playground', label: 'Theme Playground', end: false },
+  { kind: 'route', to: '/analytics', label: 'Analytics', end: false },
+  { kind: 'route', to: '/dos-games', label: 'Dos games', end: false },
+  {
+    kind: 'external',
+    href: 'https://flood.tomibabjak.dev/',
+    label: 'Flood monitor',
+  },
+]
 
 const navItemClassName = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -88,20 +98,37 @@ export function AppShell() {
         </Button>
       </div>
       <nav className="mb-4 flex flex-col gap-2" aria-label="Pages">
-        {pages.map((page) => (
-          <NavLink
-            key={page.to}
-            to={page.to}
-            end={page.end}
-            onClick={() => {
-              track('Nav Clicked', { to: page.to, source: 'sidebar' })
-              closeMobileMenu()
-            }}
-            className={navItemClassName}
-          >
-            {page.label}
-          </NavLink>
-        ))}
+        {pages.map((page) =>
+          page.kind === 'external' ? (
+            <a
+              key={page.href}
+              href={page.href}
+              target="_blank"
+              rel="noreferrer"
+              title="Opens in a new tab"
+              onClick={() => {
+                track('Nav Clicked', { to: page.href, source: 'sidebar' })
+                closeMobileMenu()
+              }}
+              className={navItemClassName({ isActive: false })}
+            >
+              <span className="flex items-center justify-between gap-2">{page.label}<ExternalLink className="h-4 w-4 shrink-0" aria-hidden /></span>
+            </a>
+          ) : (
+            <NavLink
+              key={page.to}
+              to={page.to}
+              end={page.end}
+              onClick={() => {
+                track('Nav Clicked', { to: page.to, source: 'sidebar' })
+                closeMobileMenu()
+              }}
+              className={navItemClassName}
+            >
+              {page.label}
+            </NavLink>
+          ),
+        )}
       </nav>
 
       <div className="mt-6 border-t border-border/60 pt-4">

@@ -16,7 +16,7 @@ The app in this folder is served from GitHub Pages with routes:
 - `/ask-tomi` and `/tomi-ai` — redirect to `/`
 - `/privacy` — short privacy note (hosting, Ask Tomi, profile pixel)
 
-The sidebar **Pages** menu lists Ask Tomi, ADS-B radar, Theme Playground, Analytics, and Dos games. Theme and font controls (including random theme) live on Theme Playground. A **Privacy** link sits under the sidebar footer.
+The sidebar **Pages** menu lists Ask Tomi, ADS-B radar, Theme Playground, Analytics, Dos games, and Flood monitor. Flood monitor opens https://flood.tomibabjak.dev/ in a new tab and shows an off-site icon. Theme and font controls (including random theme) live on Theme Playground. A **Privacy** link sits under the sidebar footer.
 
 ## Features
 
