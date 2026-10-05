@@ -1,3 +1,4 @@
+import { parseIfsVariant, type IfsVariantId } from '@/domain/ifs'
 import {
   clampMazeDensity,
   clampMazeVisibility,
@@ -35,6 +36,7 @@ export class MazeService {
           DEFAULT_MAZE_VISIBILITY,
         ),
       ),
+      ifsVariant: parseIfsVariant(this.persistence.loadIfsVariant()),
     }
   }
 
@@ -53,6 +55,12 @@ export class MazeService {
   saveVisibility(visibility: number): number {
     const next = clampMazeVisibility(visibility)
     this.persistence.saveVisibility(String(next))
+    return next
+  }
+
+  saveIfsVariant(id: IfsVariantId): IfsVariantId {
+    const next = parseIfsVariant(id)
+    this.persistence.saveIfsVariant(next)
     return next
   }
 }

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import {
+  isTunableAmbientBackground,
   MAX_MAZE_DENSITY,
   MAX_MAZE_VISIBILITY,
   MIN_MAZE_DENSITY,
@@ -28,9 +29,12 @@ export function ThemeFontControls() {
     backgrounds,
     density,
     visibility,
+    ifsVariant,
+    ifsVariants,
     setBackground,
     setDensity,
     setVisibility,
+    setIfsVariant,
     regenerate,
   } = useMaze()
   const [draftDensity, setDraftDensity] = useState<number | null>(null)
@@ -95,8 +99,42 @@ export function ThemeFontControls() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Settings
               </p>
-              {background === 'maze' ? (
-                <div className="space-y-4" role="group" aria-label="Maze controls">
+              {isTunableAmbientBackground(background) ? (
+                <div
+                  className="space-y-4"
+                  role="group"
+                  aria-label="Background settings"
+                >
+                  {background === 'ifs' ? (
+                    <div
+                      className="flex flex-col gap-2"
+                      role="group"
+                      aria-label="IFS variants"
+                    >
+                      <span className="text-sm font-medium text-foreground">
+                        Variant
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {ifsVariants.map((item) => (
+                          <Button
+                            key={item.id}
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setIfsVariant(item.id)}
+                            className={cn(
+                              'h-auto rounded-lg border px-3 py-2 text-sm',
+                              item.id === ifsVariant
+                                ? 'border-primary bg-primary/10 text-foreground'
+                                : 'border-transparent bg-secondary/50 hover:bg-secondary',
+                            )}
+                          >
+                            {item.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
                   <label className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-foreground">
                       Density
@@ -107,7 +145,7 @@ export function ThemeFontControls() {
                       max={MAX_MAZE_DENSITY}
                       step={0.05}
                       value={densityValue}
-                      aria-label="Maze density"
+                      aria-label="Density"
                       className="h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
                       onChange={(event) => {
                         setDraftDensity(Number(event.target.value))
@@ -131,7 +169,7 @@ export function ThemeFontControls() {
                       max={MAX_MAZE_VISIBILITY}
                       step={0.05}
                       value={visibilityValue}
-                      aria-label="Maze visibility"
+                      aria-label="Visibility"
                       className="h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
                       onChange={(event) => {
                         setDraftVisibility(Number(event.target.value))
@@ -147,7 +185,7 @@ export function ThemeFontControls() {
 
                   <Button className="w-full" onClick={regenerate}>
                     <RefreshCw className="h-4 w-4" />
-                    Regenerate maze
+                    Regenerate
                   </Button>
                 </div>
               ) : (

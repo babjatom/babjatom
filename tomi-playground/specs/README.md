@@ -24,10 +24,10 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 
 | Spec | Executable tests |
 | --- | --- |
-| `shell.feature` | `tests/app.test.tsx`, `tests/maze.test.ts` |
+| `shell.feature` | `tests/app.test.tsx`, `tests/maze.test.ts`, `tests/ifs.test.ts` |
 | `themes.feature` | `tests/app.test.tsx`, `tests/theme-service.test.ts`, `tests/theme-domain.test.ts` |
 | `fonts.feature` | `tests/app.test.tsx`, `tests/font-service.test.ts`, `tests/font-domain.test.ts`, `tests/apply-font.test.ts` |
-| `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx` |
+| `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx`, `tests/maze-prefs.test.ts` |
 | `analytics.feature` | `tests/analytics.test.tsx` |
 | `ask-tomi.feature` | `tests/ask-tomi.test.tsx` |
 | `dos-games.feature` | `tests/dos-games.test.tsx`, `tests/app.test.tsx` |

@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
+import { IfsBackground } from '@/presentation/shared/ifs-background'
 import { MazeLightBackground } from '@/presentation/shared/maze-light-background'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
@@ -161,6 +162,7 @@ export function AppShell() {
       )}
     >
       <MazeLightBackground />
+      <IfsBackground />
       <aside
         className={cn(
           'relative z-30 shrink-0 border-b border-border/80 bg-card/70 pt-[env(safe-area-inset-top)] backdrop-blur-md transition-[width,padding] duration-300 lg:min-h-screen lg:border-b-0 lg:border-r lg:pt-0',
