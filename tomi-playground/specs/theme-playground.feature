@@ -9,39 +9,62 @@ Feature: Theme Playground
 
   Scenario: Background controls sit above theme and font controls
     Given I am on the Theme Playground page
-    Then I should see background controls to choose Maze or None
+    Then I should see background controls to choose Maze, IFS, or None
     And the background controls should appear above the theme and font controls
 
   Scenario: Maze settings show when Maze is selected
     Given I am on the Theme Playground page
     And the Maze background is selected
-    Then I should see maze density and visibility controls
-    And I should see a control to regenerate the maze
+    Then I should see density and visibility controls
+    And I should see a control to regenerate the background
+
+  Scenario: IFS settings show when IFS is selected
+    Given I am on the Theme Playground page
+    When I choose the IFS background
+    Then I should see the ambient IFS background
+    And I should see IFS variant controls for Barnsley and Sierpinski
+    And I should see density and visibility controls
+    And I should see a control to regenerate the background
+
+  Scenario: Visitor switches IFS variant
+    Given I am on the Theme Playground page
+    And the IFS background is selected
+    When I choose the Sierpinski IFS variant
+    Then the ambient IFS should use the Sierpinski variant
+
+  Scenario: IFS variant sticks after reload
+    Given I am on the Theme Playground page
+    And the IFS background is selected
+    When I choose the Sierpinski IFS variant
+    And I reload the page
+    Then the IFS background should stay selected
+    And the ambient IFS should use the Sierpinski variant
 
   Scenario: Visitor turns the background off
     Given I am on the Theme Playground page
     When I choose the None background
     Then the ambient maze should not be shown
-    And maze density and visibility controls should be hidden
+    And the ambient IFS should not be shown
+    And density and visibility controls should be hidden
 
   Scenario: Visitor changes maze density and visibility
     Given I am on the Theme Playground page
     And the Maze background is selected
-    When I set maze density lower
-    And I set maze visibility higher
+    When I set density lower
+    And I set visibility higher
     Then the ambient maze should use fewer passage cells for this viewport
     And the ambient maze should use the higher visibility
 
   Scenario: Visitor regenerates the maze
     Given I am on the Theme Playground page
     And the Maze background is selected
-    When I regenerate the maze
+    When I regenerate the background
     Then the ambient maze layout should change
 
   Scenario: Background and maze preferences stick after reload
     Given I am on the Theme Playground page
-    When I set maze density lower
-    And I set maze visibility higher
+    When I set density lower
+    And I set visibility higher
     And I choose the None background
     And I reload the page
     Then the None background should stay selected

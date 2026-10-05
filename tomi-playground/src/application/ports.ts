@@ -18,4 +18,6 @@ export type MazePersistence = {
   saveDensity: (value: string) => void
   loadVisibility: () => string | null
   saveVisibility: (value: string) => void
+  loadIfsVariant: () => string | null
+  saveIfsVariant: (id: string) => void
 }

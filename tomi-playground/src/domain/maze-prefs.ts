@@ -1,5 +1,7 @@
+import type { IfsVariantId } from '@/domain/ifs'
+
 /** Ambient background choices shown on Theme Playground. */
-export type AmbientBackgroundId = 'maze' | 'none'
+export type AmbientBackgroundId = 'maze' | 'ifs' | 'none'
 
 export type AmbientBackgroundOption = {
   id: AmbientBackgroundId
@@ -8,8 +10,21 @@ export type AmbientBackgroundOption = {
 
 export const AMBIENT_BACKGROUNDS: AmbientBackgroundOption[] = [
   { id: 'maze', name: 'Maze' },
+  { id: 'ifs', name: 'IFS' },
   { id: 'none', name: 'None' },
 ]
+
+/** Backgrounds that expose density / visibility / regenerate controls. */
+export const TUNABLE_AMBIENT_BACKGROUNDS: AmbientBackgroundId[] = [
+  'maze',
+  'ifs',
+]
+
+export function isTunableAmbientBackground(
+  id: AmbientBackgroundId,
+): boolean {
+  return TUNABLE_AMBIENT_BACKGROUNDS.includes(id)
+}
 
 export const DEFAULT_AMBIENT_BACKGROUND: AmbientBackgroundId = 'maze'
 
@@ -51,11 +66,14 @@ export type MazePrefs = {
   background: AmbientBackgroundId
   density: number
   visibility: number
+  ifsVariant: IfsVariantId
 }
 
 export function parseAmbientBackground(
   value: string | null | undefined,
 ): AmbientBackgroundId {
+  // Legacy "fern" id maps to IFS (same ambient point-cloud background).
+  if (value === 'fern' || value === 'ifs') return 'ifs'
   if (value === 'maze' || value === 'none') return value
   return DEFAULT_AMBIENT_BACKGROUND
 }

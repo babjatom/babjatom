@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MazeService } from '@/application/maze-service'
 import type { MazePersistence } from '@/application/ports'
+import { DEFAULT_IFS_VARIANT } from '@/domain/ifs'
 import {
   clampMazeDensity,
   clampMazeVisibility,
@@ -87,6 +88,9 @@ describe('clamp helpers', () => {
   it('parses ambient background ids', () => {
     expect(parseAmbientBackground('none')).toBe('none')
     expect(parseAmbientBackground('maze')).toBe('maze')
+    expect(parseAmbientBackground('ifs')).toBe('ifs')
+    expect(parseAmbientBackground('fern')).toBe('ifs')
+    expect(parseAmbientBackground('hilbert')).toBe(DEFAULT_AMBIENT_BACKGROUND)
     expect(parseAmbientBackground('nope')).toBe(DEFAULT_AMBIENT_BACKGROUND)
   })
 })
@@ -97,12 +101,14 @@ describe('MazeService', () => {
       background?: string
       density?: string
       visibility?: string
+      ifsVariant?: string
     } = {},
   ): MazePersistence & { store: Record<string, string | null> } {
     const store: Record<string, string | null> = {
       background: initial.background ?? null,
       density: initial.density ?? null,
       visibility: initial.visibility ?? null,
+      ifsVariant: initial.ifsVariant ?? null,
     }
     return {
       store,
@@ -118,6 +124,10 @@ describe('MazeService', () => {
       saveVisibility: (value) => {
         store.visibility = value
       },
+      loadIfsVariant: () => store.ifsVariant,
+      saveIfsVariant: (value) => {
+        store.ifsVariant = value
+      },
     }
   }
 
@@ -127,6 +137,7 @@ describe('MazeService', () => {
       background: DEFAULT_AMBIENT_BACKGROUND,
       density: DEFAULT_MAZE_DENSITY,
       visibility: DEFAULT_MAZE_VISIBILITY,
+      ifsVariant: DEFAULT_IFS_VARIANT,
     })
   })
 
@@ -137,13 +148,16 @@ describe('MazeService', () => {
     expect(service.saveBackground('none')).toBe('none')
     expect(service.saveDensity(1.5)).toBe(1.5)
     expect(service.saveVisibility(2)).toBe(2)
+    expect(service.saveIfsVariant('sierpinski')).toBe('sierpinski')
     expect(persistence.store.background).toBe('none')
     expect(persistence.store.density).toBe('1.5')
     expect(persistence.store.visibility).toBe('2')
+    expect(persistence.store.ifsVariant).toBe('sierpinski')
     expect(service.loadPrefs()).toEqual({
       background: 'none',
       density: 1.5,
       visibility: 2,
+      ifsVariant: 'sierpinski',
     })
   })
 })

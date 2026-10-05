@@ -46,6 +46,12 @@ Feature: Shell navigation
     When I show the browser tab again
     Then the ambient maze light should resume animating
 
+  Scenario: Ambient IFS stays decorative
+    Given I am on the home page
+    And the IFS background is selected
+    Then I should see the ambient IFS background
+    And the ambient IFS should not capture pointer events
+
   Scenario: Mobile pages menu starts collapsed
     Given I am on a mobile viewport
     And I am on the home page

@@ -10,6 +10,9 @@ const FONT_ID_KEY = 'tomi-playground:font-id'
 const MAZE_DENSITY_KEY = 'tomi-playground:maze-density'
 const MAZE_VISIBILITY_KEY = 'tomi-playground:maze-visibility'
 const AMBIENT_BACKGROUND_KEY = 'tomi-playground:ambient-background'
+const IFS_VARIANT_KEY = 'tomi-playground:ifs-variant'
+/** Pre-rename key; read as fallback then migrated on save. */
+const LEGACY_FERN_VARIANT_KEY = 'tomi-playground:fern-variant'
 
 export function createLocalStoragePersistence(
   storage: Storage = window.localStorage,
@@ -43,5 +46,12 @@ export function createLocalStorageMazePersistence(
     saveDensity: (value) => storage.setItem(MAZE_DENSITY_KEY, value),
     loadVisibility: () => storage.getItem(MAZE_VISIBILITY_KEY),
     saveVisibility: (value) => storage.setItem(MAZE_VISIBILITY_KEY, value),
+    loadIfsVariant: () =>
+      storage.getItem(IFS_VARIANT_KEY) ??
+      storage.getItem(LEGACY_FERN_VARIANT_KEY),
+    saveIfsVariant: (id) => {
+      storage.setItem(IFS_VARIANT_KEY, id)
+      storage.removeItem(LEGACY_FERN_VARIANT_KEY)
+    },
   }
 }

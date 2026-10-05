@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
+import { densityToIfsCount } from '@/domain/ifs'
 import {
   DEFAULT_MAZE_DENSITY,
   densityToGrid,
@@ -150,6 +151,7 @@ describe('babjatom shell navigation', () => {
       lineTo: vi.fn(),
       stroke: vi.fn(),
       fill: vi.fn(),
+      fillRect: vi.fn(),
       arc: vi.fn(),
       setLineDash: vi.fn(),
       drawImage: vi.fn(),
@@ -185,6 +187,24 @@ describe('babjatom shell navigation', () => {
     await waitFor(() => {
       expect(canvas).toHaveAttribute('data-maze-animating', 'true')
     })
+  })
+
+  it('keeps the ambient IFS behind content and non-interactive', () => {
+    window.localStorage.setItem('tomi-playground:ambient-background', 'ifs')
+    renderApp('/')
+    const canvas = screen.getByTestId('ifs-background')
+    expect(canvas.tagName).toBe('CANVAS')
+    expect(canvas).toHaveAttribute('aria-hidden')
+    expect(canvas).toHaveClass('pointer-events-none')
+    expect(canvas).toHaveClass('z-0')
+    expect(screen.queryByTestId('maze-light-background')).not.toBeInTheDocument()
+  })
+
+  it('migrates the legacy fern background id to IFS', () => {
+    window.localStorage.setItem('tomi-playground:ambient-background', 'fern')
+    renderApp('/')
+    expect(screen.getByTestId('ifs-background')).toBeInTheDocument()
+    expect(screen.queryByTestId('maze-light-background')).not.toBeInTheDocument()
   })
 
   it('keeps the pages menu collapsed on mobile viewports', async () => {
@@ -383,7 +403,7 @@ describe('babjatom shell navigation', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows background controls before themes and maze settings when Maze is on', async () => {
+  it('shows background controls before themes and settings when Maze is on', async () => {
     const user = userEvent.setup()
     renderApp('/')
 
@@ -402,14 +422,18 @@ describe('babjatom shell navigation', () => {
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
 
+    const options = screen.getByRole('group', { name: /background options/i })
+    expect(within(options).getByRole('button', { name: /^maze$/i })).toBeInTheDocument()
+    expect(within(options).getByRole('button', { name: /^ifs$/i })).toBeInTheDocument()
+    expect(within(options).getByRole('button', { name: /^none$/i })).toBeInTheDocument()
     expect(
-      screen.getByRole('group', { name: /background options/i }),
+      within(options).queryByRole('button', { name: /^fern$/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('group', { name: /background settings/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('group', { name: /maze controls/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /regenerate maze/i }),
+      screen.getByRole('button', { name: /^regenerate$/i }),
     ).toBeInTheDocument()
 
     const canvas = screen.getByTestId('maze-light-background')
@@ -420,7 +444,7 @@ describe('babjatom shell navigation', () => {
     expect(canvas).toHaveAttribute('data-maze-generation', '0')
 
     const baseCells = baseGrid.cols * baseGrid.rows
-    const density = screen.getByRole('slider', { name: /maze density/i })
+    const density = screen.getByRole('slider', { name: /^density$/i })
     fireEvent.change(density, { target: { value: '2' } })
     fireEvent.pointerUp(density)
     const sparser = densityToGrid(2, 1440, 900)
@@ -428,12 +452,12 @@ describe('babjatom shell navigation', () => {
     expect(canvas).toHaveAttribute('data-maze-rows', String(sparser.rows))
     expect(sparser.cols * sparser.rows).toBeLessThan(baseCells)
 
-    const visibility = screen.getByRole('slider', { name: /maze visibility/i })
+    const visibility = screen.getByRole('slider', { name: /^visibility$/i })
     fireEvent.change(visibility, { target: { value: '2.5' } })
     fireEvent.pointerUp(visibility)
     expect(canvas).toHaveAttribute('data-maze-visibility', '2.5')
 
-    await user.click(screen.getByRole('button', { name: /regenerate maze/i }))
+    await user.click(screen.getByRole('button', { name: /^regenerate$/i }))
     expect(canvas).toHaveAttribute('data-maze-generation', '1')
     expect(track).toHaveBeenCalledWith('Background Setting Changed', {
       setting: 'density',
@@ -448,7 +472,81 @@ describe('babjatom shell navigation', () => {
     })
   })
 
-  it('hides the maze when None background is selected', async () => {
+  it('shows IFS background and shared settings when IFS is selected', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    await user.click(screen.getByRole('button', { name: /^ifs$/i }))
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'background',
+      value: 'ifs',
+    })
+
+    const canvas = screen.getByTestId('ifs-background')
+    expect(screen.queryByTestId('maze-light-background')).not.toBeInTheDocument()
+    expect(canvas).toHaveAttribute(
+      'data-ifs-points',
+      String(densityToIfsCount(DEFAULT_MAZE_DENSITY, 1440)),
+    )
+    expect(canvas).toHaveAttribute('data-ifs-variant', 'barnsley')
+    const variants = screen.getByRole('group', { name: /ifs variants/i })
+    expect(within(variants).getByRole('button', { name: /^barnsley$/i })).toBeInTheDocument()
+    expect(
+      within(variants).getByRole('button', { name: /^sierpinski$/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('group', { name: /background settings/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /^regenerate$/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('switches IFS variants and persists the choice', async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderApp('/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    await user.click(screen.getByRole('button', { name: /^ifs$/i }))
+
+    await user.click(screen.getByRole('button', { name: /^sierpinski$/i }))
+    expect(track).toHaveBeenCalledWith('Background Setting Changed', {
+      setting: 'variant',
+      value: 'sierpinski',
+    })
+    expect(screen.getByTestId('ifs-background')).toHaveAttribute(
+      'data-ifs-variant',
+      'sierpinski',
+    )
+
+    unmount()
+    renderApp('/')
+
+    expect(screen.getByTestId('ifs-background')).toHaveAttribute(
+      'data-ifs-variant',
+      'sierpinski',
+    )
+    const remountNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(remountNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+    expect(screen.getByRole('button', { name: /^ifs$/i })).toHaveClass(
+      /border-primary/,
+    )
+    expect(screen.getByRole('button', { name: /^sierpinski$/i })).toHaveClass(
+      /border-primary/,
+    )
+  })
+
+  it('hides ambient backgrounds when None is selected', async () => {
     const user = userEvent.setup()
     renderApp('/')
 
@@ -467,8 +565,9 @@ describe('babjatom shell navigation', () => {
     expect(
       screen.queryByTestId('maze-light-background'),
     ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('ifs-background')).not.toBeInTheDocument()
     expect(
-      screen.queryByRole('group', { name: /maze controls/i }),
+      screen.queryByRole('group', { name: /background settings/i }),
     ).not.toBeInTheDocument()
     expect(
       screen.getByText(/no settings for this background/i),
@@ -484,10 +583,10 @@ describe('babjatom shell navigation', () => {
       within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
     )
 
-    const density = screen.getByRole('slider', { name: /maze density/i })
+    const density = screen.getByRole('slider', { name: /^density$/i })
     fireEvent.change(density, { target: { value: '1.5' } })
     fireEvent.pointerUp(density)
-    const visibility = screen.getByRole('slider', { name: /maze visibility/i })
+    const visibility = screen.getByRole('slider', { name: /^visibility$/i })
     fireEvent.change(visibility, { target: { value: '2' } })
     fireEvent.pointerUp(visibility)
     await user.click(screen.getByRole('button', { name: /^none$/i }))
@@ -518,11 +617,11 @@ describe('babjatom shell navigation', () => {
     expect(canvas).toHaveAttribute('data-maze-cols', String(saved.cols))
     expect(canvas).toHaveAttribute('data-maze-rows', String(saved.rows))
     expect(canvas).toHaveAttribute('data-maze-visibility', '2')
-    expect(screen.getByRole('slider', { name: /maze density/i })).toHaveValue(
+    expect(screen.getByRole('slider', { name: /^density$/i })).toHaveValue(
       '1.5',
     )
-    expect(
-      screen.getByRole('slider', { name: /maze visibility/i }),
-    ).toHaveValue('2')
+    expect(screen.getByRole('slider', { name: /^visibility$/i })).toHaveValue(
+      '2',
+    )
   })
 })

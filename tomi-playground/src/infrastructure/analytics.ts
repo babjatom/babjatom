@@ -14,7 +14,7 @@ export type AnalyticsEventMap = {
     font_id: string
   }
   'Background Setting Changed': {
-    setting: 'background' | 'density' | 'visibility' | 'regenerate'
+    setting: 'background' | 'density' | 'visibility' | 'regenerate' | 'variant'
     value?: string | number
   }
   'Ask Tomi Message Sent': {
