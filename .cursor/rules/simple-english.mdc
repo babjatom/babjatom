@@ -1,0 +1,31 @@
+---
+description: Write docs and replies in Simple English Plain mode
+alwaysApply: true
+---
+
+# Simple English
+
+Before you write documentation, a README, pull request text, or a commit message, read `.cursor/skills/simple-english/SKILL.md`.
+
+Plain mode is the default.
+Follow that skill for the document and for the reply.
+
+When you choose words for a document, also read `.cursor/skills/simple-english/references/word-swaps.md`.
+
+For an error message, a runbook, an incident report, release notes, a commit message, or UI copy, read `.cursor/skills/simple-english/references/use-cases.md` first.
+
+If the user asks you to check text, read `.cursor/skills/simple-english/references/rule-catalog.md` first.
+Quote a rule number only from that file.
+
+If the user names STE, ASD-STE100, or compliance, read `.cursor/skills/simple-english/references/strict-vocabulary.md` before you draft.
+Say once that no tool guarantees compliance.
+
+Do not apply these rules to code.
+Do not apply them to comments that quote code.
+Do not apply them to marketing copy the user asks for.
+
+Keep commands, flags, file paths, identifiers, and facts exact.
+
+The skill files live in `.cursor/skills/simple-english/`.
+After you write a document, do the self-check in that skill.
+Do not replace this rule with a shorter summary.
