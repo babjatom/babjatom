@@ -344,25 +344,25 @@ export function AskTomiPage() {
                   >
                     Start with a suggested question, or type your own below.
                   </Reveal>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
-                    <Reveal rootRef={listRef} delayMs={40}>
+                  <div className="flex w-full flex-col gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                    <Reveal rootRef={listRef} delayMs={40} className="sm:flex-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             type="button"
                             variant="default"
-                            size="lg"
-                            className="h-14 w-full justify-start gap-2 px-6 text-base sm:w-auto"
+                            className="h-10 w-full justify-start gap-2 text-left sm:h-12 sm:px-6 sm:text-base"
                             disabled={pending}
                             data-testid="download-cv-chip"
                           >
                             <FileDown
-                              className="h-5 w-5 shrink-0"
+                              className="h-4 w-4 shrink-0"
                               aria-hidden
                             />
                             Download CV
                             <ChevronDown
-                              className="ml-1 h-5 w-5 shrink-0"
+                              className="ml-auto h-4 w-4 shrink-0"
                               aria-hidden
                               data-testid="download-cv-chevron"
                             />
@@ -407,7 +407,34 @@ export function AskTomiPage() {
                         Schedule call
                       </Button>
                     </Reveal>
-                    {STARTER_PROMPTS.map((prompt, index) => (
+                    <Reveal rootRef={listRef} delayMs={60}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full justify-start text-left sm:w-auto"
+                        disabled={pending}
+                        onClick={() => {
+                          stickToBottomRef.current = true
+                          track('Ask Tomi Chip Clicked', {
+                            chip: 'starter',
+                            starter_id: STARTER_PROMPTS[0],
+                          })
+                          void send(STARTER_PROMPTS[0], {
+                            source: 'starter',
+                            starter_id: STARTER_PROMPTS[0],
+                            submit_method: 'chip',
+                          })
+                        }}
+                      >
+                        {STARTER_PROMPTS[0]}
+                      </Button>
+                    </Reveal>
+                    </div>
+                    <div
+                      className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                      data-testid="starter-lines"
+                    >
+                    {STARTER_PROMPTS.slice(1).map((prompt, index) => (
                       <Reveal
                         key={prompt}
                         rootRef={listRef}
@@ -416,7 +443,7 @@ export function AskTomiPage() {
                         <Button
                           type="button"
                           variant="secondary"
-                          className="w-full justify-start text-left sm:w-auto"
+                          className="w-full justify-start text-left"
                           disabled={pending}
                           onClick={() => {
                             stickToBottomRef.current = true
@@ -435,6 +462,7 @@ export function AskTomiPage() {
                         </Button>
                       </Reveal>
                     ))}
+                    </div>
                   </div>
                 </div>
               </div>

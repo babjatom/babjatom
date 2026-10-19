@@ -101,7 +101,11 @@ describe('Ask Tomi chat', () => {
     expect(downloadCv).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chevron')).toBeInTheDocument()
-    expect(downloadCv.className).toMatch(/\bh-14\b/)
+    expect(downloadCv.className).toMatch(/\bh-10\b/)
+    expect(downloadCv.className).not.toMatch(/(?:^|\s)h-14(?:\s|$)/)
+    expect(downloadCv.className).toMatch(/\bsm:h-12\b/)
+    expect(downloadCv.parentElement).toHaveClass('sm:flex-1')
+    expect(screen.getByTestId('starter-lines')).toHaveClass('sm:grid-cols-2')
     expect(scheduleCall.className).toMatch(/\bh-10\b/)
     expect(
       downloadCv.compareDocumentPosition(scheduleCall) &
