@@ -2,6 +2,8 @@
 PR title MUST be a Conventional Commit (validated by pr-title.yml) and becomes
 the squash commit on main. Example: feat(tomi-playground): add analytics page
 Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+Branch name must be type/short-description (validated by pr-branch.yml).
+Example: feat/ask-tomi-chat-list
 -->
 
 ## Summary
@@ -32,5 +34,6 @@ Ran from `tomi-playground/`:
 ## Checklist
 
 - [ ] PR title is a Conventional Commit
+- [ ] Branch name is `type/short-description`
 - [ ] One logical change; branch rebased on `origin/main`
 - [ ] No secrets or license-violating assets added
