@@ -1,6 +1,7 @@
 import { TOMI_CHAT_SESSION_IDLE_MS } from '@/infrastructure/tomi-chat-api'
 
 export const TOMI_CHAT_HISTORY_KEY = 'tomi-chat-history'
+export const TOMI_TEST_CHAT_HISTORY_KEY = 'tomi-test-chat-history'
 export const MAX_STORED_CHATS = 3
 
 export type StoredChatMessage = {
@@ -120,9 +121,12 @@ function normalizeChat(value: unknown): StoredChat | null {
   }
 }
 
-function readHistory(storage: Storage): StoredChatHistory | null {
+function readHistory(
+  storage: Storage,
+  key: string,
+): StoredChatHistory | null {
   try {
-    const raw = storage.getItem(TOMI_CHAT_HISTORY_KEY)
+    const raw = storage.getItem(key)
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     if (!isRecord(parsed) || !Array.isArray(parsed.chats)) return null
@@ -141,8 +145,9 @@ export function loadChatHistory(
   storage: Storage = window.localStorage,
   now = Date.now(),
   idleMs = TOMI_CHAT_SESSION_IDLE_MS,
+  key: string = TOMI_CHAT_HISTORY_KEY,
 ): StoredChatHistory {
-  const parsed = readHistory(storage)
+  const parsed = readHistory(storage, key)
   const fresh = (parsed?.chats ?? []).filter(
     (chat) => now - chat.updatedAt < idleMs,
   )
@@ -169,9 +174,10 @@ export function loadChatHistory(
 export function saveChatHistory(
   history: StoredChatHistory,
   storage: Storage = window.localStorage,
+  key: string = TOMI_CHAT_HISTORY_KEY,
 ) {
   try {
-    storage.setItem(TOMI_CHAT_HISTORY_KEY, JSON.stringify(history))
+    storage.setItem(key, JSON.stringify(history))
   } catch {
     // localStorage may be full or unavailable; the open tab still works
   }

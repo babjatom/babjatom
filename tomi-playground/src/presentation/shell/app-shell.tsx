@@ -11,10 +11,11 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { track } from '@/infrastructure/analytics'
+import { TOMI_TEST_ASK_PATH } from '@/infrastructure/tomi-chat-api'
 import { cn } from '@/lib/utils'
+import { useTomiChat } from '@/presentation/ask-tomi/use-tomi-chat'
 import { IfsBackground } from '@/presentation/shared/ifs-background'
 import { MazeLightBackground } from '@/presentation/shared/maze-light-background'
-import { useTomiChat } from '@/presentation/ask-tomi/use-tomi-chat'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 type ShellPage =
@@ -102,7 +103,7 @@ function getIsMobileViewport() {
 export function AppShell() {
   const { sidebarCollapsed, setSidebarCollapsed } = useTheme()
   const { pathname } = useLocation()
-  const isAskTomi = pathname === '/'
+  const isAskTomi = pathname === '/' || pathname === TOMI_TEST_ASK_PATH
   const [isMobile, setIsMobile] = useState(getIsMobileViewport)
   const mobileMenuOpen = isMobile && !sidebarCollapsed
 

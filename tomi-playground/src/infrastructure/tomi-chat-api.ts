@@ -1,5 +1,12 @@
 export const TOMI_CHAT_URL =
+  import.meta.env.VITE_TOMI_CHAT_URL?.trim() ||
   'https://tomi-interview-bot.tomibabjak.workers.dev/chat'
+
+export const TOMI_TEST_ASK_PATH = '/test/ask-tomi'
+
+export const TOMI_TEST_CHAT_URL =
+  import.meta.env.VITE_TOMI_TEST_CHAT_URL?.trim() ||
+  'https://tomi-interview-bot.tomibabjak.workers.dev/test/ask-tomi'
 
 export const TOMI_CHAT_SESSION_KEY = 'tomi-chat-session-id'
 export const TOMI_CHAT_SESSION_ACTIVITY_KEY = 'tomi-chat-session-activity'
@@ -83,6 +90,7 @@ export async function askTomiChat(
   question: string,
   signal?: AbortSignal,
   sessionId?: string,
+  url: string = TOMI_CHAT_URL,
 ): Promise<string> {
   const trimmed = question.trim()
   if (!trimmed) {
@@ -93,7 +101,7 @@ export async function askTomiChat(
 
   let response: Response
   try {
-    response = await fetch(TOMI_CHAT_URL, {
+    response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

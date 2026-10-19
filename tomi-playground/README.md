@@ -18,6 +18,7 @@ The routes are:
 - `/dos-games`: curated shareware/freeware DOS games in-browser
 - `/ask-tomi` and `/tomi-ai`: redirect to `/`
 - `/privacy`: short privacy note (hosting, Ask Tomi, profile pixel)
+- `/test/ask-tomi`: hidden trial of Ask Tomi. It is not in the Pages menu. It keeps its own chat list.
 
 The sidebar Pages menu lists Ask Tomi, ADS-B radar, Theme Playground, Analytics, Dos games, and Flood monitor.
 Flood monitor opens https://flood.tomibabjak.dev/ in a new tab.

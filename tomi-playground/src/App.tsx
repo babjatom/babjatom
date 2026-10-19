@@ -30,6 +30,7 @@ export default function App() {
                   <Route path="analytics" element={<AnalyticsPage />} />
                   <Route path="dos-games" element={<DosGamesPage />} />
                   <Route path="privacy" element={<PrivacyPage />} />
+                  <Route path="test/ask-tomi" element={<AskTomiPage />} />
                   <Route path="ask-tomi" element={<Navigate to="/" replace />} />
                   <Route path="tomi-ai" element={<Navigate to="/" replace />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

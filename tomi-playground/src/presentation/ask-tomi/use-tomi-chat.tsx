@@ -7,11 +7,15 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useLocation } from 'react-router-dom'
 import { track } from '@/infrastructure/analytics'
 import { extractCalScheduleUrl } from '@/infrastructure/cal-url'
 import {
   askTomiChat,
   persistChatSessionId,
+  TOMI_CHAT_SESSION_IDLE_MS,
+  TOMI_TEST_ASK_PATH,
+  TOMI_TEST_CHAT_URL,
   TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
 import {
@@ -20,7 +24,10 @@ import {
   loadChatHistory,
   MAX_STORED_CHATS,
   saveChatHistory,
+  TOMI_CHAT_HISTORY_KEY,
+  TOMI_TEST_CHAT_HISTORY_KEY,
   type StoredChat,
+  type StoredChatHistory,
 } from '@/infrastructure/tomi-chat-history'
 import {
   previewCalLink,
@@ -147,8 +154,34 @@ type TomiChatValue = {
 
 const TomiChatContext = createContext<TomiChatValue | null>(null)
 
+function cancelPendingChats(history: StoredChatHistory): StoredChatHistory {
+  return {
+    ...history,
+    chats: history.chats.map((chat) => ({
+      ...chat,
+      messages: chat.messages.map((message) =>
+        message.status === 'pending'
+          ? { ...message, content: 'Stopped.', status: 'cancelled' as const }
+          : message,
+      ),
+    })),
+  }
+}
+
 function useTomiChatState(): TomiChatValue {
-  const [history, setHistory] = useState(() => loadChatHistory())
+  const { pathname } = useLocation()
+  const isTest = pathname === TOMI_TEST_ASK_PATH
+  const historyKey = isTest ? TOMI_TEST_CHAT_HISTORY_KEY : TOMI_CHAT_HISTORY_KEY
+  const chatUrl = isTest ? TOMI_TEST_CHAT_URL : undefined
+  const historyKeyRef = useRef(historyKey)
+  const [history, setHistory] = useState(() =>
+    loadChatHistory(
+      window.localStorage,
+      Date.now(),
+      TOMI_CHAT_SESSION_IDLE_MS,
+      historyKey,
+    ),
+  )
   const [pending, setPending] = useState(false)
   const [scheduleByChat, setScheduleByChat] = useState<
     Record<string, PendingScheduleChoice | null>
@@ -160,9 +193,32 @@ function useTomiChatState(): TomiChatValue {
     chats.find((chat) => chat.id === activeId)?.messages ?? []
 
   useEffect(() => {
-    saveChatHistory(history)
-    persistChatSessionId(history.activeId)
-  }, [history])
+    if (historyKeyRef.current !== historyKey) {
+      const previousKey = historyKeyRef.current
+      const previousIsTest = previousKey === TOMI_TEST_CHAT_HISTORY_KEY
+      abortInFlight()
+      const settled = cancelPendingChats(history)
+      saveChatHistory(settled, window.localStorage, previousKey)
+      if (!previousIsTest) {
+        persistChatSessionId(settled.activeId)
+      }
+      historyKeyRef.current = historyKey
+      setPending(false)
+      setHistory(
+        loadChatHistory(
+          window.localStorage,
+          Date.now(),
+          TOMI_CHAT_SESSION_IDLE_MS,
+          historyKey,
+        ),
+      )
+      return
+    }
+    saveChatHistory(history, window.localStorage, historyKey)
+    if (!isTest) {
+      persistChatSessionId(history.activeId)
+    }
+  }, [history, historyKey, isTest])
 
   function writeSchedule(chatId: string, value: PendingScheduleChoice | null) {
     setScheduleByChat((current) => ({ ...current, [chatId]: value }))
@@ -310,8 +366,10 @@ function useTomiChatState(): TomiChatValue {
   ) {
     writeSchedule(chatId, null)
     await runWithPending(chatId, assistantId, async (signal) => {
-      persistChatSessionId(chatId)
-      const answer = await askTomiChat(question, signal, chatId)
+      if (!isTest) {
+        persistChatSessionId(chatId)
+      }
+      const answer = await askTomiChat(question, signal, chatId, chatUrl)
       return { content: answer, kind: 'chat' }
     })
   }
