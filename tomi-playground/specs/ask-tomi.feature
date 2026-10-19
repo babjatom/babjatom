@@ -166,10 +166,19 @@ Feature: Ask Tomi
     And the chat API should not have been called
     And the scheduler should not have booked yet
 
-  Scenario: Download CV chip lists the three CVs
+  Scenario: Download CV chip lists the CV choices
     Given I am on the Ask Tomi page
     When I open the Download CV chip
-    Then I should see Fullstack CV, Frontend CV, and Backend CV
+    Then I should see Fullstack CV, Frontend CV, Backend CV, and Match to your JD
+    And each choice should be as wide as the Download CV chip
+    And Match to your JD should be lighter than the other choices
+    And I should not see an assistant answer yet
+
+  Scenario: Choosing Match to your JD does nothing yet
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Match to your JD
+    Then a CV PDF download should not start
     And I should not see an assistant answer yet
 
   Scenario: Choosing Fullstack CV starts a PDF download

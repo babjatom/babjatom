@@ -653,7 +653,22 @@ describe('Ask Tomi chat', () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    const downloadCv = screen.getByRole('button', { name: 'Download CV' })
+    downloadCv.getBoundingClientRect = () =>
+      ({
+        width: 320,
+        height: 40,
+        top: 0,
+        left: 0,
+        right: 320,
+        bottom: 40,
+        x: 0,
+        y: 0,
+        toJSON() {
+          return {}
+        },
+      }) as DOMRect
+    await user.click(downloadCv)
 
     expect(
       await screen.findByRole('menuitem', { name: 'Fullstack CV' }),
@@ -664,9 +679,42 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByRole('menuitem', { name: 'Backend CV' }),
     ).toBeInTheDocument()
+    const matchJd = screen.getByRole('menuitem', { name: 'Match to your JD' })
+    expect(matchJd).toBeInTheDocument()
+    expect(matchJd).toHaveClass('bg-muted')
+    expect(screen.getByRole('menuitem', { name: 'Fullstack CV' })).not.toHaveClass(
+      'bg-muted',
+    )
+    const menu = screen.getByRole('menu')
+    expect(menu).toHaveStyle({ width: '320px' })
+    for (const name of [
+      'Fullstack CV',
+      'Frontend CV',
+      'Backend CV',
+      'Match to your JD',
+    ]) {
+      expect(screen.getByRole('menuitem', { name })).toHaveClass('w-full')
+    }
     expect(downloadCvPdf).not.toHaveBeenCalled()
     expect(fetch).not.toHaveBeenCalled()
     expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+  })
+
+  it('does nothing yet when Match to your JD is chosen', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Match to your JD' }),
+    )
+
+    expect(downloadCvPdf).not.toHaveBeenCalled()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('menuitem', { name: 'Match to your JD' }),
+    ).toBeInTheDocument()
   })
 
   it.each([

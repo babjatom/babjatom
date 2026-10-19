@@ -140,6 +140,8 @@ export function AskTomiPage() {
   const emptyContentRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const stickToBottomRef = useRef(true)
+  const downloadCvRef = useRef<HTMLButtonElement>(null)
+  const [downloadCvWidth, setDownloadCvWidth] = useState<number>()
 
   const hasMessages = messages.length > 0
   const showComposerMeta = !hasMessages || composerFocused
@@ -347,9 +349,17 @@ export function AskTomiPage() {
                   <div className="flex w-full flex-col gap-2">
                     <div className="flex flex-col gap-2 sm:flex-row">
                     <Reveal rootRef={listRef} delayMs={40} className="sm:flex-1">
-                      <DropdownMenu>
+                      <DropdownMenu
+                        onOpenChange={(open) => {
+                          if (!open) return
+                          const width =
+                            downloadCvRef.current?.getBoundingClientRect().width
+                          if (width) setDownloadCvWidth(width)
+                        }}
+                      >
                         <DropdownMenuTrigger asChild>
                           <Button
+                            ref={downloadCvRef}
                             type="button"
                             variant="default"
                             className="h-10 w-full justify-start gap-2 text-left sm:h-12 sm:px-6 sm:text-base"
@@ -368,10 +378,19 @@ export function AskTomiPage() {
                             />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
+                        <DropdownMenuContent
+                          align="start"
+                          className="min-w-0"
+                          style={
+                            downloadCvWidth
+                              ? { width: downloadCvWidth }
+                              : undefined
+                          }
+                        >
                           {CV_CHOICES.map(({ variant, label }) => (
                             <DropdownMenuItem
                               key={variant}
+                              className="w-full"
                               onSelect={() => {
                                 downloadCvPdf(variant)
                                 track('Ask Tomi Chip Clicked', {
@@ -385,6 +404,14 @@ export function AskTomiPage() {
                               {label}
                             </DropdownMenuItem>
                           ))}
+                          <DropdownMenuItem
+                            className="w-full bg-muted focus:bg-muted"
+                            onSelect={(event) => {
+                              event.preventDefault()
+                            }}
+                          >
+                            Match to your JD
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </Reveal>
