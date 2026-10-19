@@ -1,12 +1,27 @@
-import { useRef, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { track } from '@/infrastructure/analytics'
 import { extractCalScheduleUrl } from '@/infrastructure/cal-url'
 import {
   askTomiChat,
-  getOrCreateChatSessionId,
-  rotateChatSessionId,
+  persistChatSessionId,
   TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
+import {
+  createStoredChat,
+  firstQuestionLine,
+  loadChatHistory,
+  MAX_STORED_CHATS,
+  saveChatHistory,
+  type StoredChat,
+} from '@/infrastructure/tomi-chat-history'
 import {
   previewCalLink,
   scheduleCalLink,
@@ -108,12 +123,62 @@ export function parseScheduleChoice(
   return { kind: 'unrecognized' }
 }
 
-export function useTomiChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+export type ChatListItem = {
+  id: string
+  label: string
+  active: boolean
+}
+
+type TomiChatValue = {
+  messages: ChatMessage[]
+  pending: boolean
+  pendingSchedule: PendingScheduleChoice | null
+  chatList: ChatListItem[]
+  newChatDisabled: boolean
+  send: (question: string, options?: SendOptions) => Promise<void>
+  requestOwnSchedule: () => Promise<void>
+  stop: () => void
+  regenerate: (assistantId: string) => Promise<void>
+  clear: () => void
+  copy: (content: string) => Promise<void>
+  startNewChat: () => void
+  selectChat: (chatId: string) => void
+}
+
+const TomiChatContext = createContext<TomiChatValue | null>(null)
+
+function useTomiChatState(): TomiChatValue {
+  const [history, setHistory] = useState(() => loadChatHistory())
   const [pending, setPending] = useState(false)
-  const [pendingSchedule, setPendingSchedule] =
-    useState<PendingScheduleChoice | null>(null)
+  const [scheduleByChat, setScheduleByChat] = useState<
+    Record<string, PendingScheduleChoice | null>
+  >({})
   const abortRef = useRef<AbortController | null>(null)
+
+  const { activeId, chats } = history
+  const messages =
+    chats.find((chat) => chat.id === activeId)?.messages ?? []
+
+  useEffect(() => {
+    saveChatHistory(history)
+    persistChatSessionId(history.activeId)
+  }, [history])
+
+  function writeSchedule(chatId: string, value: PendingScheduleChoice | null) {
+    setScheduleByChat((current) => ({ ...current, [chatId]: value }))
+  }
+
+  function updateChat(
+    chatId: string,
+    updater: (chat: StoredChat) => StoredChat,
+  ) {
+    setHistory((current) => ({
+      ...current,
+      chats: current.chats.map((chat) =>
+        chat.id === chatId ? updater(chat) : chat,
+      ),
+    }))
+  }
 
   function abortInFlight() {
     abortRef.current?.abort()
@@ -125,26 +190,32 @@ export function useTomiChat() {
   }
 
   function completeAssistant(
+    chatId: string,
     assistantId: string,
     content: string,
     status: ChatMessageStatus = 'complete',
     schedulePreview?: { slots: SchedulePreviewSlot[] },
   ) {
-    setMessages((current) =>
-      current.map((message) =>
+    updateChat(chatId, (chat) => ({
+      ...chat,
+      updatedAt: Date.now(),
+      messages: chat.messages.map((message) =>
         message.id === assistantId
           ? {
               ...message,
               content,
               status,
-              ...(schedulePreview ? { schedulePreview } : { schedulePreview: undefined }),
+              ...(schedulePreview
+                ? { schedulePreview }
+                : { schedulePreview: undefined }),
             }
           : message,
       ),
-    )
+    }))
   }
 
   async function runWithPending(
+    chatId: string,
     assistantId: string,
     work: (signal: AbortSignal) => Promise<{
       content: string
@@ -160,6 +231,7 @@ export function useTomiChat() {
     try {
       const result = await work(controller.signal)
       completeAssistant(
+        chatId,
         assistantId,
         result.content,
         'complete',
@@ -174,14 +246,14 @@ export function useTomiChat() {
       const latency_ms = Math.round(performance.now() - startedAt)
 
       if (isAbortError(error)) {
-        completeAssistant(assistantId, 'Stopped.', 'cancelled')
+        completeAssistant(chatId, assistantId, 'Stopped.', 'cancelled')
         track('Ask Tomi Result', { status: 'cancelled', latency_ms })
         return
       }
 
       const message =
         error instanceof Error ? error.message : 'Something went wrong.'
-      completeAssistant(assistantId, message, 'error')
+      completeAssistant(chatId, assistantId, message, 'error')
       track('Ask Tomi Result', {
         status: 'error',
         latency_ms,
@@ -190,23 +262,27 @@ export function useTomiChat() {
     } finally {
       if (abortRef.current === controller) {
         abortRef.current = null
+        setPending(false)
       }
-      setPending(false)
     }
   }
 
-  async function runPreview(calUrl: string, assistantId: string) {
-    await runWithPending(assistantId, async (signal) => {
+  async function runPreview(
+    chatId: string,
+    calUrl: string,
+    assistantId: string,
+  ) {
+    await runWithPending(chatId, assistantId, async (signal) => {
       const preview = await previewCalLink(calUrl, signal)
       if (preview.ok && preview.slots.length > 0) {
-        setPendingSchedule({ url: calUrl, slots: preview.slots })
+        writeSchedule(chatId, { url: calUrl, slots: preview.slots })
         return {
           content: preview.answer,
           kind: 'schedule_preview',
           schedulePreview: { slots: preview.slots },
         }
       }
-      setPendingSchedule(null)
+      writeSchedule(chatId, null)
       return {
         content: preview.answer,
         kind: 'schedule_preview',
@@ -215,48 +291,54 @@ export function useTomiChat() {
   }
 
   async function runBook(
+    chatId: string,
     calUrl: string,
     start: string,
     assistantId: string,
   ) {
-    setPendingSchedule(null)
-    await runWithPending(assistantId, async (signal) => {
+    writeSchedule(chatId, null)
+    await runWithPending(chatId, assistantId, async (signal) => {
       const answer = await scheduleCalLink(calUrl, start, signal)
       return { content: answer, kind: 'schedule' }
     })
   }
 
-  async function runChat(question: string, assistantId: string) {
-    setPendingSchedule(null)
-    await runWithPending(assistantId, async (signal) => {
-      const answer = await askTomiChat(
-        question,
-        signal,
-        getOrCreateChatSessionId(),
-      )
+  async function runChat(
+    chatId: string,
+    question: string,
+    assistantId: string,
+  ) {
+    writeSchedule(chatId, null)
+    await runWithPending(chatId, assistantId, async (signal) => {
+      persistChatSessionId(chatId)
+      const answer = await askTomiChat(question, signal, chatId)
       return { content: answer, kind: 'chat' }
     })
   }
 
-  function appendTurn(content: string) {
+  function appendTurn(chatId: string, content: string) {
     const userId = createId()
     const assistantId = createId()
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: userId,
-        role: 'user',
-        content,
-        status: 'complete',
-      },
-      {
-        id: assistantId,
-        role: 'assistant',
-        content: '',
-        status: 'pending',
-      },
-    ])
+    updateChat(chatId, (chat) => ({
+      ...chat,
+      updatedAt: Date.now(),
+      messages: [
+        ...chat.messages,
+        {
+          id: userId,
+          role: 'user',
+          content,
+          status: 'complete',
+        },
+        {
+          id: assistantId,
+          role: 'assistant',
+          content: '',
+          status: 'pending',
+        },
+      ],
+    }))
 
     return assistantId
   }
@@ -264,15 +346,19 @@ export function useTomiChat() {
   async function requestOwnSchedule() {
     if (pending) return
 
-    const assistantId = appendTurn(SCHEDULE_CALL_PROMPT)
-    await runPreview(TOMI_OWN_CAL_URL, assistantId)
+    const chatId = history.activeId
+    const assistantId = appendTurn(chatId, SCHEDULE_CALL_PROMPT)
+    await runPreview(chatId, TOMI_OWN_CAL_URL, assistantId)
   }
 
   async function send(question: string, options?: SendOptions) {
     const trimmed = question.trim()
     if (!trimmed || pending) return
 
-    const priorUserTurns = countUserTurns(messages)
+    const chatId = history.activeId
+    const currentMessages =
+      history.chats.find((chat) => chat.id === chatId)?.messages ?? []
+    const priorUserTurns = countUserTurns(currentMessages)
     const source = options?.source ?? 'typed'
     track('Ask Tomi Message Sent', {
       source,
@@ -284,13 +370,14 @@ export function useTomiChat() {
         : {}),
     })
 
-    const assistantId = appendTurn(trimmed)
+    const assistantId = appendTurn(chatId, trimmed)
+    const pendingChoice = scheduleByChat[chatId] ?? null
 
-    if (pendingSchedule) {
-      const choice = parseScheduleChoice(trimmed, pendingSchedule.slots.length)
+    if (pendingChoice) {
+      const choice = parseScheduleChoice(trimmed, pendingChoice.slots.length)
       if (choice.kind === 'decline') {
-        setPendingSchedule(null)
-        completeAssistant(assistantId, 'Cancelled.', 'complete')
+        writeSchedule(chatId, null)
+        completeAssistant(chatId, assistantId, 'Cancelled.', 'complete')
         track('Ask Tomi Result', {
           status: 'complete',
           latency_ms: 0,
@@ -299,23 +386,23 @@ export function useTomiChat() {
         return
       }
       if (choice.kind === 'book') {
-        const slot = pendingSchedule.slots[choice.index]
+        const slot = pendingChoice.slots[choice.index]
         if (slot) {
-          await runBook(pendingSchedule.url, slot.start, assistantId)
+          await runBook(chatId, pendingChoice.url, slot.start, assistantId)
           return
         }
       }
       // Unrecognized while preview pending: drop pending and continue normally
-      setPendingSchedule(null)
+      writeSchedule(chatId, null)
     }
 
     const calUrl = extractCalScheduleUrl(trimmed)
     if (calUrl) {
-      await runPreview(calUrl, assistantId)
+      await runPreview(chatId, calUrl, assistantId)
       return
     }
 
-    await runChat(trimmed, assistantId)
+    await runChat(chatId, trimmed, assistantId)
   }
 
   function stop() {
@@ -327,11 +414,14 @@ export function useTomiChat() {
   async function regenerate(assistantId: string) {
     if (pending) return
 
-    const index = messages.findIndex((message) => message.id === assistantId)
+    const chatId = history.activeId
+    const currentMessages =
+      history.chats.find((chat) => chat.id === chatId)?.messages ?? []
+    const index = currentMessages.findIndex((message) => message.id === assistantId)
     if (index <= 0) return
 
-    const assistant = messages[index]
-    const previous = messages[index - 1]
+    const assistant = currentMessages[index]
+    const previous = currentMessages[index - 1]
     if (
       assistant?.role !== 'assistant' ||
       previous?.role !== 'user' ||
@@ -342,8 +432,10 @@ export function useTomiChat() {
 
     track('Ask Tomi Action', { action: 'regenerate' })
 
-    setMessages((current) =>
-      current.map((message) =>
+    updateChat(chatId, (chat) => ({
+      ...chat,
+      updatedAt: Date.now(),
+      messages: chat.messages.map((message) =>
         message.id === assistantId
           ? {
               ...message,
@@ -353,32 +445,66 @@ export function useTomiChat() {
             }
           : message,
       ),
-    )
+    }))
 
     if (previous.content === SCHEDULE_CALL_PROMPT) {
-      await runPreview(TOMI_OWN_CAL_URL, assistantId)
+      await runPreview(chatId, TOMI_OWN_CAL_URL, assistantId)
       return
     }
 
     // Regenerating a preview/book choice: treat prior user text as a fresh send target
     const calUrl = extractCalScheduleUrl(previous.content)
     if (calUrl) {
-      await runPreview(calUrl, assistantId)
+      await runPreview(chatId, calUrl, assistantId)
       return
     }
 
     // If regenerating a book confirmation reply, prior was "2" etc. — fall through to chat
-    setPendingSchedule(null)
-    await runChat(previous.content, assistantId)
+    writeSchedule(chatId, null)
+    await runChat(chatId, previous.content, assistantId)
+  }
+
+  function openFreshChat(dropActive: boolean) {
+    const droppedId = dropActive ? history.activeId : null
+    const next = createStoredChat()
+    if (droppedId) writeSchedule(droppedId, null)
+    setHistory((current) => ({
+      activeId: next.id,
+      chats: [
+        ...current.chats.filter((chat) => {
+          if (droppedId && chat.id === droppedId) return false
+          return Boolean(firstQuestionLine(chat.messages))
+        }),
+        next,
+      ],
+    }))
+    persistChatSessionId(next.id)
   }
 
   function clear() {
     track('Ask Tomi Action', { action: 'clear' })
     abortInFlight()
     setPending(false)
-    setPendingSchedule(null)
-    setMessages([])
-    rotateChatSessionId()
+    openFreshChat(true)
+  }
+
+  function startNewChat() {
+    const savedCount = history.chats.filter((chat) =>
+      firstQuestionLine(chat.messages),
+    ).length
+    if (savedCount >= MAX_STORED_CHATS) return
+    abortInFlight()
+    setPending(false)
+    openFreshChat(false)
+  }
+
+  function selectChat(chatId: string) {
+    if (chatId === history.activeId) return
+    if (!history.chats.some((chat) => chat.id === chatId)) return
+    abortInFlight()
+    setPending(false)
+    setHistory((current) => ({ ...current, activeId: chatId }))
+    persistChatSessionId(chatId)
   }
 
   async function copy(content: string) {
@@ -394,15 +520,49 @@ export function useTomiChat() {
     throw new Error('Clipboard is unavailable.')
   }
 
+  const pendingSchedule = scheduleByChat[activeId] ?? null
+
+  const chatList = useMemo<ChatListItem[]>(() => {
+    return chats
+      .filter((chat) => firstQuestionLine(chat.messages))
+      .sort((left, right) => right.updatedAt - left.updatedAt)
+      .map((chat) => ({
+        id: chat.id,
+        label: firstQuestionLine(chat.messages),
+        active: chat.id === activeId,
+      }))
+  }, [activeId, chats])
+
+  const newChatDisabled = chatList.length >= MAX_STORED_CHATS
+
   return {
     messages,
     pending,
     pendingSchedule,
+    chatList,
+    newChatDisabled,
     send,
     requestOwnSchedule,
     stop,
     regenerate,
     clear,
     copy,
+    startNewChat,
+    selectChat,
   }
+}
+
+export function TomiChatProvider({ children }: { children: ReactNode }) {
+  const value = useTomiChatState()
+  return (
+    <TomiChatContext.Provider value={value}>{children}</TomiChatContext.Provider>
+  )
+}
+
+export function useTomiChat() {
+  const value = useContext(TomiChatContext)
+  if (!value) {
+    throw new Error('useTomiChat must be used within TomiChatProvider')
+  }
+  return value
 }
