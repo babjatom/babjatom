@@ -96,14 +96,21 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
+    const downloadCv = screen.getByRole('button', { name: 'Download CV' })
+    const scheduleCall = screen.getByRole('button', { name: 'Schedule call' })
+    expect(downloadCv).toBeInTheDocument()
+    expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
+    expect(screen.getByTestId('download-cv-chevron')).toBeInTheDocument()
+    expect(downloadCv.className).toMatch(/\bh-14\b/)
+    expect(scheduleCall.className).toMatch(/\bh-10\b/)
     expect(
-      screen.getByRole('button', { name: 'Schedule call' }),
-    ).toBeInTheDocument()
+      downloadCv.compareDocumentPosition(scheduleCall) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
     expect(screen.getByTestId('schedule-call-chip')).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Download CV' }),
-    ).toBeInTheDocument()
-    expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
+      screen.queryByRole('menuitem', { name: 'Fullstack CV' }),
+    ).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: 'How do you structure a React + TypeScript app?',
@@ -638,22 +645,51 @@ describe('Ask Tomi chat', () => {
     expect(chatCalls).toHaveLength(0)
   })
 
-  it('downloads the CV PDF when Download CV is chosen', async () => {
+  it('lists the three CVs when Download CV is opened', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
     await user.click(screen.getByRole('button', { name: 'Download CV' }))
 
-    expect(downloadCvPdf).toHaveBeenCalledTimes(1)
-    expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
-      chip: 'download_cv',
-    })
-    expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
-      action: 'download_cv',
-    })
+    expect(
+      await screen.findByRole('menuitem', { name: 'Fullstack CV' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('menuitem', { name: 'Frontend CV' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('menuitem', { name: 'Backend CV' }),
+    ).toBeInTheDocument()
+    expect(downloadCvPdf).not.toHaveBeenCalled()
     expect(fetch).not.toHaveBeenCalled()
     expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
   })
+
+  it.each([
+    ['Fullstack CV', 'fullstack'],
+    ['Frontend CV', 'frontend'],
+    ['Backend CV', 'backend'],
+  ] as const)(
+    'downloads the %s PDF without asking the chat',
+    async (label, variant) => {
+      const user = userEvent.setup()
+      await openAskTomi(user)
+
+      await user.click(screen.getByRole('button', { name: 'Download CV' }))
+      await user.click(await screen.findByRole('menuitem', { name: label }))
+
+      expect(downloadCvPdf).toHaveBeenCalledTimes(1)
+      expect(downloadCvPdf).toHaveBeenCalledWith(variant)
+      expect(track).toHaveBeenCalledWith('Ask Tomi Chip Clicked', {
+        chip: `download_cv_${variant}`,
+      })
+      expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
+        action: `download_cv_${variant}`,
+      })
+      expect(fetch).not.toHaveBeenCalled()
+      expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+    },
+  )
 
   it('previews slots for a Cal.com link without booking', async () => {
     const user = userEvent.setup()

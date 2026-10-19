@@ -25,7 +25,12 @@ export type AnalyticsEventMap = {
     submit_method?: 'button' | 'enter' | 'chip'
   }
   'Ask Tomi Chip Clicked': {
-    chip: 'schedule_call' | 'download_cv' | 'starter'
+    chip:
+      | 'schedule_call'
+      | 'download_cv_fullstack'
+      | 'download_cv_frontend'
+      | 'download_cv_backend'
+      | 'starter'
     starter_id?: string
   }
   'Ask Tomi Composer Used': {
@@ -37,7 +42,9 @@ export type AnalyticsEventMap = {
       | 'regenerate'
       | 'clear'
       | 'copy'
-      | 'download_cv'
+      | 'download_cv_fullstack'
+      | 'download_cv_frontend'
+      | 'download_cv_backend'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'

@@ -10,8 +10,10 @@ Feature: Ask Tomi
     And I should see a Privacy link
     And I should see a hint to start with a suggested question
     And I should see starter prompts
+    And I should see a distinctive Download CV chip with a download icon and a chevron
+    And the Download CV chip should come before the Schedule call chip
+    And the Download CV chip should be larger than the Schedule call chip
     And I should see a distinctive Schedule call chip with a calendar icon
-    And I should see a distinctive Download CV chip with a download icon
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder
     And I should not see the 3D scene
@@ -163,10 +165,31 @@ Feature: Ask Tomi
     And the chat API should not have been called
     And the scheduler should not have booked yet
 
-  Scenario: Download CV chip starts a PDF download
+  Scenario: Download CV chip lists the three CVs
     Given I am on the Ask Tomi page
-    When I choose the Download CV chip
-    Then a CV PDF download should start
+    When I open the Download CV chip
+    Then I should see Fullstack CV, Frontend CV, and Backend CV
+    And I should not see an assistant answer yet
+
+  Scenario: Choosing Fullstack CV starts a PDF download
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Fullstack CV
+    Then the full-stack CV PDF download should start
+    And I should not see an assistant answer yet
+
+  Scenario: Choosing Frontend CV starts a PDF download
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Frontend CV
+    Then the frontend CV PDF download should start
+    And I should not see an assistant answer yet
+
+  Scenario: Choosing Backend CV starts a PDF download
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Backend CV
+    Then the backend CV PDF download should start
     And I should not see an assistant answer yet
 
   Scenario: Pasting a Cal.com link previews slots

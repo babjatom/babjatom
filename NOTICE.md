@@ -18,7 +18,9 @@ The following are personal to the repository owner and are **not** licensed for
 reuse, redistribution, or modification. They are published here only so the site
 can serve them:
 
-- `tomi-playground/public/tomi-babjak-cv.pdf` — curriculum vitae.
+- `tomi-playground/public/tomi-babjak-cv.pdf` — full-stack curriculum vitae.
+- `tomi-playground/public/tomi-babjak-cv-frontend.pdf` — frontend curriculum vitae.
+- `tomi-playground/public/tomi-babjak-cv-backend.pdf` — backend curriculum vitae.
 - `tomi-playground/public/models/tomi.glb` — a 3D likeness model of the owner.
 - Profile prose — the root [`README.md`](README.md) and the biographical / "Ask
   Tomi" copy shown in the app.
