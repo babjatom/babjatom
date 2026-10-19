@@ -40,6 +40,10 @@ function writeStoredSessionId(sessionId: string) {
   }
 }
 
+export function persistChatSessionId(sessionId: string) {
+  writeStoredSessionId(sessionId)
+}
+
 function readLastActivity() {
   try {
     const raw = sessionStorage.getItem(TOMI_CHAT_SESSION_ACTIVITY_KEY)

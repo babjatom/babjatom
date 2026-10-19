@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   ExternalLink,
+  FileText,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
   SwatchBook,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,6 +14,7 @@ import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { IfsBackground } from '@/presentation/shared/ifs-background'
 import { MazeLightBackground } from '@/presentation/shared/maze-light-background'
+import { useTomiChat } from '@/presentation/ask-tomi/use-tomi-chat'
 import { useTheme } from '@/presentation/theme/theme-provider'
 
 type ShellPage =
@@ -31,6 +34,9 @@ const pages: ShellPage[] = [
   },
 ]
 
+const sectionTitleClassName =
+  'text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground'
+
 const navItemClassName = ({ isActive }: { isActive: boolean }) =>
   cn(
     'rounded-lg border px-3 py-2 text-sm transition-colors',
@@ -38,6 +44,51 @@ const navItemClassName = ({ isActive }: { isActive: boolean }) =>
       ? 'border-primary bg-primary/10 text-foreground'
       : 'border-transparent bg-secondary/50 hover:bg-secondary',
   )
+
+function ChatHistoryNav({ onNavigate }: { onNavigate: () => void }) {
+  const { chatList, newChatDisabled, startNewChat, selectChat } = useTomiChat()
+
+  return (
+    <div className="mb-4">
+      <p className={cn(sectionTitleClassName, 'mb-2')}>My chat</p>
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={newChatDisabled}
+        onClick={() => {
+          startNewChat()
+          onNavigate()
+        }}
+      >
+        <Plus className="h-4 w-4 shrink-0" aria-hidden />
+        New chat
+      </button>
+      <nav
+        className="flex max-h-64 flex-col overflow-y-auto"
+        aria-label="My chat"
+      >
+        {chatList.map((chat) => (
+          <button
+            key={chat.id}
+            type="button"
+            aria-current={chat.active ? 'true' : undefined}
+            onClick={() => {
+              selectChat(chat.id)
+              onNavigate()
+            }}
+            className={cn(
+              'flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground',
+              chat.active && 'text-foreground',
+            )}
+          >
+            <FileText className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="truncate">{chat.label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+  )
+}
 
 const MOBILE_BREAKPOINT = '(max-width: 1023px)'
 
@@ -85,7 +136,7 @@ export function AppShell() {
   const menuPanel = (
     <>
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className={sectionTitleClassName}>
           Pages
         </p>
         <Button
@@ -133,6 +184,7 @@ export function AppShell() {
       </nav>
 
       <div className="mt-6 border-t border-border/60 pt-4">
+        {isAskTomi && <ChatHistoryNav onNavigate={closeMobileMenu} />}
         <NavLink
           to="/privacy"
           onClick={() => {
