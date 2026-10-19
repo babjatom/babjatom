@@ -347,8 +347,11 @@ export function AskTomiPage() {
                     Start with a suggested question, or type your own below.
                   </Reveal>
                   <div className="flex w-full flex-col gap-2">
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                    <Reveal rootRef={listRef} delayMs={40} className="sm:flex-1">
+                    <div
+                      className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                      data-testid="action-line"
+                    >
+                    <Reveal rootRef={listRef} delayMs={40} className="min-w-0">
                       <DropdownMenu
                         onOpenChange={(open) => {
                           if (!open) return
@@ -415,11 +418,15 @@ export function AskTomiPage() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </Reveal>
-                    <Reveal rootRef={listRef} delayMs={50}>
+                    <div
+                      className="flex min-w-0 flex-col gap-2 sm:flex-row"
+                      data-testid="action-line-rest"
+                    >
+                    <Reveal rootRef={listRef} delayMs={50} className="min-w-0 sm:flex-1">
                       <Button
                         type="button"
                         variant="default"
-                        className="w-full justify-start gap-2 text-left sm:w-auto"
+                        className="h-10 w-full justify-start gap-2 text-left"
                         disabled={pending}
                         data-testid="schedule-call-chip"
                         onClick={() => {
@@ -434,11 +441,11 @@ export function AskTomiPage() {
                         Schedule call
                       </Button>
                     </Reveal>
-                    <Reveal rootRef={listRef} delayMs={60}>
+                    <Reveal rootRef={listRef} delayMs={60} className="min-w-0 sm:flex-1">
                       <Button
                         type="button"
                         variant="secondary"
-                        className="w-full justify-start text-left sm:w-auto"
+                        className="h-10 w-full justify-start text-left"
                         disabled={pending}
                         onClick={() => {
                           stickToBottomRef.current = true
@@ -456,6 +463,7 @@ export function AskTomiPage() {
                         {STARTER_PROMPTS[0]}
                       </Button>
                     </Reveal>
+                    </div>
                     </div>
                     <div
                       className="grid grid-cols-1 gap-2 sm:grid-cols-2"

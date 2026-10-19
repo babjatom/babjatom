@@ -13,7 +13,8 @@ Feature: Ask Tomi
     And I should see a distinctive Download CV chip with a download icon and a chevron
     And the Download CV chip should come before the Schedule call chip
     And on a phone the Download CV chip should match the Schedule call chip in size
-    And on a wide screen the Download CV chip should grow to the width of the two starter lines
+    And on a wide screen the Download CV chip should match the width of the left starter column below it
+    And on a wide screen Schedule call and What’s your tech stack? should share the width of the right starter column below them
     And I should see a distinctive Schedule call chip with a calendar icon
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder

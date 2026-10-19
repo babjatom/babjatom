@@ -104,8 +104,18 @@ describe('Ask Tomi chat', () => {
     expect(downloadCv.className).toMatch(/\bh-10\b/)
     expect(downloadCv.className).not.toMatch(/(?:^|\s)h-14(?:\s|$)/)
     expect(downloadCv.className).toMatch(/\bsm:h-12\b/)
-    expect(downloadCv.parentElement).toHaveClass('sm:flex-1')
+    expect(downloadCv).toHaveClass('w-full')
+    expect(screen.getByTestId('action-line')).toHaveClass('sm:grid-cols-2')
     expect(screen.getByTestId('starter-lines')).toHaveClass('sm:grid-cols-2')
+    expect(screen.getByTestId('action-line-rest')).toHaveClass('sm:flex-row')
+    expect(scheduleCall).toHaveClass('w-full')
+    expect(scheduleCall.className).not.toMatch(/\bsm:w-auto\b/)
+    expect(scheduleCall.parentElement).toHaveClass('sm:flex-1')
+    const techStack = screen.getByRole('button', {
+      name: 'What’s your tech stack?',
+    })
+    expect(techStack).toHaveClass('w-full')
+    expect(techStack.parentElement).toHaveClass('sm:flex-1')
     expect(scheduleCall.className).toMatch(/\bh-10\b/)
     expect(
       downloadCv.compareDocumentPosition(scheduleCall) &
