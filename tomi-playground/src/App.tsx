@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AdsbRadarPage } from '@/presentation/adsb-radar/adsb-radar-page'
 import { AnalyticsPage } from '@/presentation/analytics/analytics-page'
 import { AskTomiPage } from '@/presentation/ask-tomi/ask-tomi-page'
+import { TomiChatProvider } from '@/presentation/ask-tomi/use-tomi-chat'
 import { DosGamesPage } from '@/presentation/dos-games/dos-games-page'
 import { FontProvider } from '@/presentation/font/font-provider'
 import { MazeProvider } from '@/presentation/maze/maze-provider'
@@ -19,20 +20,22 @@ export default function App() {
       <FontProvider>
         <MazeProvider>
           <BrowserRouter basename={basename}>
-            <PageViewTracker />
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route index element={<AskTomiPage />} />
-                <Route path="adsb-radar" element={<AdsbRadarPage />} />
-                <Route path="theme-playground" element={<ComponentShowcase />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
-                <Route path="dos-games" element={<DosGamesPage />} />
-                <Route path="privacy" element={<PrivacyPage />} />
-                <Route path="ask-tomi" element={<Navigate to="/" replace />} />
-                <Route path="tomi-ai" element={<Navigate to="/" replace />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Route>
-            </Routes>
+            <TomiChatProvider>
+              <PageViewTracker />
+              <Routes>
+                <Route element={<AppShell />}>
+                  <Route index element={<AskTomiPage />} />
+                  <Route path="adsb-radar" element={<AdsbRadarPage />} />
+                  <Route path="theme-playground" element={<ComponentShowcase />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="dos-games" element={<DosGamesPage />} />
+                  <Route path="privacy" element={<PrivacyPage />} />
+                  <Route path="ask-tomi" element={<Navigate to="/" replace />} />
+                  <Route path="tomi-ai" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+              </Routes>
+            </TomiChatProvider>
           </BrowserRouter>
         </MazeProvider>
       </FontProvider>

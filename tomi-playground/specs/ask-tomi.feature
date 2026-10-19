@@ -85,8 +85,56 @@ Feature: Ask Tomi
     Given I have received an answer in Ask Tomi
     When I clear the chat
     Then the conversation should be gone
+    And that chat should not stay in the sidebar
     And starter prompts should be visible again
     And the next question should start a new conversation
+
+  Scenario: Sidebar lists My chat
+    Given I am on the Ask Tomi page
+    Then I should see "My chat" in the sidebar
+    And "My chat" should sit below Pages and above Privacy
+    And I should see a "New chat" button
+    And I should not see "Current chat"
+
+  Scenario: New chat keeps the previous conversation in the sidebar
+    Given I have received an answer in Ask Tomi
+    When I start a new chat
+    Then starter prompts should be visible again
+    And the previous chat should stay in the sidebar
+    And the next question should start a new conversation
+
+  Scenario: Visitor opens a previous chat
+    Given I have started a new chat after an answered question
+    When I choose the previous chat in the sidebar
+    Then I should see that chat's question and answer
+    And that chat should stay in the sidebar under its question
+    And the other chat should stay in the sidebar
+    When I ask a follow-up question
+    Then the follow-up should stay in that conversation
+
+  Scenario: Refresh restores chats from the last 30 minutes
+    Given I have a previous chat and an open chat with an answer
+    When I refresh the page
+    Then I should see the open question and answer
+    And I should see the open chat in the sidebar under its question
+    And I should see the previous chat in the sidebar
+
+  Scenario: New chat stops after three chats
+    Given I have three chats in the sidebar
+    Then the New chat button should be disabled
+    When I clear the open chat
+    Then the New chat button should be available
+
+  Scenario: A chat idle for more than 30 minutes disappears
+    Given I have a chat that has been idle for more than 30 minutes
+    When I open the Ask Tomi page
+    Then I should not see that chat in the sidebar
+    And I should not see that chat's question
+    And starter prompts should be visible
+
+  Scenario: Chat list stays on the Ask Tomi page
+    Given I am on the Theme Playground page
+    Then I should not see "My chat"
 
   Scenario: Visitor stops an in-flight answer
     Given I have sent a question that has not finished answering

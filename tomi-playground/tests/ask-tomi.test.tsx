@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
 import { track } from '@/infrastructure/analytics'
+import { TOMI_CHAT_HISTORY_KEY } from '@/infrastructure/tomi-chat-history'
 import {
   TOMI_CHAT_SESSION_KEY,
   TOMI_CHAT_URL,
@@ -31,6 +32,14 @@ async function openAskTomi(
   renderApp(path)
   const pagesNav = screen.getByRole('navigation', { name: /pages/i })
   await user.click(within(pagesNav).getByRole('link', { name: 'Ask Tomi' }))
+}
+
+function chatNav() {
+  return screen.getByRole('navigation', { name: 'My chat' })
+}
+
+function conversation() {
+  return screen.getByRole('region', { name: /conversation/i })
 }
 
 function getChatRequestBody(callIndex = 0) {
@@ -335,7 +344,9 @@ describe('Ask Tomi chat', () => {
         'Tomi is a full-stack engineer based in Prague.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('What’s your tech stack?')).toBeInTheDocument()
+    expect(
+      within(conversation()).getByText('What’s your tech stack?'),
+    ).toBeInTheDocument()
 
     expect(track).toHaveBeenCalledWith(
       'Ask Tomi Result',
@@ -437,6 +448,9 @@ describe('Ask Tomi chat', () => {
 
     expect(
       screen.queryByText('Tomi is a full-stack engineer based in Prague.'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'What’s your tech stack?' }),
     ).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
@@ -589,7 +603,9 @@ describe('Ask Tomi chat', () => {
     await openAskTomi(user)
     await user.click(screen.getByRole('button', { name: 'Schedule call' }))
 
-    expect(await screen.findByText('Schedule call')).toBeInTheDocument()
+    expect(
+      await within(conversation()).findByText('Schedule call'),
+    ).toBeInTheDocument()
     expect(
       await screen.findByText(/reply with/i),
     ).toBeInTheDocument()
@@ -839,5 +855,263 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByRole('button', { name: 'What’s your tech stack?' }),
     ).toBeInTheDocument()
+  })
+
+  it('lists the current chat in the sidebar', () => {
+    const { container } = renderApp('/')
+
+    const myChat = screen.getByText('My chat')
+    const pages = screen.getByText('Pages')
+    expect(myChat).toBeInTheDocument()
+    expect(myChat.className).toContain('uppercase')
+    expect(myChat.className).toContain('tracking-[0.14em]')
+    expect(pages.className).toContain('uppercase')
+
+    const asideText = container.querySelector('aside')?.textContent ?? ''
+    expect(asideText.indexOf('Pages')).toBeGreaterThanOrEqual(0)
+    expect(asideText.indexOf('Pages')).toBeLessThan(asideText.indexOf('My chat'))
+    expect(asideText.indexOf('My chat')).toBeLessThan(asideText.indexOf('Privacy'))
+
+    const newChat = screen.getByRole('button', { name: 'New chat' })
+    expect(newChat).toBeEnabled()
+    expect(newChat.className).not.toMatch(/bg-secondary/)
+    expect(screen.queryByRole('button', { name: 'Current chat' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the previous chat in the sidebar when starting a new one', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText('Tomi is a full-stack engineer based in Prague.'),
+    ).toBeInTheDocument()
+    const firstSession = getChatRequestBody(0).session_id
+
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+
+    expect(
+      within(screen.getByRole('region', { name: /conversation/i })).getByRole(
+        'button',
+        { name: 'What’s your tech stack?' },
+      ),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'Current chat' }),
+    ).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Question'), 'What other projects?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    await waitFor(() => {
+      expect(vi.mocked(fetch).mock.calls).toHaveLength(2)
+    })
+    expect(getChatRequestBody(1).session_id).not.toBe(firstSession)
+  })
+
+  it('opens a previous chat and keeps that conversation', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ answer: 'First answer about the stack.' }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ answer: 'Second answer about projects.' }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ answer: 'Follow-up on the stack.' }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    renderApp('/')
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText('First answer about the stack.'),
+    ).toBeInTheDocument()
+    const firstSession = getChatRequestBody(0).session_id
+
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+    await user.type(screen.getByLabelText('Question'), 'What other projects?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await screen.findByText('Second answer about projects.'),
+    ).toBeInTheDocument()
+
+    await user.click(
+      within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
+    )
+
+    const conversation = screen.getByRole('region', { name: /conversation/i })
+    expect(within(conversation).getByText('What’s your tech stack?')).toBeInTheDocument()
+    expect(
+      within(conversation).getByText('First answer about the stack.'),
+    ).toBeInTheDocument()
+    expect(
+      within(conversation).queryByText('What other projects?'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What other projects?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'Current chat' }),
+    ).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Question'), 'Tell me more about that')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await screen.findByText('Follow-up on the stack.'),
+    ).toBeInTheDocument()
+    expect(getChatRequestBody(2).session_id).toBe(firstSession)
+    expect(getChatRequestBody(2).question).toBe('Tell me more about that')
+  })
+
+  it('restores the open chat and the previous chat after refresh', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ answer: 'First answer about the stack.' }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ answer: 'Second answer about projects.' }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    const first = renderApp('/')
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText('First answer about the stack.'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+    await user.type(screen.getByLabelText('Question'), 'What other projects?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await screen.findByText('Second answer about projects.'),
+    ).toBeInTheDocument()
+
+    first.unmount()
+    renderApp('/')
+
+    expect(
+      within(conversation()).getByText('What other projects?'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Second answer about projects.')).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What other projects?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'Current chat' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('drops a chat that has been idle for more than 30 minutes', async () => {
+    const user = userEvent.setup()
+    const first = renderApp('/')
+
+    await user.type(
+      screen.getByLabelText('Question'),
+      'Where did the Prague office sit?',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await screen.findByText('Tomi is a full-stack engineer based in Prague.'),
+    ).toBeInTheDocument()
+
+    const raw = window.localStorage.getItem(TOMI_CHAT_HISTORY_KEY)
+    expect(raw).toEqual(expect.any(String))
+    const parsed = JSON.parse(String(raw)) as {
+      chats: { updatedAt: number }[]
+    }
+    const stale = Date.now() - 31 * 60 * 1000
+    for (const chat of parsed.chats) chat.updatedAt = stale
+    window.localStorage.setItem(TOMI_CHAT_HISTORY_KEY, JSON.stringify(parsed))
+
+    first.unmount()
+    renderApp('/')
+
+    expect(
+      screen.queryByText('Where did the Prague office sit?'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', {
+        name: 'Where did the Prague office sit?',
+      }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'Current chat' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('disables New chat after three chats', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+    expect(
+      await screen.findByText('Tomi is a full-stack engineer based in Prague.'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+    await user.type(screen.getByLabelText('Question'), 'What other projects?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await within(conversation()).findByText('What other projects?'),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'New chat' }))
+    await user.type(screen.getByLabelText('Question'), 'How do you test?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(
+      await within(conversation()).findByText('How do you test?'),
+    ).toBeInTheDocument()
+
+    expect(screen.getByRole('button', { name: 'New chat' })).toBeDisabled()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What other projects?' }),
+    ).toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'How do you test?' }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Clear chat' }))
+
+    expect(screen.getByRole('button', { name: 'New chat' })).toBeEnabled()
+    expect(
+      within(chatNav()).queryByRole('button', { name: 'How do you test?' }),
+    ).not.toBeInTheDocument()
+    expect(
+      within(chatNav()).getByRole('button', { name: 'What other projects?' }),
+    ).toBeInTheDocument()
+  })
+
+  it('hides the chat list away from Ask Tomi', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+
+    const pagesNav = screen.getByRole('navigation', { name: /pages/i })
+    await user.click(
+      within(pagesNav).getByRole('link', { name: 'Theme Playground' }),
+    )
+
+    expect(screen.queryByText('My chat')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('navigation', { name: 'My chat' }),
+    ).not.toBeInTheDocument()
   })
 })

@@ -51,9 +51,9 @@ export function PrivacyPage() {
               tomi-interview-bot.tomibabjak.workers.dev
             </code>
             ) to generate a reply. Do not send secrets, passwords, or other
-            sensitive information. Chat history stays in this browser tab until
-            you clear it or leave; the session id rotates after about 30 minutes
-            of inactivity.
+            sensitive information. Questions and answers stay in this browser
+            for about 30 minutes. This site then removes them. The session id
+            rotates after about 30 minutes of inactivity.
           </p>
         </section>
 
