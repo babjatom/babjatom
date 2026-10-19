@@ -703,7 +703,10 @@ describe('Ask Tomi chat', () => {
       'Backend CV',
       'Match to your JD',
     ]) {
-      expect(screen.getByRole('menuitem', { name })).toHaveClass('w-full')
+      expect(screen.getByRole('menuitem', { name })).toHaveClass(
+        'w-full',
+        'cursor-pointer',
+      )
     }
     expect(downloadCvPdf).not.toHaveBeenCalled()
     expect(fetch).not.toHaveBeenCalled()
@@ -972,6 +975,7 @@ describe('Ask Tomi chat', () => {
 
     const newChat = screen.getByRole('button', { name: 'New chat' })
     expect(newChat).toBeEnabled()
+    expect(newChat).toHaveClass('cursor-pointer')
     expect(newChat.className).not.toMatch(/bg-secondary/)
     expect(screen.queryByRole('button', { name: 'Current chat' })).not.toBeInTheDocument()
   })
@@ -996,7 +1000,7 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
     expect(
       within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
-    ).toBeInTheDocument()
+    ).toHaveClass('cursor-pointer')
     expect(
       within(chatNav()).queryByRole('button', { name: 'Current chat' }),
     ).not.toBeInTheDocument()

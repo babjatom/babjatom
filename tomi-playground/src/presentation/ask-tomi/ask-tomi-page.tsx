@@ -393,7 +393,7 @@ export function AskTomiPage() {
                           {CV_CHOICES.map(({ variant, label }) => (
                             <DropdownMenuItem
                               key={variant}
-                              className="w-full"
+                              className="w-full cursor-pointer"
                               onSelect={() => {
                                 downloadCvPdf(variant)
                                 track('Ask Tomi Chip Clicked', {
@@ -408,7 +408,7 @@ export function AskTomiPage() {
                             </DropdownMenuItem>
                           ))}
                           <DropdownMenuItem
-                            className="w-full bg-muted focus:bg-muted"
+                            className="w-full cursor-pointer bg-muted focus:bg-muted"
                             onSelect={(event) => {
                               event.preventDefault()
                             }}
