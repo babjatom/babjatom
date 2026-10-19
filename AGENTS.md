@@ -62,6 +62,16 @@ Rules:
 - The PR **title** becomes the `main` commit subject. It must be a Conventional Commit (for example `feat(tomi-playground): add analytics charts page`). The PR body can be a normal summary.
 - If `main` moved, rebase the feature branch onto `origin/main`. Do not merge `main` into the feature branch.
 
+### Branches
+
+Name the branch `type/short-description`.
+
+Use the same types as commits: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+
+Use lowercase words and hyphens after the slash. Example: `feat/ask-tomi-chat-list`.
+
+CI checks the name in [`.github/workflows/pr-branch.yml`](.github/workflows/pr-branch.yml).
+
 Examples:
 
 ```text

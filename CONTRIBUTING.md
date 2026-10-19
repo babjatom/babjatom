@@ -56,6 +56,10 @@ every PR.
   Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
   `build`, `ci`, `chore`, `revert`. Example:
   `feat(tomi-playground): add analytics charts page`.
+- Name the branch `type/short-description`. Use the same types as commits.
+  Use lowercase words and hyphens after the slash. Example:
+  `feat/ask-tomi-chat-list`. CI checks the name in
+  [`pr-branch.yml`](.github/workflows/pr-branch.yml).
 - Keep each PR to **one logical change**.
 - `main` is **linear and squash-only**. PRs land via `gh pr merge --squash`;
   never merge commits. Rebase your branch onto `origin/main` if it has moved.
