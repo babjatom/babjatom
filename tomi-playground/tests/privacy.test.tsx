@@ -42,6 +42,11 @@ describe('Privacy page', () => {
       screen.getByText(/tomi-interview-bot\.tomibabjak\.workers\.dev/i),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(
+        /questions and answers stay in this browser for about 30 minutes/i,
+      ),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(/github-visitors-tracking\.tomibabjak\.workers\.dev/i),
     ).toBeInTheDocument()
     expect(track).toHaveBeenCalledWith('Nav Clicked', {
