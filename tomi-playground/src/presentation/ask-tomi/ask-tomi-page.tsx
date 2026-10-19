@@ -10,6 +10,7 @@ import {
 import ReactMarkdown from 'react-markdown'
 import {
   Calendar,
+  ChevronDown,
   Copy,
   Eraser,
   FileDown,
@@ -20,10 +21,16 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { track } from '@/infrastructure/analytics'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
-import { downloadCvPdf } from './download-cv'
+import { downloadCvPdf, type CvVariant } from './download-cv'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
@@ -33,6 +40,12 @@ import {
 } from './use-tomi-chat'
 
 const NEAR_BOTTOM_PX = 80
+
+const CV_CHOICES: { variant: CvVariant; label: string }[] = [
+  { variant: 'fullstack', label: 'Fullstack CV' },
+  { variant: 'frontend', label: 'Frontend CV' },
+  { variant: 'backend', label: 'Backend CV' },
+]
 
 function AssistantBody({
   message,
@@ -333,6 +346,49 @@ export function AskTomiPage() {
                   </Reveal>
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
                     <Reveal rootRef={listRef} delayMs={40}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="default"
+                            size="lg"
+                            className="h-14 w-full justify-start gap-2 px-6 text-base sm:w-auto"
+                            disabled={pending}
+                            data-testid="download-cv-chip"
+                          >
+                            <FileDown
+                              className="h-5 w-5 shrink-0"
+                              aria-hidden
+                            />
+                            Download CV
+                            <ChevronDown
+                              className="ml-1 h-5 w-5 shrink-0"
+                              aria-hidden
+                              data-testid="download-cv-chevron"
+                            />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          {CV_CHOICES.map(({ variant, label }) => (
+                            <DropdownMenuItem
+                              key={variant}
+                              onSelect={() => {
+                                downloadCvPdf(variant)
+                                track('Ask Tomi Chip Clicked', {
+                                  chip: `download_cv_${variant}`,
+                                })
+                                track('Ask Tomi Action', {
+                                  action: `download_cv_${variant}`,
+                                })
+                              }}
+                            >
+                              {label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Reveal>
+                    <Reveal rootRef={listRef} delayMs={50}>
                       <Button
                         type="button"
                         variant="default"
@@ -351,30 +407,11 @@ export function AskTomiPage() {
                         Schedule call
                       </Button>
                     </Reveal>
-                    <Reveal rootRef={listRef} delayMs={50}>
-                      <Button
-                        type="button"
-                        variant="default"
-                        className="w-full justify-start gap-2 text-left sm:w-auto"
-                        disabled={pending}
-                        data-testid="download-cv-chip"
-                        onClick={() => {
-                          downloadCvPdf()
-                          track('Ask Tomi Chip Clicked', {
-                            chip: 'download_cv',
-                          })
-                          track('Ask Tomi Action', { action: 'download_cv' })
-                        }}
-                      >
-                        <FileDown className="h-4 w-4 shrink-0" aria-hidden />
-                        Download CV
-                      </Button>
-                    </Reveal>
                     {STARTER_PROMPTS.map((prompt, index) => (
                       <Reveal
                         key={prompt}
                         rootRef={listRef}
-                        delayMs={60 + index * 70}
+                        delayMs={80 + index * 70}
                       >
                         <Button
                           type="button"

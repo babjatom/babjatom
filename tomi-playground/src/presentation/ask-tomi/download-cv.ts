@@ -1,13 +1,27 @@
-/** Public CV PDF served from Vite `public/` (site root). */
-export const TOMI_CV_PDF_HREF = '/tomi-babjak-cv.pdf'
-export const TOMI_CV_PDF_FILENAME = 'tomi-babjak-cv.pdf'
+/** Public CV PDFs served from Vite `public/` (site root). */
+export const CV_VARIANTS = {
+  fullstack: {
+    href: '/tomi-babjak-cv.pdf',
+    filename: 'tomi-babjak-cv.pdf',
+  },
+  frontend: {
+    href: '/tomi-babjak-cv-frontend.pdf',
+    filename: 'tomi-babjak-cv-frontend.pdf',
+  },
+  backend: {
+    href: '/tomi-babjak-cv-backend.pdf',
+    filename: 'tomi-babjak-cv-backend.pdf',
+  },
+} as const
 
-/** Trigger a browser download of the CV PDF without navigating away. */
+export type CvVariant = keyof typeof CV_VARIANTS
+
+/** Trigger a browser download of one CV PDF without navigating away. */
 export function downloadCvPdf(
+  variant: CvVariant,
   doc: Document = document,
-  href: string = TOMI_CV_PDF_HREF,
-  filename: string = TOMI_CV_PDF_FILENAME,
 ): void {
+  const { href, filename } = CV_VARIANTS[variant]
   const anchor = doc.createElement('a')
   anchor.href = href
   anchor.download = filename
