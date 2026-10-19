@@ -12,7 +12,9 @@ Feature: Ask Tomi
     And I should see starter prompts
     And I should see a distinctive Download CV chip with a download icon and a chevron
     And the Download CV chip should come before the Schedule call chip
-    And the Download CV chip should be larger than the Schedule call chip
+    And on a phone the Download CV chip should match the Schedule call chip in size
+    And on a wide screen the Download CV chip should match the width of the left starter column below it
+    And on a wide screen Schedule call and What’s your tech stack? should share the width of the right starter column below them
     And I should see a distinctive Schedule call chip with a calendar icon
     And the Ask button should be disabled
     And I should not see a coming-soon placeholder
@@ -96,6 +98,7 @@ Feature: Ask Tomi
     Then I should see "My chat" in the sidebar
     And "My chat" should sit below Pages and above Privacy
     And I should see a "New chat" button
+    And New chat should show a hand pointer
     And I should not see "Current chat"
 
   Scenario: New chat keeps the previous conversation in the sidebar
@@ -103,6 +106,7 @@ Feature: Ask Tomi
     When I start a new chat
     Then starter prompts should be visible again
     And the previous chat should stay in the sidebar
+    And that chat should show a hand pointer
     And the next question should start a new conversation
 
   Scenario: Visitor opens a previous chat
@@ -165,10 +169,20 @@ Feature: Ask Tomi
     And the chat API should not have been called
     And the scheduler should not have booked yet
 
-  Scenario: Download CV chip lists the three CVs
+  Scenario: Download CV chip lists the CV choices
     Given I am on the Ask Tomi page
     When I open the Download CV chip
-    Then I should see Fullstack CV, Frontend CV, and Backend CV
+    Then I should see Fullstack CV, Frontend CV, Backend CV, and Match to your JD
+    And each choice should be as wide as the Download CV chip
+    And each choice should show a hand pointer
+    And Match to your JD should be lighter than the other choices
+    And I should not see an assistant answer yet
+
+  Scenario: Choosing Match to your JD does nothing yet
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Match to your JD
+    Then a CV PDF download should not start
     And I should not see an assistant answer yet
 
   Scenario: Choosing Fullstack CV starts a PDF download

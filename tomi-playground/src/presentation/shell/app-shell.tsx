@@ -53,7 +53,7 @@ function ChatHistoryNav({ onNavigate }: { onNavigate: () => void }) {
       <p className={cn(sectionTitleClassName, 'mb-2')}>My chat</p>
       <button
         type="button"
-        className="flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
         disabled={newChatDisabled}
         onClick={() => {
           startNewChat()
@@ -77,7 +77,7 @@ function ChatHistoryNav({ onNavigate }: { onNavigate: () => void }) {
               onNavigate()
             }}
             className={cn(
-              'flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground',
+              'flex w-full cursor-pointer items-center gap-2 rounded-md px-1 py-1.5 text-left text-sm text-muted-foreground hover:text-foreground',
               chat.active && 'text-foreground',
             )}
           >

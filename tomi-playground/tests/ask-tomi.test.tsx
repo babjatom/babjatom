@@ -101,7 +101,21 @@ describe('Ask Tomi chat', () => {
     expect(downloadCv).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chip')).toBeInTheDocument()
     expect(screen.getByTestId('download-cv-chevron')).toBeInTheDocument()
-    expect(downloadCv.className).toMatch(/\bh-14\b/)
+    expect(downloadCv.className).toMatch(/\bh-10\b/)
+    expect(downloadCv.className).not.toMatch(/(?:^|\s)h-14(?:\s|$)/)
+    expect(downloadCv.className).toMatch(/\bsm:h-12\b/)
+    expect(downloadCv).toHaveClass('w-full')
+    expect(screen.getByTestId('action-line')).toHaveClass('sm:grid-cols-2')
+    expect(screen.getByTestId('starter-lines')).toHaveClass('sm:grid-cols-2')
+    expect(screen.getByTestId('action-line-rest')).toHaveClass('sm:flex-row')
+    expect(scheduleCall).toHaveClass('w-full')
+    expect(scheduleCall.className).not.toMatch(/\bsm:w-auto\b/)
+    expect(scheduleCall.parentElement).toHaveClass('sm:flex-1')
+    const techStack = screen.getByRole('button', {
+      name: 'What’s your tech stack?',
+    })
+    expect(techStack).toHaveClass('w-full')
+    expect(techStack.parentElement).toHaveClass('sm:flex-1')
     expect(scheduleCall.className).toMatch(/\bh-10\b/)
     expect(
       downloadCv.compareDocumentPosition(scheduleCall) &
@@ -649,7 +663,22 @@ describe('Ask Tomi chat', () => {
     const user = userEvent.setup()
     await openAskTomi(user)
 
-    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    const downloadCv = screen.getByRole('button', { name: 'Download CV' })
+    downloadCv.getBoundingClientRect = () =>
+      ({
+        width: 320,
+        height: 40,
+        top: 0,
+        left: 0,
+        right: 320,
+        bottom: 40,
+        x: 0,
+        y: 0,
+        toJSON() {
+          return {}
+        },
+      }) as DOMRect
+    await user.click(downloadCv)
 
     expect(
       await screen.findByRole('menuitem', { name: 'Fullstack CV' }),
@@ -660,9 +689,45 @@ describe('Ask Tomi chat', () => {
     expect(
       screen.getByRole('menuitem', { name: 'Backend CV' }),
     ).toBeInTheDocument()
+    const matchJd = screen.getByRole('menuitem', { name: 'Match to your JD' })
+    expect(matchJd).toBeInTheDocument()
+    expect(matchJd).toHaveClass('bg-muted')
+    expect(screen.getByRole('menuitem', { name: 'Fullstack CV' })).not.toHaveClass(
+      'bg-muted',
+    )
+    const menu = screen.getByRole('menu')
+    expect(menu).toHaveStyle({ width: '320px' })
+    for (const name of [
+      'Fullstack CV',
+      'Frontend CV',
+      'Backend CV',
+      'Match to your JD',
+    ]) {
+      expect(screen.getByRole('menuitem', { name })).toHaveClass(
+        'w-full',
+        'cursor-pointer',
+      )
+    }
     expect(downloadCvPdf).not.toHaveBeenCalled()
     expect(fetch).not.toHaveBeenCalled()
     expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+  })
+
+  it('does nothing yet when Match to your JD is chosen', async () => {
+    const user = userEvent.setup()
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Match to your JD' }),
+    )
+
+    expect(downloadCvPdf).not.toHaveBeenCalled()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('menuitem', { name: 'Match to your JD' }),
+    ).toBeInTheDocument()
   })
 
   it.each([
@@ -910,6 +975,7 @@ describe('Ask Tomi chat', () => {
 
     const newChat = screen.getByRole('button', { name: 'New chat' })
     expect(newChat).toBeEnabled()
+    expect(newChat).toHaveClass('cursor-pointer')
     expect(newChat.className).not.toMatch(/bg-secondary/)
     expect(screen.queryByRole('button', { name: 'Current chat' })).not.toBeInTheDocument()
   })
@@ -934,7 +1000,7 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
     expect(
       within(chatNav()).getByRole('button', { name: 'What’s your tech stack?' }),
-    ).toBeInTheDocument()
+    ).toHaveClass('cursor-pointer')
     expect(
       within(chatNav()).queryByRole('button', { name: 'Current chat' }),
     ).not.toBeInTheDocument()
