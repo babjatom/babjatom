@@ -378,6 +378,45 @@ describe('Ask Tomi chat', () => {
     )
   })
 
+  it('retries once when the first chat request fails to reach the service', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(
+        Response.json({
+          answer: 'Tomi is a full-stack engineer based in Prague.',
+        }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await openAskTomi(user)
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+
+    expect(
+      await screen.findByText(
+        'Tomi is a full-stack engineer based in Prague.',
+      ),
+    ).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(getChatRequestBody(0).question).toBe('What’s your tech stack?')
+    expect(getChatRequestBody(1).question).toBe('What’s your tech stack?')
+  })
+
+  it('does not retry when the chat service returns an error status', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn(async () =>
+      Response.json({ error: 'rate limit exceeded' }, { status: 429 }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await openAskTomi(user)
+    await user.click(screen.getByRole('button', { name: 'What’s your tech stack?' }))
+
+    expect(await screen.findByText('rate limit exceeded')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it('submits a typed question from the composer', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
