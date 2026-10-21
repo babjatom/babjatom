@@ -79,6 +79,35 @@ export function getOrCreateChatSessionId(
   return rotateChatSessionId()
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError'
+}
+
+async function postChatRequest(
+  question: string,
+  sessionId: string,
+  signal?: AbortSignal,
+): Promise<Response> {
+  try {
+    return await fetch(TOMI_CHAT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question,
+        session_id: sessionId,
+      }),
+      signal,
+    })
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error
+    }
+    throw new TomiChatError(
+      error instanceof Error ? error.message : 'Network request failed.',
+    )
+  }
+}
+
 export async function askTomiChat(
   question: string,
   signal?: AbortSignal,
@@ -93,22 +122,13 @@ export async function askTomiChat(
 
   let response: Response
   try {
-    response = await fetch(TOMI_CHAT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question: trimmed,
-        session_id: resolvedSessionId,
-      }),
-      signal,
-    })
+    response = await postChatRequest(trimmed, resolvedSessionId, signal)
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (isAbortError(error) || signal?.aborted) {
       throw error
     }
-    throw new TomiChatError(
-      error instanceof Error ? error.message : 'Network request failed.',
-    )
+    // One retry: cold Worker / AI often fails the first fetch, then succeeds.
+    response = await postChatRequest(trimmed, resolvedSessionId, signal)
   }
 
   let payload: unknown

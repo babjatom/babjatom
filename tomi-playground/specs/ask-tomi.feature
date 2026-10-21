@@ -74,6 +74,18 @@ Feature: Ask Tomi
     Then I should see my question in the chat
     And I should see the assistant answer
 
+  Scenario: Ask Tomi retries once when the first request never reaches the service
+    Given I am on the Ask Tomi page
+    When I ask a question and the first request fails to reach the service
+    And the second request succeeds
+    Then I should see the assistant answer
+
+  Scenario: Ask Tomi does not retry when the service returns an error status
+    Given I am on the Ask Tomi page
+    When I ask a question and the service returns an error status
+    Then I should see an error in the chat
+    And the service should have been called only once
+
   Scenario: Visitor submits a typed question
     Given I am on the Ask Tomi page
     When I type a question into the composer
