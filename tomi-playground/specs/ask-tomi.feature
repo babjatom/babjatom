@@ -187,15 +187,41 @@ Feature: Ask Tomi
     Then I should see Fullstack CV, Frontend CV, Backend CV, and Match to your JD
     And each choice should be as wide as the Download CV chip
     And each choice should show a hand pointer
-    And Match to your JD should be lighter than the other choices
+    And Match to your JD should look like the other choices
     And I should not see an assistant answer yet
 
-  Scenario: Choosing Match to your JD does nothing yet
+  Scenario: Choosing Match to your JD opens a PDF or DOCX picker
     Given I am on the Ask Tomi page
     When I open the Download CV chip
     And I choose Match to your JD
-    Then a CV PDF download should not start
+    Then I should be able to choose a PDF or DOCX file
+    And a CV PDF download should not start
     And I should not see an assistant answer yet
+
+  Scenario: A readable job description shows a matched CV preview
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Match to your JD
+    And I select a readable job-description file
+    Then I should see the Match to your JD request in the chat
+    And I should see an assistant answer with a CV preview
+    And I should see a Print CV action
+    And the chat API should not have been called
+
+  Scenario: A bad job-description file stays in chat as an error
+    Given I am on the Ask Tomi page
+    When I open the Download CV chip
+    And I choose Match to your JD
+    And I select a file that is not a readable PDF or DOCX
+    Then I should see an error in the chat
+    And the match API should not have been called
+    And the chat API should not have been called
+
+  Scenario: Print CV opens a print-ready page
+    Given I have a matched CV preview in Ask Tomi
+    When I choose Print CV
+    Then a print-ready CV should open
+    And the chat API should not have been called
 
   Scenario: Choosing Fullstack CV starts a PDF download
     Given I am on the Ask Tomi page

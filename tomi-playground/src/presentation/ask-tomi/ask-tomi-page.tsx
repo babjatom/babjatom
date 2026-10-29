@@ -15,6 +15,7 @@ import {
   Eraser,
   FileDown,
   LoaderCircle,
+  Printer,
   RefreshCw,
   SendHorizontal,
   Square,
@@ -28,9 +29,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { track } from '@/infrastructure/analytics'
+import { JD_FILE_ACCEPT } from '@/infrastructure/parse-jd-file'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
 import { downloadCvPdf, type CvVariant } from './download-cv'
+import { printMatchedCv } from './print-matched-cv'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
@@ -96,6 +99,8 @@ function AssistantBody({
   }
 
   const slots = message.schedulePreview?.slots
+  const cvMatch = message.cvMatch
+  const matchedCv = cvMatch?.cv
 
   return (
     <div className="space-y-3 text-sm leading-relaxed">
@@ -120,13 +125,49 @@ function AssistantBody({
           ))}
         </ol>
       )}
+      {matchedCv && message.status === 'complete' && done && (
+        <div
+          className="space-y-3 rounded-md border border-border bg-muted/40 p-3"
+          data-testid="cv-match-preview"
+        >
+          <p className="font-medium">{matchedCv.headline}</p>
+          <p className="text-muted-foreground">{matchedCv.summary}</p>
+          <p>
+            Skills:{' '}
+            {matchedCv.skills.map((skill) => skill.group).join(', ')}
+          </p>
+          <Button
+            type="button"
+            variant="default"
+            className="h-9 gap-2"
+            data-testid="print-cv"
+            onClick={() => {
+              track('Ask Tomi Action', { action: 'print_cv' })
+              printMatchedCv(matchedCv)
+            }}
+          >
+            <Printer className="h-4 w-4" aria-hidden />
+            Print CV
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
 
 export function AskTomiPage() {
-  const { messages, pending, send, requestOwnSchedule, stop, regenerate, clear, copy } =
-    useTomiChat()
+  const {
+    messages,
+    pending,
+    send,
+    requestOwnSchedule,
+    requestMatchJd,
+    stop,
+    regenerate,
+    clear,
+    copy,
+  } = useTomiChat()
+  const matchJdInputRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [typingDoneIds, setTypingDoneIds] = useState<Record<string, boolean>>(
@@ -252,6 +293,20 @@ export function AskTomiPage() {
 
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-7xl flex-1 flex-col gap-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:gap-3 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:pb-[env(safe-area-inset-bottom)]">
+      <input
+        ref={matchJdInputRef}
+        type="file"
+        accept={JD_FILE_ACCEPT}
+        className="sr-only"
+        data-testid="match-jd-file"
+        onChange={(event) => {
+          const file = event.target.files?.[0]
+          event.currentTarget.value = ''
+          if (!file) return
+          stickToBottomRef.current = true
+          void requestMatchJd(file)
+        }}
+      />
       <header
         className={cn(
           'animate-rise relative shrink-0 rounded-2xl border border-border/70',
@@ -408,9 +463,9 @@ export function AskTomiPage() {
                             </DropdownMenuItem>
                           ))}
                           <DropdownMenuItem
-                            className="w-full cursor-pointer bg-muted focus:bg-muted"
-                            onSelect={(event) => {
-                              event.preventDefault()
+                            className="w-full cursor-pointer"
+                            onSelect={() => {
+                              matchJdInputRef.current?.click()
                             }}
                           >
                             Match to your JD

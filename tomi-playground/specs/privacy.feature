@@ -11,6 +11,8 @@ Feature: Privacy
     And I should see that theme, font, and background preferences stay in the browser
     And I should see the Ask Tomi worker host
     And I should see that Ask Tomi questions and answers stay in this browser for about 30 minutes
+    And I should see that Match to your JD sends job-description text to the same Worker
+    And I should see that the site does not keep the uploaded file
     And I should see the profile pixel host
 
   Scenario: Privacy is reachable from Ask Tomi

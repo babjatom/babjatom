@@ -10,6 +10,9 @@ import {
 } from '@/infrastructure/tomi-chat-api'
 import { TOMI_OWN_CAL_URL } from '@/infrastructure/tomi-schedule-api'
 import { downloadCvPdf } from '@/presentation/ask-tomi/download-cv'
+import { printMatchedCv } from '@/presentation/ask-tomi/print-matched-cv'
+import { JdParseError, parseJdFile } from '@/infrastructure/parse-jd-file'
+import { TOMI_CV_MATCH_URL } from '@/infrastructure/tomi-cv-match-api'
 
 vi.mock('@/presentation/ask-tomi/download-cv', async (importOriginal) => {
   const actual =
@@ -19,6 +22,49 @@ vi.mock('@/presentation/ask-tomi/download-cv', async (importOriginal) => {
     downloadCvPdf: vi.fn(),
   }
 })
+
+vi.mock('@/presentation/ask-tomi/print-matched-cv', () => ({
+  printMatchedCv: vi.fn(() => true),
+  matchedCvHtml: vi.fn(),
+}))
+
+vi.mock('@/infrastructure/parse-jd-file', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/infrastructure/parse-jd-file')>()
+  return {
+    ...actual,
+    parseJdFile: vi.fn(),
+  }
+})
+
+const MATCHED_CV = {
+  headline: 'Senior Frontend Engineer · Prague, Czechia',
+  summary: 'Senior frontend engineer with over 10 years building React.',
+  skills: [{ group: 'Frontend', items: 'React, Next.js, TypeScript' }],
+  jobs: [
+    {
+      id: 'plots',
+      title: 'Fullstack Engineer · Plots Inc',
+      when: '2024–2026',
+      location: 'Los Angeles',
+      stack: 'React',
+      bullets: ['Built public pages in React.'],
+    },
+  ],
+  projects: [
+    {
+      id: 'ask-tomi',
+      name: 'Ask Tomi',
+      when: '2026',
+      bullets: ['Built a chat.'],
+    },
+  ],
+  education: {
+    school: 'Czech Technical University, Prague',
+    when: '2009–2013',
+  },
+  interests: 'Plane spotting and flight tracking.',
+}
 
 function renderApp(path = '/') {
   window.history.pushState({}, '', path)
@@ -58,6 +104,11 @@ describe('Ask Tomi chat', () => {
     window.sessionStorage.clear()
     vi.mocked(track).mockClear()
     vi.mocked(downloadCvPdf).mockClear()
+    vi.mocked(printMatchedCv).mockClear()
+    vi.mocked(parseJdFile).mockReset()
+    vi.mocked(parseJdFile).mockResolvedValue(
+      'Senior frontend engineer. React TypeScript Next.js.',
+    )
     vi.stubGlobal(
       'fetch',
       vi.fn(async () =>
@@ -730,7 +781,7 @@ describe('Ask Tomi chat', () => {
     ).toBeInTheDocument()
     const matchJd = screen.getByRole('menuitem', { name: 'Match to your JD' })
     expect(matchJd).toBeInTheDocument()
-    expect(matchJd).toHaveClass('bg-muted')
+    expect(matchJd).not.toHaveClass('bg-muted')
     expect(screen.getByRole('menuitem', { name: 'Fullstack CV' })).not.toHaveClass(
       'bg-muted',
     )
@@ -752,21 +803,130 @@ describe('Ask Tomi chat', () => {
     expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
   })
 
-  it('does nothing yet when Match to your JD is chosen', async () => {
+  it('opens a PDF or DOCX picker when Match to your JD is chosen', async () => {
     const user = userEvent.setup()
     await openAskTomi(user)
+
+    const input = screen.getByTestId('match-jd-file')
+    expect(input.getAttribute('accept')).toContain('.pdf')
+    expect(input.getAttribute('accept')).toContain('.docx')
+    const clickSpy = vi.spyOn(input, 'click')
 
     await user.click(screen.getByRole('button', { name: 'Download CV' }))
     await user.click(
       await screen.findByRole('menuitem', { name: 'Match to your JD' }),
     )
 
+    expect(clickSpy).toHaveBeenCalled()
     expect(downloadCvPdf).not.toHaveBeenCalled()
     expect(fetch).not.toHaveBeenCalled()
     expect(screen.queryByText(/tomi is thinking/i)).not.toBeInTheDocument()
+  })
+
+  it('shows a matched CV preview after a readable job-description file', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).includes('/cv-match')) {
+        return Response.json({
+          answer: 'I matched this to a senior frontend role.',
+          role: 'frontend',
+          cv: MATCHED_CV,
+          omitted_tools: [],
+        })
+      }
+      return Response.json({ answer: 'chat should not run' })
+    })
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Match to your JD' }),
+    )
+    const file = new File(['react'], 'frontend-jd.pdf', {
+      type: 'application/pdf',
+    })
+    await user.upload(screen.getByTestId('match-jd-file'), file)
+
     expect(
-      screen.getByRole('menuitem', { name: 'Match to your JD' }),
+      await within(conversation()).findByText(/Match to your JD \(frontend-jd\.pdf\)/),
     ).toBeInTheDocument()
+    expect(
+      await screen.findByText('I matched this to a senior frontend role.'),
+    ).toBeInTheDocument()
+    expect(await screen.findByTestId('cv-match-preview')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Print CV' })).toBeInTheDocument()
+    expect(parseJdFile).toHaveBeenCalled()
+    const matchCalls = fetchMock.mock.calls.filter((call) =>
+      String(call[0]).includes('/cv-match'),
+    )
+    expect(matchCalls.length).toBeGreaterThan(0)
+    expect(String(matchCalls[0]?.[0])).toBe(TOMI_CV_MATCH_URL)
+    const chatCalls = fetchMock.mock.calls.filter((call) =>
+      String(call[0]).includes('/chat'),
+    )
+    expect(chatCalls).toHaveLength(0)
+    expect(downloadCvPdf).not.toHaveBeenCalled()
+  })
+
+  it('shows an error for a bad job-description file without calling the APIs', async () => {
+    const user = userEvent.setup()
+    vi.mocked(parseJdFile).mockRejectedValueOnce(
+      new JdParseError(
+        'That file had no readable text. Use a text PDF or a DOCX file.',
+      ),
+    )
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Match to your JD' }),
+    )
+    await user.upload(
+      screen.getByTestId('match-jd-file'),
+      new File(['%PDF'], 'scanned-jd.pdf', { type: 'application/pdf' }),
+    )
+
+    expect(
+      await screen.findByText(
+        'That file had no readable text. Use a text PDF or a DOCX file.',
+      ),
+    ).toBeInTheDocument()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(downloadCvPdf).not.toHaveBeenCalled()
+  })
+
+  it('opens a print-ready CV from the preview', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).includes('/cv-match')) {
+        return Response.json({
+          answer: 'I matched this to a senior frontend role.',
+          role: 'frontend',
+          cv: MATCHED_CV,
+          omitted_tools: [],
+        })
+      }
+      return Response.json({ answer: 'chat should not run' })
+    })
+    await openAskTomi(user)
+
+    await user.click(screen.getByRole('button', { name: 'Download CV' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Match to your JD' }),
+    )
+    await user.upload(
+      screen.getByTestId('match-jd-file'),
+      new File(['react'], 'frontend-jd.pdf', { type: 'application/pdf' }),
+    )
+    const printButton = await screen.findByRole('button', { name: 'Print CV' })
+    fetchMock.mockClear()
+    await user.click(printButton)
+
+    expect(printMatchedCv).toHaveBeenCalledTimes(1)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(track).toHaveBeenCalledWith('Ask Tomi Action', { action: 'print_cv' })
   })
 
   it.each([

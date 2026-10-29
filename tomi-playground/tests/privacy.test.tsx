@@ -47,6 +47,12 @@ describe('Privacy page', () => {
       ),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(/Match to your JD sends job-description text/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/does not keep the uploaded file/i),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(/github-visitors-tracking\.tomibabjak\.workers\.dev/i),
     ).toBeInTheDocument()
     expect(track).toHaveBeenCalledWith('Nav Clicked', {

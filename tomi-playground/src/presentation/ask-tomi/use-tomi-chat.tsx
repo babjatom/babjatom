@@ -9,11 +9,17 @@ import {
 } from 'react'
 import { track } from '@/infrastructure/analytics'
 import { extractCalScheduleUrl } from '@/infrastructure/cal-url'
+import { JdParseError, parseJdFile } from '@/infrastructure/parse-jd-file'
 import {
   askTomiChat,
   persistChatSessionId,
   TomiChatError,
 } from '@/infrastructure/tomi-chat-api'
+import {
+  matchJdToCv,
+  TomiCvMatchError,
+  type CvMatchResult,
+} from '@/infrastructure/tomi-cv-match-api'
 import {
   createStoredChat,
   firstQuestionLine,
@@ -44,6 +50,7 @@ export type ChatMessage = {
   content: string
   status: ChatMessageStatus
   schedulePreview?: { slots: SchedulePreviewSlot[] }
+  cvMatch?: CvMatchResult
 }
 
 export type PendingScheduleChoice = {
@@ -53,6 +60,20 @@ export type PendingScheduleChoice = {
 
 /** User turn inserted when the Schedule call chip loads open times. */
 export const SCHEDULE_CALL_PROMPT = 'Schedule call'
+
+/** User turn inserted when Match to your JD parses a file. */
+export const MATCH_JD_PROMPT = 'Match to your JD'
+
+export function matchJdUserLine(filename: string): string {
+  return `${MATCH_JD_PROMPT} (${filename})`
+}
+
+export function isMatchJdUserContent(content: string): boolean {
+  const trimmed = content.trim()
+  return (
+    trimmed === MATCH_JD_PROMPT || trimmed.startsWith(`${MATCH_JD_PROMPT} (`)
+  )
+}
 
 export const STARTER_PROMPTS = [
   'What’s your tech stack?',
@@ -78,8 +99,13 @@ function isAbortError(error: unknown) {
 
 function classifyAskTomiError(
   error: unknown,
-): 'network' | 'http' | 'unknown' {
-  if (error instanceof TomiChatError || error instanceof TomiScheduleError) {
+): 'network' | 'http' | 'unknown' | 'parse' {
+  if (error instanceof JdParseError) return 'parse'
+  if (
+    error instanceof TomiChatError ||
+    error instanceof TomiScheduleError ||
+    error instanceof TomiCvMatchError
+  ) {
     if (typeof error.status === 'number') return 'http'
     return 'network'
   }
@@ -137,6 +163,7 @@ type TomiChatValue = {
   newChatDisabled: boolean
   send: (question: string, options?: SendOptions) => Promise<void>
   requestOwnSchedule: () => Promise<void>
+  requestMatchJd: (file: File) => Promise<void>
   stop: () => void
   regenerate: (assistantId: string) => Promise<void>
   clear: () => void
@@ -194,7 +221,10 @@ function useTomiChatState(): TomiChatValue {
     assistantId: string,
     content: string,
     status: ChatMessageStatus = 'complete',
-    schedulePreview?: { slots: SchedulePreviewSlot[] },
+    extras?: {
+      schedulePreview?: { slots: SchedulePreviewSlot[] }
+      cvMatch?: CvMatchResult
+    },
   ) {
     updateChat(chatId, (chat) => ({
       ...chat,
@@ -205,9 +235,8 @@ function useTomiChatState(): TomiChatValue {
               ...message,
               content,
               status,
-              ...(schedulePreview
-                ? { schedulePreview }
-                : { schedulePreview: undefined }),
+              schedulePreview: extras?.schedulePreview,
+              cvMatch: extras?.cvMatch,
             }
           : message,
       ),
@@ -219,8 +248,14 @@ function useTomiChatState(): TomiChatValue {
     assistantId: string,
     work: (signal: AbortSignal) => Promise<{
       content: string
-      kind: 'chat' | 'schedule' | 'schedule_preview' | 'schedule_cancel'
+      kind:
+        | 'chat'
+        | 'schedule'
+        | 'schedule_preview'
+        | 'schedule_cancel'
+        | 'cv_match'
       schedulePreview?: { slots: SchedulePreviewSlot[] }
+      cvMatch?: CvMatchResult
     }>,
   ) {
     const controller = new AbortController()
@@ -230,13 +265,10 @@ function useTomiChatState(): TomiChatValue {
 
     try {
       const result = await work(controller.signal)
-      completeAssistant(
-        chatId,
-        assistantId,
-        result.content,
-        'complete',
-        result.schedulePreview,
-      )
+      completeAssistant(chatId, assistantId, result.content, 'complete', {
+        schedulePreview: result.schedulePreview,
+        cvMatch: result.cvMatch,
+      })
       track('Ask Tomi Result', {
         status: 'complete',
         latency_ms: Math.round(performance.now() - startedAt),
@@ -351,6 +383,25 @@ function useTomiChatState(): TomiChatValue {
     await runPreview(chatId, TOMI_OWN_CAL_URL, assistantId)
   }
 
+  async function requestMatchJd(file: File) {
+    if (pending) return
+
+    const chatId = history.activeId
+    const assistantId = appendTurn(chatId, matchJdUserLine(file.name))
+    track('Ask Tomi Chip Clicked', { chip: 'match_jd' })
+    track('Ask Tomi Action', { action: 'match_jd' })
+    await runWithPending(chatId, assistantId, async (signal) => {
+      persistChatSessionId(chatId)
+      const jdText = await parseJdFile(file)
+      const result = await matchJdToCv(jdText, signal, chatId)
+      return {
+        content: result.answer,
+        kind: 'cv_match',
+        cvMatch: result,
+      }
+    })
+  }
+
   async function send(question: string, options?: SendOptions) {
     const trimmed = question.trim()
     if (!trimmed || pending) return
@@ -442,6 +493,7 @@ function useTomiChatState(): TomiChatValue {
               content: '',
               status: 'pending',
               schedulePreview: undefined,
+              cvMatch: undefined,
             }
           : message,
       ),
@@ -449,6 +501,16 @@ function useTomiChatState(): TomiChatValue {
 
     if (previous.content === SCHEDULE_CALL_PROMPT) {
       await runPreview(chatId, TOMI_OWN_CAL_URL, assistantId)
+      return
+    }
+
+    if (isMatchJdUserContent(previous.content)) {
+      completeAssistant(
+        chatId,
+        assistantId,
+        'Upload the job description again to match it.',
+        'error',
+      )
       return
     }
 
@@ -543,6 +605,7 @@ function useTomiChatState(): TomiChatValue {
     newChatDisabled,
     send,
     requestOwnSchedule,
+    requestMatchJd,
     stop,
     regenerate,
     clear,

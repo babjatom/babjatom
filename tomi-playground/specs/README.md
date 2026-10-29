@@ -29,7 +29,7 @@ These files are not run by Cucumber. They are for humans and agents. Do not add 
 | `fonts.feature` | `tests/app.test.tsx`, `tests/font-service.test.ts`, `tests/font-domain.test.ts`, `tests/apply-font.test.ts` |
 | `theme-playground.feature` | `tests/app.test.tsx`, `tests/visits-data-table.test.tsx`, `tests/maze-prefs.test.ts` |
 | `analytics.feature` | `tests/analytics.test.tsx` |
-| `ask-tomi.feature` | `tests/ask-tomi.test.tsx` |
+| `ask-tomi.feature` | `tests/ask-tomi.test.tsx`, `tests/parse-jd-file.test.ts`, `tests/tomi-cv-match-api.test.ts`, `tests/print-matched-cv.test.ts` |
 | `dos-games.feature` | `tests/dos-games.test.tsx`, `tests/app.test.tsx` |
 | `adsb-radar.feature` | `tests/adsb-radar.test.tsx`, `tests/app.test.tsx` |
 | `privacy.feature` | `tests/privacy.test.tsx` |

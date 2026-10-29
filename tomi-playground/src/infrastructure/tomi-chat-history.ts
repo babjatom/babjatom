@@ -1,4 +1,8 @@
 import { TOMI_CHAT_SESSION_IDLE_MS } from '@/infrastructure/tomi-chat-api'
+import {
+  parseCvMatchPayload,
+  type CvMatchResult,
+} from '@/infrastructure/tomi-cv-match-api'
 
 export const TOMI_CHAT_HISTORY_KEY = 'tomi-chat-history'
 export const MAX_STORED_CHATS = 3
@@ -11,6 +15,7 @@ export type StoredChatMessage = {
   schedulePreview?: {
     slots: { start: string; end: string; label: string }[]
   }
+  cvMatch?: CvMatchResult
 }
 
 export type StoredChat = {
@@ -97,6 +102,14 @@ function normalizeMessage(value: unknown): StoredChatMessage | null {
       .filter((slot) => slot !== null)
     if (slots.length > 0) {
       message.schedulePreview = { slots }
+    }
+  }
+
+  if (value.cvMatch) {
+    try {
+      message.cvMatch = parseCvMatchPayload(value.cvMatch)
+    } catch {
+      // Drop a stored match that no longer matches the API shape.
     }
   }
 
