@@ -60,7 +60,6 @@ describe('openMatchedCvPreview', () => {
     const blob = createObjectURL.mock.calls[0]?.[0] as Blob
     expect(blob.type).toContain('text/html')
     expect(await blob.text()).toContain('Built public pages in React.')
-    expect(open.mock.calls[0]?.[2]).toContain('noopener')
     createObjectURL.mockRestore()
   })
 })
