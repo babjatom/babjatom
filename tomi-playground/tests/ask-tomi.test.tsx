@@ -10,7 +10,7 @@ import {
 } from '@/infrastructure/tomi-chat-api'
 import { TOMI_OWN_CAL_URL } from '@/infrastructure/tomi-schedule-api'
 import { downloadCvPdf } from '@/presentation/ask-tomi/download-cv'
-import { printMatchedCv } from '@/presentation/ask-tomi/print-matched-cv'
+import { openMatchedCvPreview } from '@/presentation/ask-tomi/print-matched-cv'
 import { JdParseError, parseJdFile } from '@/infrastructure/parse-jd-file'
 import { TOMI_CV_MATCH_URL } from '@/infrastructure/tomi-cv-match-api'
 
@@ -24,7 +24,7 @@ vi.mock('@/presentation/ask-tomi/download-cv', async (importOriginal) => {
 })
 
 vi.mock('@/presentation/ask-tomi/print-matched-cv', () => ({
-  printMatchedCv: vi.fn(() => true),
+  openMatchedCvPreview: vi.fn(() => true),
   matchedCvHtml: vi.fn(),
 }))
 
@@ -104,7 +104,7 @@ describe('Ask Tomi chat', () => {
     window.sessionStorage.clear()
     vi.mocked(track).mockClear()
     vi.mocked(downloadCvPdf).mockClear()
-    vi.mocked(printMatchedCv).mockClear()
+    vi.mocked(openMatchedCvPreview).mockClear()
     vi.mocked(parseJdFile).mockReset()
     vi.mocked(parseJdFile).mockResolvedValue(
       'Senior frontend engineer. React TypeScript Next.js.',
@@ -855,7 +855,7 @@ describe('Ask Tomi chat', () => {
       await screen.findByText('I matched this to a senior frontend role.'),
     ).toBeInTheDocument()
     expect(await screen.findByTestId('cv-match-preview')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Print CV' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Preview' })).toBeInTheDocument()
     expect(parseJdFile).toHaveBeenCalled()
     const matchCalls = fetchMock.mock.calls.filter((call) =>
       String(call[0]).includes('/cv-match'),
@@ -896,7 +896,7 @@ describe('Ask Tomi chat', () => {
     expect(downloadCvPdf).not.toHaveBeenCalled()
   })
 
-  it('opens a print-ready CV from the preview', async () => {
+  it('opens the matched CV in a new tab from Preview', async () => {
     const user = userEvent.setup()
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockImplementation(async (input) => {
@@ -920,13 +920,15 @@ describe('Ask Tomi chat', () => {
       screen.getByTestId('match-jd-file'),
       new File(['react'], 'frontend-jd.pdf', { type: 'application/pdf' }),
     )
-    const printButton = await screen.findByRole('button', { name: 'Print CV' })
+    const previewButton = await screen.findByRole('button', { name: 'Preview' })
     fetchMock.mockClear()
-    await user.click(printButton)
+    await user.click(previewButton)
 
-    expect(printMatchedCv).toHaveBeenCalledTimes(1)
+    expect(openMatchedCvPreview).toHaveBeenCalledTimes(1)
     expect(fetch).not.toHaveBeenCalled()
-    expect(track).toHaveBeenCalledWith('Ask Tomi Action', { action: 'print_cv' })
+    expect(track).toHaveBeenCalledWith('Ask Tomi Action', {
+      action: 'preview_cv',
+    })
   })
 
   it.each([

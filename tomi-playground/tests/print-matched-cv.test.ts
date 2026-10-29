@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { matchedCvHtml, printMatchedCv } from '@/presentation/ask-tomi/print-matched-cv'
+import {
+  matchedCvHtml,
+  openMatchedCvPreview,
+} from '@/presentation/ask-tomi/print-matched-cv'
 import type { MatchedCv } from '@/infrastructure/tomi-cv-match-api'
 
 const cv: MatchedCv = {
@@ -31,29 +34,33 @@ const cv: MatchedCv = {
 }
 
 describe('matchedCvHtml', () => {
-  it('renders headline, summary, and print CSS', () => {
+  it('renders headline, jobs, and skills', () => {
     const html = matchedCvHtml(cv, 'https://tomibabjak.dev')
     expect(html).toContain('Senior Frontend Engineer')
     expect(html).toContain('Built public pages in React.')
+    expect(html).toContain('React, Next.js')
     expect(html).toContain('Exo 2')
     expect(html).not.toContain('<script')
   })
 })
 
-describe('printMatchedCv', () => {
-  it('writes the CV into a new window', () => {
-    const print = vi.fn()
-    const openDoc = { open: vi.fn(), write: vi.fn(), close: vi.fn(), readyState: 'complete' }
-    const popup = {
-      document: openDoc,
-      focus: vi.fn(),
-      print,
-      onload: null as (() => void) | null,
-    }
-    const opened = printMatchedCv(cv, () => popup as unknown as Window)
+describe('openMatchedCvPreview', () => {
+  it('opens the full matched CV in a new tab', async () => {
+    const open = vi.fn(() => ({ closed: false }) as unknown as Window)
+    const createObjectURL = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:cv-preview')
+    const opened = openMatchedCvPreview(cv, open)
     expect(opened).toBe(true)
-    expect(openDoc.write).toHaveBeenCalled()
-    expect(String(openDoc.write.mock.calls[0]?.[0])).toContain('Senior Frontend Engineer')
-    expect(print).toHaveBeenCalled()
+    expect(open).toHaveBeenCalledWith(
+      'blob:cv-preview',
+      '_blank',
+      'noopener,noreferrer',
+    )
+    const blob = createObjectURL.mock.calls[0]?.[0] as Blob
+    expect(blob.type).toContain('text/html')
+    expect(await blob.text()).toContain('Built public pages in React.')
+    expect(open.mock.calls[0]?.[2]).toContain('noopener')
+    createObjectURL.mockRestore()
   })
 })

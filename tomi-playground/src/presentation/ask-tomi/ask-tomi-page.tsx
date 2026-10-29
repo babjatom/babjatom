@@ -13,9 +13,9 @@ import {
   ChevronDown,
   Copy,
   Eraser,
+  ExternalLink,
   FileDown,
   LoaderCircle,
-  Printer,
   RefreshCw,
   SendHorizontal,
   Square,
@@ -33,7 +33,7 @@ import { JD_FILE_ACCEPT } from '@/infrastructure/parse-jd-file'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/presentation/shared/reveal'
 import { downloadCvPdf, type CvVariant } from './download-cv'
-import { printMatchedCv } from './print-matched-cv'
+import { openMatchedCvPreview } from './print-matched-cv'
 import { usePendingStatus } from './use-pending-status'
 import { useTypewriter } from './use-typewriter'
 import {
@@ -134,20 +134,26 @@ function AssistantBody({
           <p className="text-muted-foreground">{matchedCv.summary}</p>
           <p>
             Skills:{' '}
-            {matchedCv.skills.map((skill) => skill.group).join(', ')}
+            {matchedCv.skills
+              .flatMap((skill) =>
+                skill.items.split(',').map((item) => item.trim()),
+              )
+              .filter(Boolean)
+              .slice(0, 10)
+              .join(', ')}
           </p>
           <Button
             type="button"
             variant="default"
             className="h-9 gap-2"
-            data-testid="print-cv"
+            data-testid="preview-cv"
             onClick={() => {
-              track('Ask Tomi Action', { action: 'print_cv' })
-              printMatchedCv(matchedCv)
+              track('Ask Tomi Action', { action: 'preview_cv' })
+              openMatchedCvPreview(matchedCv)
             }}
           >
-            <Printer className="h-4 w-4" aria-hidden />
-            Print CV
+            <ExternalLink className="h-4 w-4" aria-hidden />
+            Preview
           </Button>
         </div>
       )}
