@@ -30,6 +30,7 @@ export type AnalyticsEventMap = {
       | 'download_cv_fullstack'
       | 'download_cv_frontend'
       | 'download_cv_backend'
+      | 'match_jd'
       | 'starter'
     starter_id?: string
   }
@@ -45,12 +46,19 @@ export type AnalyticsEventMap = {
       | 'download_cv_fullstack'
       | 'download_cv_frontend'
       | 'download_cv_backend'
+      | 'match_jd'
+      | 'print_cv'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'
     latency_ms: number
-    error_kind?: 'network' | 'http' | 'unknown'
-    kind?: 'chat' | 'schedule' | 'schedule_preview' | 'schedule_cancel'
+    error_kind?: 'network' | 'http' | 'unknown' | 'parse'
+    kind?:
+      | 'chat'
+      | 'schedule'
+      | 'schedule_preview'
+      | 'schedule_cancel'
+      | 'cv_match'
   }
   'Dos Game Started': { game_id: string }
   'Dos Game Ready': { game_id: string }

@@ -58,16 +58,16 @@ The first half page must scan as engineering work. End with a project and the in
 - Frontend: lead with React, Next.js, TypeScript, Storybook, and the browser extensions. Keep one service or data bullet per job so the career stays honest. Put GKE, SQL cutovers, and schema work after the UI bullets.
 - Backend: lead with Go, Node.js, Postgres, AWS, GCP, and GKE. Put UI work after the service bullets. Keep CLEEVIO as one short bullet so the timeline stays complete.
 
-## Job description later
+## Job description match
 
-A pasted job description is not a public page yet. Do not add a route until `specs/ask-tomi.feature` has a scenario for it.
+Ask Tomi Match to your JD is visitor-facing. Specs live in `tomi-playground/specs/ask-tomi.feature`. The Worker contract lives in `tomi-interview-bot/specs/cv-match.feature`.
 
-When that work starts:
-
-1. Pick the closest base CV (frontend, backend, or full-stack).
-2. Reorder the summary, the skills, and the bullets so the first words match the job's engineering work.
-3. Use only persona facts. If the job names a tool that is not in the persona, leave it out.
-4. Do not change employers or dates. Do not add a fourth title.
+1. The browser parses PDF or DOCX and sends `jd_text` to `POST /cv-match`.
+2. The Worker picks the closest base CV (frontend, backend, or full-stack).
+3. It rewrites the summary and reorders canned skills and bullets so the first words match the job.
+4. Use only persona facts. If the job names a tool that is not in the persona, leave it out.
+5. Do not change employers or dates. Do not add a fourth title.
+6. The visitor sees a chat preview, then Print CV. Do not add a sidebar route.
 
 ## After an edit
 

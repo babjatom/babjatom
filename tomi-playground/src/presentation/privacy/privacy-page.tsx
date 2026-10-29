@@ -50,10 +50,13 @@ export function PrivacyPage() {
             <code className="break-all rounded bg-muted px-1 py-0.5 text-xs">
               tomi-interview-bot.tomibabjak.workers.dev
             </code>
-            ) to generate a reply. Do not send secrets, passwords, or other
-            sensitive information. Questions and answers stay in this browser
-            for about 30 minutes. This site then removes them. The session id
-            rotates after about 30 minutes of inactivity.
+            ) to generate a reply. Match to your JD sends job-description text
+            to the same Worker after this browser reads a PDF or DOCX. The site
+            does not keep the uploaded file. Do not send
+            secrets, passwords, or other sensitive information. Questions and
+            answers stay in this browser for about 30 minutes. This site then
+            removes them. The session id rotates after about 30 minutes of
+            inactivity.
           </p>
         </section>
 
