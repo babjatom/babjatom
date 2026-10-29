@@ -205,7 +205,7 @@ Feature: Ask Tomi
     And I select a readable job-description file
     Then I should see the Match to your JD request in the chat
     And I should see an assistant answer with a CV preview
-    And I should see a Print CV action
+    And I should see a Preview action
     And the chat API should not have been called
 
   Scenario: A bad job-description file stays in chat as an error
@@ -217,10 +217,10 @@ Feature: Ask Tomi
     And the match API should not have been called
     And the chat API should not have been called
 
-  Scenario: Print CV opens a print-ready page
+  Scenario: Preview opens the matched CV in a new tab
     Given I have a matched CV preview in Ask Tomi
-    When I choose Print CV
-    Then a print-ready CV should open
+    When I choose Preview
+    Then the full matched CV should open in a new tab
     And the chat API should not have been called
 
   Scenario: Choosing Fullstack CV starts a PDF download

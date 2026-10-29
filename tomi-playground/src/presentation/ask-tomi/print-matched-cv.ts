@@ -203,22 +203,16 @@ export function matchedCvHtml(
 </html>`
 }
 
-export function printMatchedCv(
+export function openMatchedCvPreview(
   cv: MatchedCv,
   openWindow: typeof window.open = window.open.bind(window),
 ): boolean {
   const html = matchedCvHtml(cv)
-  const popup = openWindow('', '_blank', 'noopener,noreferrer')
-  if (!popup) return false
-  popup.document.open()
-  popup.document.write(html)
-  popup.document.close()
-  popup.focus()
-  popup.onload = () => {
-    popup.print()
-  }
-  if (popup.document.readyState === 'complete') {
-    popup.print()
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }))
+  const tab = openWindow(url, '_blank', 'noopener,noreferrer')
+  if (!tab) {
+    URL.revokeObjectURL(url)
+    return false
   }
   return true
 }

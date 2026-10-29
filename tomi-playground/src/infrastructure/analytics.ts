@@ -47,7 +47,7 @@ export type AnalyticsEventMap = {
       | 'download_cv_frontend'
       | 'download_cv_backend'
       | 'match_jd'
-      | 'print_cv'
+      | 'preview_cv'
   }
   'Ask Tomi Result': {
     status: 'complete' | 'error' | 'cancelled'

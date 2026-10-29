@@ -67,7 +67,7 @@ Ask Tomi Match to your JD is visitor-facing. Specs live in `tomi-playground/spec
 3. It always builds a new CV for that job: skills the job names come first (languages and frameworks, then the rest), and job bullets that match real features come first.
 4. Use only persona facts. If the job names a tool that is not in the persona, leave it out.
 5. Do not change employers or dates. Do not add a fourth title.
-6. The visitor sees a chat preview, then Print CV. Do not add a sidebar route.
+6. The visitor sees a short chat summary, then Preview. Preview opens the full matched CV in a new tab. Do not add a sidebar route.
 
 ## After an edit
 
