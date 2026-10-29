@@ -63,8 +63,8 @@ The first half page must scan as engineering work. End with a project and the in
 Ask Tomi Match to your JD is visitor-facing. Specs live in `tomi-playground/specs/ask-tomi.feature`. The Worker contract lives in `tomi-interview-bot/specs/cv-match.feature`.
 
 1. The browser parses PDF or DOCX and sends `jd_text` to `POST /cv-match`.
-2. The Worker picks the closest base CV (frontend, backend, or full-stack).
-3. It rewrites the summary and reorders canned skills and bullets so the first words match the job.
+2. The Worker picks the closest base CV title (frontend, backend, or full-stack).
+3. It always builds a new CV for that job: skills the job names come first (languages and frameworks, then the rest), and job bullets that match real features come first.
 4. Use only persona facts. If the job names a tool that is not in the persona, leave it out.
 5. Do not change employers or dates. Do not add a fourth title.
 6. The visitor sees a chat preview, then Print CV. Do not add a sidebar route.
