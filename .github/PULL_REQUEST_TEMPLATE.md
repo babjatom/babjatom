@@ -37,3 +37,9 @@ Ran from `tomi-playground/`:
 - [ ] Branch name is `type/short-description`
 - [ ] One logical change; branch rebased on `origin/main`
 - [ ] No secrets or license-violating assets added
+
+## Agent / security notes
+
+- [ ] No secrets, `.env`, or credentials in the diff
+- [ ] `add-tests` / project test command covered this diff (or waived)
+- [ ] `review-pr` done for non-trivial changes (or waived)

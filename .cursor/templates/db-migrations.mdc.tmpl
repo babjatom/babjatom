@@ -1,0 +1,13 @@
+---
+description: Handle database migrations carefully; do not invent schema changes
+globs: {{MIGRATION_GLOBS}}
+alwaysApply: false
+---
+
+# Database migrations
+
+- Do not edit applied migration files; add a new migration instead.
+- Prefer the project migration command: `{{CMD_MIGRATE}}`
+- Ask before destructive or irreversible schema changes.
+- Keep migration names clear and one concern per migration.
+- See boundaries in @AGENTS.md
