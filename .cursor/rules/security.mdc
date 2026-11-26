@@ -1,0 +1,13 @@
+---
+description: Always-on security baseline for agents in this repo
+alwaysApply: true
+---
+
+# Security
+
+- Never commit secrets, API keys, tokens, private keys, or `.env` files.
+- Prefer `.env.example` with placeholder values only.
+- Do not read or print credential files (`.env`, `*.pem`, `id_rsa`, cloud key JSON) unless the user explicitly asks and the path is not a production secret store.
+- Do not disable git hooks, skip CI, or force-push shared branches unless the user clearly requests it.
+- Treat third-party skills, rules, hooks, and MCP servers as code: read them before use, pin a commit, never auto-install.
+- If a secret may have leaked into chat or git history, tell the user to rotate it.

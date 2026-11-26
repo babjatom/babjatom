@@ -1,0 +1,33 @@
+# Stack-agnostic product CI. Bootstrap fills placeholders from AGENTS.md commands.
+# Do not enable deploy/CD here. Keep secret-scan and hooks-smoke as separate workflows.
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+{{CI_SETUP}}
+
+      - name: Install
+        run: {{CMD_INSTALL}}
+
+      - name: Lint
+        run: {{CMD_LINT}}
+
+      - name: Test
+        run: {{CMD_TEST}}
+
+      - name: Build
+        run: {{CMD_BUILD}}

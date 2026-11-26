@@ -93,6 +93,18 @@ pnpm build
 
 Local development: `pnpm dev`. Full runbook: [`tomi-playground/README.md`](tomi-playground/README.md). Spec convention: [`tomi-playground/specs/README.md`](tomi-playground/specs/README.md).
 
+## Agent layer
+
+Security and day-2 agent tools came from [agentic-bootstrap](https://github.com/babjatom/agentic-bootstrap). Template commit: [`.bootstrap-version`](.bootstrap-version).
+
+- Always-on security rule: [`.cursor/rules/security.mdc`](.cursor/rules/security.mdc)
+- Project hooks: [`.cursor/hooks.json`](.cursor/hooks.json) (format hook stays off)
+- Day-2 skills: `ship-change`, `review-pr`, `add-tests`, `doctor`, `add-rule`, `update-from-template`
+- Hook fixtures: `bash scripts/hooks-smoke.sh`
+- Optional user-level guards: `./scripts/install-user-layer.sh`
+
+Do not overwrite this file with the bootstrap skeleton. Keep product CI and [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) as they are.
+
 ## Cursor Cloud
 
-No committed `.cursor/environment.json` yet; environment is dashboard-managed. On a cold machine, run `pnpm install` in `tomi-playground/` before developing or verifying.
+No committed `.cursor/environment.json` yet; environment is dashboard-managed. On a cold machine, run `pnpm install` in `tomi-playground/` before developing or verifying. Install `jq` so project hooks can run (`failClosed: true`).
