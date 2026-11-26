@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Tomas Babjak (Tomi), Senior Full-Stack Engineer</title>
+    <title>Tomas Babjak (Tomi), Senior Software Engineer &amp; Architect</title>
     <link rel="stylesheet" href="cv.css" />
 
   </head>
@@ -10,7 +10,7 @@
     <div class="opening">
     <header>
       <h1>Tomas Babjak <span class="aka">(Tomi)</span></h1>
-      <p class="headline">Senior Full-Stack Engineer · Prague, Czechia</p>
+      <p class="headline">Senior Software Engineer &amp; Architect · Prague, Czechia</p>
       <p class="contact">
         <a href="mailto:babjatom@gmail.com">babjatom@gmail.com</a>
         ·
@@ -25,13 +25,16 @@
     </header>
 
     <p class="summary">
-      Senior full-stack engineer with over 10 years of experience building web
-      products in React, Next.js, TypeScript, Node.js, and Go. Led a 4-person
-      agile team and owned cloud architecture on AWS and GCP. Delivered production
-      systems at PropertyGuru, Elitebrains, and Plots, including an
-      image-compliance pipeline across on the order of 80M+ user images, a
-      coding assessment platform, and a public interview assistant on
-      Cloudflare Workers.
+      I'm a software engineer who ships and designs software, from small fixes
+      to complex production systems. For over 15 years I've worked with
+      engineering teams in Prague, Singapore, Bangkok, and Los Angeles, from
+      early startups to platforms at scale. That work includes an
+      image-compliance pipeline across about 80M images. My current stack
+      centers on React, Next.js, Go, Node.js, Postgres, AWS, and GCP; I pick
+      the languages, databases, and infrastructure that fit each problem. I
+      build with coding agents from specs, with a human review step before
+      production, and I shipped a grounded LLM assistant on Cloudflare Workers
+      AI.
     </p>
 
     <h2>Skills</h2>
@@ -83,7 +86,7 @@
         <p class="role">Fullstack Engineer · Plots Inc</p>
         <p class="when">2024–2026</p>
       </div>
-      <p class="meta">Los Angeles</p>
+      <p class="meta">Remote (Los Angeles)</p>
       <p class="stack">
         React, Next.js, TypeScript, Go, AWS, DynamoDB, Lambda, Postgres,
         GraphQL, AppSync, Tailwind CSS, Mixpanel
@@ -95,6 +98,12 @@
           used Postgres, DynamoDB, and Lambda.
         </li>
         <li>
+          Led the response to a production incident where unreviewed AI-agent
+          edits from a stale branch were pushed toward production. Restored a
+          known-good state and tightened review and merge rules for AI-assisted
+          changes.
+        </li>
+        <li>
           Migrated Next.js to a newer major version, preserved the critical ROI
           UI, and kept Mixpanel on those paths through redesigns.
         </li>
@@ -103,15 +112,15 @@
           and end-to-end tests across Go services and React/Next.js.
         </li>
         <li>
-          Developed features and tests from specs with Cursor and coding
-          agents, then deployed manually after human review.
+          Built features and tests from specs with coding agents, with human
+          review before each manual deploy.
         </li>
       </ul>
     </article>
 
     <article class="job">
       <div class="row">
-        <p class="role">Fullstack / CTO · Elitebrains.com</p>
+        <p class="role">CTO (hands-on) · Elitebrains.com</p>
         <p class="when">2021–2024</p>
       </div>
       <p class="meta">Prague</p>
@@ -130,12 +139,9 @@
           Judge0.
         </li>
         <li>
-          Deployed Judge0 on GKE with monitoring and autoscaling tuned for
-          bursty assessment load and low idle cost.
-        </li>
-        <li>
-          Set the delivery process on GCP and bare metal for bursty assessment
-          load at low idle cost.
+          Deployed Judge0 on GKE with monitoring and autoscaling, and set the
+          delivery process on GCP and bare metal so bursty assessment load ran
+          at low idle cost.
         </li>
       </ul>
     </article>
@@ -274,7 +280,8 @@
       <ul>
         <li>
           Built an ADS-B air-traffic receiver on a Raspberry Pi and a map for
-          the tracks.
+          the tracks. Directed coding agents to write C/C++ instead of Python
+          so the code fits the limited CPU and memory of the Pi.
         </li>
       </ul>
     </article>

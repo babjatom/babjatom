@@ -15,11 +15,11 @@ Three base CVs exist. They share employers, dates, and facts. The title, the sum
 
 | Role | Title | HTML | PDF |
 | --- | --- | --- | --- |
-| Full-stack | Senior Full-Stack Engineer | `cv/cv.html` | `public/tomi-babjak-cv.pdf` |
+| Full-stack | Senior Software Engineer & Architect | `cv/cv.html` | `public/tomi-babjak-cv.pdf` |
 | Frontend | Senior Frontend Engineer | `cv/cv-frontend.html` | `public/tomi-babjak-cv-frontend.pdf` |
 | Backend | Senior Backend Engineer | `cv/cv-backend.html` | `public/tomi-babjak-cv-backend.pdf` |
 
-Product Engineer stays off every CV title.
+Product Engineer stays off every CV title. The download chip may still say Fullstack CV; the printed headline is Senior Software Engineer & Architect.
 
 ## Facts
 
@@ -43,7 +43,7 @@ Read [examples.md](examples.md) before you rewrite bullets.
 ## Page order
 
 1. Name, one role title, city, and contact.
-2. Summary of about three sentences. Lead with the role, the years, and the tools for that CV.
+2. Summary in first person, about three to four sentences. Open with "I'm a software engineer who ships and designs…" (add frontend or backend when that CV fits). Use over 15 years for career length only. Keep the current stack in a later sentence that starts with "My current stack" so tools are not read as 15-year claims. Include one real persona anchor in its own sentence. End with coding agents from specs and a human review step before production. Do not claim AI agents run in CI/CD. Do not put "See more at tomibabjak.dev" on the CV (the link is already in the header).
 3. Skills. Put the role's tools first. Keep real tools from the other slices, lower on the list.
 4. Experience, newest first. Keep every employer so the dates stay continuous.
 5. Projects, with a link when the persona has one.

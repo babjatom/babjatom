@@ -25,12 +25,14 @@
     </header>
 
     <p class="summary">
-      Senior backend engineer with over 10 years building APIs and data systems
-      in Go, Node.js, Python, and PHP. Owned cloud architecture on AWS and GCP,
-      including Lambda, DynamoDB, Postgres, and GKE. Shipped a geo schema
-      change for about 20M+ building records, an overnight MongoDB to
-      PostgreSQL cutover for about 500k customers, and self-hosted Judge0 for a
-      coding-assessment platform.
+      I'm a software engineer who ships and designs backend software, from
+      small fixes to complex production systems. For over 15 years I've worked
+      with engineering teams, from early startups to platforms at scale. That
+      work includes an overnight MongoDB to PostgreSQL cutover for about 500k
+      customers. My current stack centers on Go, Node.js, Postgres, DynamoDB,
+      AWS, GCP, and GKE; I pick the languages, databases, and infrastructure
+      that fit each problem. I build with coding agents from specs, with a
+      human review step before production.
     </p>
 
     <h2>Skills</h2>
@@ -85,7 +87,7 @@
         <p class="role">Fullstack Engineer · Plots Inc</p>
         <p class="when">2024–2026</p>
       </div>
-      <p class="meta">Los Angeles</p>
+      <p class="meta">Remote (Los Angeles)</p>
       <p class="stack">
         React, Next.js, TypeScript, Go, AWS, DynamoDB, Lambda, Postgres,
         GraphQL, AppSync, Tailwind CSS, Mixpanel
@@ -96,8 +98,14 @@
           the React and Next.js pages those services feed.
         </li>
         <li>
-          Developed features and tests from specs with Cursor and coding
-          agents, then deployed manually after human review.
+          Led the response to a production incident where unreviewed AI-agent
+          edits from a stale branch were pushed toward production. Restored a
+          known-good state and tightened review and merge rules for AI-assisted
+          changes.
+        </li>
+        <li>
+          Built features and tests from specs with coding agents, with human
+          review before each manual deploy.
         </li>
         <li>
           Expanded unit and end-to-end tests across the Go services.
@@ -111,7 +119,7 @@
 
     <article class="job">
       <div class="row">
-        <p class="role">Fullstack / CTO · Elitebrains.com</p>
+        <p class="role">CTO (hands-on) · Elitebrains.com</p>
         <p class="when">2021–2024</p>
       </div>
       <p class="meta">Prague</p>
@@ -121,8 +129,9 @@
       </p>
       <ul>
         <li>
-          Deployed Judge0 on GKE with monitoring and autoscaling tuned for
-          bursty assessment load and low idle cost.
+          Deployed Judge0 on GKE with monitoring and autoscaling, and set the
+          delivery process on GCP and bare metal so bursty assessment load ran
+          at low idle cost.
         </li>
         <li>
           Built a Node.js path from the React assessment UI into the existing
@@ -132,10 +141,6 @@
         <li>
           Led engineering for the HR technical-screening and coding-assessment
           platform.
-        </li>
-        <li>
-          Set the delivery process on GCP and bare metal, and kept Kubernetes for
-          bursty assessment load instead of always-on capacity.
         </li>
       </ul>
     </article>
@@ -274,7 +279,8 @@
       <ul>
         <li>
           Built an ADS-B air-traffic receiver on a Raspberry Pi and a map for
-          the tracks.
+          the tracks. Directed coding agents to write C/C++ instead of Python
+          so the code fits the limited CPU and memory of the Pi.
         </li>
       </ul>
     </article>
