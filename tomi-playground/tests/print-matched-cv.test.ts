@@ -7,7 +7,8 @@ import type { MatchedCv } from '@/infrastructure/tomi-cv-match-api'
 
 const cv: MatchedCv = {
   headline: 'Senior Frontend Engineer · Prague, Czechia',
-  summary: 'Senior frontend engineer with over 10 years building React.',
+  summary:
+    "I'm a software engineer who ships and designs frontend software, from small fixes to complex production systems.",
   skills: [{ group: 'Frontend', items: 'React, Next.js' }],
   jobs: [
     {
